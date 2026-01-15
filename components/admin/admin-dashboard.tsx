@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { supabase } from "@/lib/supabase/client"
 import { PieChart, BarChart, LineChart } from "lucide-react"
 import { StatCard } from "./stat-card"
-import { StatCard } from "./stat-card"
 import { RecentActivity } from "./recent-activity"
 import { useTranslations } from "next-intl"
 
