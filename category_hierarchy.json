@@ -1,0 +1,1608 @@
+[
+  {
+    "id": "bb5f07a3-c06b-4ecd-8bfa-b459371904e7",
+    "name": "AULAS",
+    "parent_id": null,
+    "children": [
+      {
+        "id": "77888af5-feac-4407-a7b9-85f453272ab8",
+        "name": "Idiomas",
+        "parent_id": "bb5f07a3-c06b-4ecd-8bfa-b459371904e7",
+        "children": [
+          {
+            "id": "f053c69d-67a8-43bc-b74a-af6520a8ae15",
+            "name": "Alemão",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "b7c26b28-0d97-4fc2-b3b0-7a54a1416be6",
+            "name": "Árabe",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "31701282-4388-4d8e-b629-c6c07e9844d3",
+            "name": "Búlgaro",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "13d36c3a-8db4-4ee0-8e84-e963aade07b9",
+            "name": "Catalão",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "4dd2acf2-5de6-4ea0-b354-1d1a0de4ad8e",
+            "name": "Chinês",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "c4572913-5671-436a-a37a-f3f69287a48a",
+            "name": "Coreano",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "d63d9ca8-548c-4691-9ddd-1abb3e94530a",
+            "name": "Croata",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "2b3ae251-7cdf-4ae7-8a0f-90f5be2d3c3e",
+            "name": "Dinamarquês",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "bdfac90d-e8b3-4ce5-b629-c5468b437218",
+            "name": "Eslovaco",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "f9d48a31-91bd-496c-981d-26e6515d3ace",
+            "name": "Esloveno",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "867513ed-1c22-4317-a972-3ec3c92c831a",
+            "name": "Espanhol",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "d1b7f12c-b2c8-4b88-b3ac-7ae7b63c3919",
+            "name": "Estoniano",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "b646b6fd-30b3-4ad9-96a2-7eeee4fab4cc",
+            "name": "Finlandês",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "a0b29377-0a87-4cda-aad4-ca57bc605b03",
+            "name": "Francês",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "0218b470-57d1-4766-9dea-255e6d902bec",
+            "name": "Galego",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "bad70cbc-305e-4026-81f2-5278961ab5e6",
+            "name": "Grego",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "c6e7e1a8-9bb6-404a-adb5-d17dac4f339a",
+            "name": "Hebraico",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "7bc724cb-cdbd-4229-b3a0-f89e5d189ef0",
+            "name": "Hindi",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "59d8f0dd-e682-4de7-aef4-24874d07c0cd",
+            "name": "Holandês",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "fd53f58f-18fc-4e9e-b8a8-9df329553738",
+            "name": "Húngaro",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "1b561ab1-aa87-4ead-b843-8bea108250c1",
+            "name": "Indonésio",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "ac3f0eab-9a10-4888-9db3-465174f2a2ed",
+            "name": "Inglês",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "a73641ab-e55b-4f91-97b3-7aa05bb7b0f4",
+            "name": "Italiano",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "92a2e621-ce15-4d21-a75e-6e446ff443c6",
+            "name": "Japonês",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "9ac04d7a-c114-416a-a440-169befe87ac2",
+            "name": "Latim",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "b40619b4-af3a-473f-a4c4-4841489015e2",
+            "name": "Lituano",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "dc33e6a3-8b02-40de-b7b2-1018744bf517",
+            "name": "Norueguês",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "346c6062-b6ca-4aeb-9a33-f74ff180d1ea",
+            "name": "Persa",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "fe106c14-73d5-4f9f-acc7-7788047740db",
+            "name": "Polaco",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "e40224df-3891-4830-af4f-9a64daf4677f",
+            "name": "Português",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "9eae6c81-ae5b-4dc0-ab66-b50dd343c361",
+            "name": "Português para Estrangeiros",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "aef9b13b-a0ba-4945-b9d8-2bc01d847166",
+            "name": "Romeno",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "9b987754-4f4e-43dd-9fe7-3dd4e02a4304",
+            "name": "Russo",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "49a014d2-f4fe-4322-9826-9eb5732749f5",
+            "name": "Sueco",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "af30d199-32cc-4288-9aa2-31f07fd101aa",
+            "name": "Tailandês",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "27328951-aff0-4e98-a7c1-8b993d967754",
+            "name": "Turco",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "bddf5ed8-ba73-499d-960f-bf95a3e6ab5c",
+            "name": "Ucraniano",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          },
+          {
+            "id": "8ab361c6-2cdd-4f45-a27a-3fcc2e98651f",
+            "name": "Vietnamita",
+            "parent_id": "77888af5-feac-4407-a7b9-85f453272ab8",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+        "name": "Apoio Escolar e Universitário",
+        "parent_id": "bb5f07a3-c06b-4ecd-8bfa-b459371904e7",
+        "children": [
+          {
+            "id": "5b572a7c-9edc-45f1-ac06-5c9e35de0b13",
+            "name": "Biologia",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "e0f081aa-e379-4c0a-b15e-8d6fb79b0821",
+            "name": "Contabilidade",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "7cd1c359-4aef-4562-9996-8c2b342eb23d",
+            "name": "Direito",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "45457ed9-f1ac-4922-85ae-9038e146c22e",
+            "name": "Economia",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "037cf5ea-df02-43f1-851d-c8d3d384c33c",
+            "name": "Estatística",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "2ddd73a4-36ce-4d42-9306-bb320fc31366",
+            "name": "Filosofia",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "14a4456a-f811-4729-ba77-6bc393bf5d63",
+            "name": "Física",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "123b6c26-7d51-4726-a9c5-1c7091bc2e38",
+            "name": "Geografia",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "d4c4f99c-7a65-4470-a940-d913ca1e11e0",
+            "name": "Geometria Descritiva",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "2534a793-f180-4986-84ea-bf822c96744b",
+            "name": "História",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "639305ef-27fe-4188-8907-f880e19ded06",
+            "name": "Literatura",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "8bfb70cf-65d0-4218-b06c-2693b459adf8",
+            "name": "Matemática",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "9900cd7f-ec66-49b1-bde8-9c9fb4cb84fa",
+            "name": "Neurociência",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "785f12af-b7a4-4be9-830c-f5cff445bed0",
+            "name": "Química",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          },
+          {
+            "id": "043bb539-26f2-4da4-a819-28d4d98adfa4",
+            "name": "Sociologia",
+            "parent_id": "666f2773-cfbe-4c82-956f-d71da421e48c",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "101be56d-2f43-4559-89a6-252a780624ac",
+        "name": "Música",
+        "parent_id": "bb5f07a3-c06b-4ecd-8bfa-b459371904e7",
+        "children": [
+          {
+            "id": "0f255e24-fe2c-4945-b268-3cf9b29bbe72",
+            "name": "Acordeão",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "d038c7a7-0c1b-4110-b0e0-c49c73f89ce4",
+            "name": "Baixo",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "1fdf7b50-b79e-478c-872f-46b3275362ed",
+            "name": "Bateria",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "31db89b2-2b07-4f29-a934-3fc5a8eeca98",
+            "name": "Canto",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "822dd41d-32e9-419b-979d-dfc1ed4cbcc2",
+            "name": "Cavaco",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "ef300a8e-7665-48c1-b3b2-9debf1c59a45",
+            "name": "Clarinete",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "09e299a0-2d04-497e-b1a7-9da878214af6",
+            "name": "Contrabaixo",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "679b3baf-2336-49a3-9e0d-8eed8a68bcbe",
+            "name": "Flauta",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "87313e2d-e0f5-4041-95b3-458e3d87348e",
+            "name": "Guitarra",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "b9014fbc-eae4-4bed-b004-3e62a88f7780",
+            "name": "Harpa",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "2e3cad98-40e2-46b0-b868-f461f45e1f3a",
+            "name": "Órgão",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "b77fece3-d7aa-4620-accf-8a896b259c20",
+            "name": "Piano",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "f5258f02-054a-49f5-9122-741bcea2a5be",
+            "name": "Saxofone",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "885ea1d6-8b3a-40b8-bf8e-b5bd48c1e0d3",
+            "name": "Teclado",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "6cde4b69-aed4-4d4d-a11f-d267493664db",
+            "name": "Trompete",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "e3242ea6-1d75-4311-a10d-ed4785fff219",
+            "name": "Ukulele",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "64b36b8e-7b24-4643-a33d-e99cf49c7619",
+            "name": "Viola",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "469d79b5-a808-40c9-acd2-e7884a475663",
+            "name": "Violino",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          },
+          {
+            "id": "4f754b3c-a0f0-47d8-9bca-623c4de337da",
+            "name": "Violoncelo",
+            "parent_id": "101be56d-2f43-4559-89a6-252a780624ac",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "e3ccd0a4-0c37-4f31-86b9-ada16b1a1495",
+        "name": "Dança",
+        "parent_id": "bb5f07a3-c06b-4ecd-8bfa-b459371904e7",
+        "children": [
+          {
+            "id": "5f12ba34-71a8-431b-ba03-c95992a31b26",
+            "name": "Ballet",
+            "parent_id": "e3ccd0a4-0c37-4f31-86b9-ada16b1a1495",
+            "children": []
+          },
+          {
+            "id": "6add1976-3dc5-48c4-9761-6d41dfd80c30",
+            "name": "Dança de Salão",
+            "parent_id": "e3ccd0a4-0c37-4f31-86b9-ada16b1a1495",
+            "children": []
+          },
+          {
+            "id": "0bfbeb35-683e-4ab2-856a-9f9222727b6d",
+            "name": "Hip Hop",
+            "parent_id": "e3ccd0a4-0c37-4f31-86b9-ada16b1a1495",
+            "children": []
+          },
+          {
+            "id": "49b9b009-fc75-448b-9f22-6fc896d3fea4",
+            "name": "Salsa",
+            "parent_id": "e3ccd0a4-0c37-4f31-86b9-ada16b1a1495",
+            "children": []
+          },
+          {
+            "id": "d8716875-8197-4098-8219-1674fa7dee6e",
+            "name": "Tango",
+            "parent_id": "e3ccd0a4-0c37-4f31-86b9-ada16b1a1495",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+        "name": "Desporto e Fitness",
+        "parent_id": "bb5f07a3-c06b-4ecd-8bfa-b459371904e7",
+        "children": [
+          {
+            "id": "443632be-c5f1-4ecd-a902-0be185a7c78f",
+            "name": "Artes Marciais",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "db03e9ac-9fb8-4245-990b-579aa65de329",
+            "name": "Basquetebol",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "22147f03-e08e-47f1-a16f-28f1dedbac8c",
+            "name": "Boxe",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "07043b3b-797d-4d52-9ff2-c2ed00d70416",
+            "name": "Ciclismo",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "0b442c8f-d4fd-47b4-b1e3-ae35167f3e73",
+            "name": "Defesa Pessoal",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "46d86365-42ca-49a0-a565-1d21b23e5cf3",
+            "name": "Futebol",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "2b1cee9c-21b2-4ca1-9b56-1f56f4f7d15e",
+            "name": "Golfe",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "83d073e5-1c3d-4da9-97e5-5cff61ec1319",
+            "name": "Natação",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "f1d3b252-fece-4834-8de6-2c8ff9e0a294",
+            "name": "Padel",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "18bc92be-f162-4ac7-885c-7ea8bc390fee",
+            "name": "Patinagem",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "e4c0826d-1f07-4aab-a6ec-47266fc8e500",
+            "name": "Personal Trainer",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "876f3e4d-365a-491c-9d7e-b061493ac47f",
+            "name": "Pilates",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "c5efb2ad-b5a5-43e6-9daf-d81f0f7d81de",
+            "name": "Surf",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "1a3cfabe-ecd7-4a84-9c25-8022b1f760da",
+            "name": "Ténis",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          },
+          {
+            "id": "34241ae3-170f-4503-949a-10df0015e7a1",
+            "name": "Yoga",
+            "parent_id": "2ebfb001-b707-46f2-b2c6-b584cfbcd1ec",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "761e6f28-80cb-448d-8d7e-435623bd6b68",
+        "name": "Artes e Lazer",
+        "parent_id": "bb5f07a3-c06b-4ecd-8bfa-b459371904e7",
+        "children": [
+          {
+            "id": "9e9e934f-853a-49a8-8961-bc9e60675a89",
+            "name": "Artesanato",
+            "parent_id": "761e6f28-80cb-448d-8d7e-435623bd6b68",
+            "children": []
+          },
+          {
+            "id": "41560ea7-7ecb-4750-8266-25705238994a",
+            "name": "Costura",
+            "parent_id": "761e6f28-80cb-448d-8d7e-435623bd6b68",
+            "children": []
+          },
+          {
+            "id": "77d26555-a0c2-44a7-8cbb-6af4cce4144c",
+            "name": "Desenho e Pintura",
+            "parent_id": "761e6f28-80cb-448d-8d7e-435623bd6b68",
+            "children": []
+          },
+          {
+            "id": "30fb9409-c118-495a-882a-c538f01ba9c1",
+            "name": "Escrita Criativa",
+            "parent_id": "761e6f28-80cb-448d-8d7e-435623bd6b68",
+            "children": []
+          },
+          {
+            "id": "932277ef-b3ea-4ab5-b344-9870d06ce5f0",
+            "name": "Fotografia",
+            "parent_id": "761e6f28-80cb-448d-8d7e-435623bd6b68",
+            "children": []
+          },
+          {
+            "id": "1b0c7994-db42-41bd-b34b-7e73fa6247ab",
+            "name": "Malabarismo",
+            "parent_id": "761e6f28-80cb-448d-8d7e-435623bd6b68",
+            "children": []
+          },
+          {
+            "id": "9ac77ddc-7fbb-46fe-8317-b08ebd59901d",
+            "name": "Robótica",
+            "parent_id": "761e6f28-80cb-448d-8d7e-435623bd6b68",
+            "children": []
+          },
+          {
+            "id": "26350732-5e69-4b1c-88d3-62f6216dcc16",
+            "name": "Teatro e Actuação",
+            "parent_id": "761e6f28-80cb-448d-8d7e-435623bd6b68",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "8c02cc65-4140-4ccc-a2f8-00fdda44c146",
+        "name": "Condução",
+        "parent_id": "bb5f07a3-c06b-4ecd-8bfa-b459371904e7",
+        "children": [
+          {
+            "id": "311dcc77-7211-4a0a-9b08-9d7365c9ea3c",
+            "name": "Condução (Carro)",
+            "parent_id": "8c02cc65-4140-4ccc-a2f8-00fdda44c146",
+            "children": []
+          },
+          {
+            "id": "a2c1f976-2516-4651-9882-405e7e09c7fd",
+            "name": "Condução (Mota)",
+            "parent_id": "8c02cc65-4140-4ccc-a2f8-00fdda44c146",
+            "children": []
+          },
+          {
+            "id": "98328c09-4536-4814-9e8e-f993818c3b8b",
+            "name": "Condução (Barco)",
+            "parent_id": "8c02cc65-4140-4ccc-a2f8-00fdda44c146",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+        "name": "Profissionais, Exames e Outras",
+        "parent_id": "bb5f07a3-c06b-4ecd-8bfa-b459371904e7",
+        "children": [
+          {
+            "id": "92bed2dd-3856-41cc-b829-d7f0f97205d3",
+            "name": "Aulas de Investimento na Bolsa",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "5eaf6f4b-6e54-4582-bdf7-b63f7a59fba5",
+            "name": "Liderança",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "82b4801f-839c-4e56-965e-f5bc30a13856",
+            "name": "Marketing",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "47058970-040f-4b31-89dd-2c7a4b913fea",
+            "name": "Marketing de Redes Sociais",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "29bfe88c-d83d-4c54-a312-ae15de830fc8",
+            "name": "Marketing Digital",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "49b4909e-6d37-46cb-824b-515e2d7923f6",
+            "name": "Marketing por E-mail",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "66b67fbe-2322-4722-bf2d-8ecf6861d1f3",
+            "name": "SEO",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "c5010d87-f969-4f70-96a6-8b8493b7f76c",
+            "name": "Soldagem",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "19eb7efd-285f-4e34-83cf-edf213bf0795",
+            "name": "Tabelas Dinâmicas",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "ef200880-5fbd-43fb-847d-d94bdc6434d3",
+            "name": "Negociação",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "f7996973-6562-4cbb-8b88-9cbb38db6b8f",
+            "name": "Educação Infantil",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "495a69b9-5916-477e-9ab3-d93c8e225276",
+            "name": "Educação para Adultos",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "b28e3e28-1e69-47ed-8ec2-82359b84de86",
+            "name": "Plataformas eLearning",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "754f7729-81f7-4720-91bb-66938b2ac65e",
+            "name": "Preparação para o Parto",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "0f571d0f-c707-40c1-85b8-2b0bb81a80ba",
+            "name": "Treino de Habilidades de Estudo",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "1c5e6fc4-19fa-4489-a8c1-6a3023152afb",
+            "name": "Nutrição",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "538a453e-d5a1-4f5b-97da-50e7e46740dc",
+            "name": "Psicologia",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "8c0d9ab6-f7b5-49cb-999b-4c3a3db14b57",
+            "name": "Primeiros Socorros",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "46a9f5a7-2896-4062-838a-9379aa38248e",
+            "name": "Reanimação Neonatal",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "d12a5d26-d6bf-4a98-8333-66561cae866c",
+            "name": "Provas de Admissão: Força Aérea",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "b8be242e-f6de-416a-a953-b0b418b24cd5",
+            "name": "Provas de Admissão: Juiz",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "a11cfe58-fb95-42ca-b017-5659061b51ff",
+            "name": "Provas de Admissão: Marinha",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "7862dad8-3d9e-43d4-9285-571c00cb8b2a",
+            "name": "Provas de Admissão: Ordem dos Advogados",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "73caf374-608d-489d-8a5a-e6c6170e658f",
+            "name": "Provas de Admissão: Exército",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "6eb74d9b-fcdc-4a32-b5e9-afecbf33dde6",
+            "name": "Provas de Admissão: GNR",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          },
+          {
+            "id": "2a8ad5b9-fa10-4780-bd79-00d06c7a9636",
+            "name": "Provas de Admissão: PSP",
+            "parent_id": "2c896b43-28d9-4295-aa28-a6caed0c663a",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fb451d6a-11ee-41f2-9152-a8da49027af0",
+    "name": "CASA",
+    "parent_id": null,
+    "children": [
+      {
+        "id": "1e31e261-2665-4eea-81b9-e99a51157652",
+        "name": "Construção e Remodelação",
+        "parent_id": "fb451d6a-11ee-41f2-9152-a8da49027af0",
+        "children": [
+          {
+            "id": "ac4d6323-54b2-43a4-b914-af7a66cf7ca3",
+            "name": "Arquitectura",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "b992216c-3e3e-4d09-8049-2d2a4972a6a9",
+            "name": "Engenharia Civil",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "076c08fb-ab3a-4600-a51a-16c14416aefe",
+            "name": "Construção de Casas",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "403f6e20-6c68-4ec3-8b5f-b3970c01b715",
+            "name": "Remodelação de Apartamentos",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "f865681e-d1f9-4c70-b56c-6ba9b471c979",
+            "name": "Remodelação de Casa de Banho",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "2c422c9c-6562-48a4-9dd5-8eb5aebc68e0",
+            "name": "Remodelação de Cozinha",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "b8637005-f961-452c-9153-faad0ea33e88",
+            "name": "Pintura (Interior)",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "51aedac9-1dce-4843-a879-9ba5482134ae",
+            "name": "Pintura (Exterior)",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "bdb0b707-c4cc-4636-9e42-e23a7707e529",
+            "name": "Pedreiros",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "4809ffd1-8f48-4236-b92a-322fe49feae0",
+            "name": "Ladrilhadores",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "5703ff7e-d7c5-4c53-99ef-7a59109aec3b",
+            "name": "Pladur",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "bcb52196-7fe0-47e6-9de9-41164a6f9431",
+            "name": "Tectos Falsos",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "6e3f1fe4-5822-4e4a-806a-ad7e05f03923",
+            "name": "Pavimentos",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "07506739-dc70-4fa5-a3f5-c7276b34a68f",
+            "name": "Telhados",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "05230e75-53cf-457d-bf85-67f640edc5d1",
+            "name": "Isolamento Térmico e Acústico",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          },
+          {
+            "id": "f925a434-5b8a-4099-921a-d22e5118244e",
+            "name": "Impermeabilizações",
+            "parent_id": "1e31e261-2665-4eea-81b9-e99a51157652",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "c82f1549-7a14-494e-b632-f98e223a3906",
+        "name": "Instalações e Reparações",
+        "parent_id": "fb451d6a-11ee-41f2-9152-a8da49027af0",
+        "children": [
+          {
+            "id": "85522d9b-c223-494b-8d16-07f2b13cd2ca",
+            "name": "Electricistas",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "f27599af-71d6-408f-a5b0-ddb018d57354",
+            "name": "Canalizadores",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "639d0167-5551-4eb6-b335-1977bfe85c24",
+            "name": "Ar Condicionado",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "04ff631f-02e2-4f62-a71c-4e075c4395ef",
+            "name": "Aquecimento Central",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "3a6e18fa-0fa9-436a-9b07-c012079301d7",
+            "name": "Caldeiras",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "9da612b3-091b-43c8-80b5-532890f9df97",
+            "name": "Termoacumuladores",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "cd654fc2-0386-4a76-8444-cee00ab85e78",
+            "name": "Painéis Solares",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "17f813b4-459c-445e-b510-87c36996042d",
+            "name": "Domótica",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "4971e606-7a47-40a2-9ec6-d14e446b6ebd",
+            "name": "Montagem de Móveis",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "f9fccbeb-1244-4fc6-88a0-5720f9e913da",
+            "name": "Marcenaria",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "5cdd21b8-b048-428b-9602-066a8d79c6b0",
+            "name": "Carpintaria",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "0bbe94c9-4ac6-484f-a84e-6b56e37ed3ca",
+            "name": "Serralharia",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "1bdf7118-c048-484f-9290-7eafb063ffc8",
+            "name": "Estofador",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "08859282-7de6-45f5-9cbf-ca09e2cee8f7",
+            "name": "Vidraceiros",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "f7b2afa4-89ea-4055-bbae-9245cebf0029",
+            "name": "Portas e Janelas",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          },
+          {
+            "id": "cfbd4ae6-78c9-4383-a017-5d18475a26cb",
+            "name": "Reparação de Electrodomésticos",
+            "parent_id": "c82f1549-7a14-494e-b632-f98e223a3906",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "65d19a2f-58cd-42a9-99af-4a0cb7b4c4e0",
+        "name": "Mudanças e Transportes",
+        "parent_id": "fb451d6a-11ee-41f2-9152-a8da49027af0",
+        "children": [
+          {
+            "id": "9047327d-4cc2-4d98-8d00-d14ea89a924b",
+            "name": "Mudanças de Habitação",
+            "parent_id": "65d19a2f-58cd-42a9-99af-4a0cb7b4c4e0",
+            "children": []
+          },
+          {
+            "id": "d8d07bf1-42d8-40be-8d6a-ff4fa9f9c167",
+            "name": "Mudanças Internacionais",
+            "parent_id": "65d19a2f-58cd-42a9-99af-4a0cb7b4c4e0",
+            "children": []
+          },
+          {
+            "id": "6e526035-4903-46f2-87c8-39adbc839fa0",
+            "name": "Aluguer de Carrinha com Condutor",
+            "parent_id": "65d19a2f-58cd-42a9-99af-4a0cb7b4c4e0",
+            "children": []
+          },
+          {
+            "id": "1e39f146-6caa-4e1b-916e-c2193e0fa8ad",
+            "name": "Transporte de Objectos Pesados (Pianos",
+            "parent_id": "65d19a2f-58cd-42a9-99af-4a0cb7b4c4e0",
+            "children": []
+          },
+          {
+            "id": "4c4d6b3e-16b5-4e69-b26c-c06bba99be0c",
+            "name": "Cofres)",
+            "parent_id": "65d19a2f-58cd-42a9-99af-4a0cb7b4c4e0",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "a025eeed-2836-4a72-894c-022015b2eefe",
+        "name": "Jardim e Exterior",
+        "parent_id": "fb451d6a-11ee-41f2-9152-a8da49027af0",
+        "children": [
+          {
+            "id": "ca295999-3790-4d8a-b633-7cbbd25fc2a0",
+            "name": "Manutenção de Jardins",
+            "parent_id": "a025eeed-2836-4a72-894c-022015b2eefe",
+            "children": []
+          },
+          {
+            "id": "1413ed8f-2c6c-4a6a-9d62-ca72eea116b7",
+            "name": "Abate de Árvores",
+            "parent_id": "a025eeed-2836-4a72-894c-022015b2eefe",
+            "children": []
+          },
+          {
+            "id": "9dc99863-46a3-4891-ac6b-8b9c697def91",
+            "name": "Limpeza de Terrenos",
+            "parent_id": "a025eeed-2836-4a72-894c-022015b2eefe",
+            "children": []
+          },
+          {
+            "id": "4a9023e2-514e-4a04-8fb6-2db2f1b0b872",
+            "name": "Manutenção de Piscinas",
+            "parent_id": "a025eeed-2836-4a72-894c-022015b2eefe",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "7891b088-2808-40bc-9f64-1d2fd2d382c2",
+        "name": "Limpeza",
+        "parent_id": "fb451d6a-11ee-41f2-9152-a8da49027af0",
+        "children": []
+      },
+      {
+        "id": "2623c324-07b4-4a01-9520-8952f135ca04",
+        "name": "Jardinagem",
+        "parent_id": "fb451d6a-11ee-41f2-9152-a8da49027af0",
+        "children": []
+      },
+      {
+        "id": "3f5ecd18-4bbc-4a63-9792-baa8282738ef",
+        "name": "Reparações",
+        "parent_id": "fb451d6a-11ee-41f2-9152-a8da49027af0",
+        "children": []
+      },
+      {
+        "id": "84b0952b-fcd4-4f50-9769-d506da45798c",
+        "name": "Pintura",
+        "parent_id": "fb451d6a-11ee-41f2-9152-a8da49027af0",
+        "children": []
+      },
+      {
+        "id": "b13689f6-7c75-443a-968d-508f81bac35f",
+        "name": "Eletricidade",
+        "parent_id": "fb451d6a-11ee-41f2-9152-a8da49027af0",
+        "children": []
+      },
+      {
+        "id": "263110c0-77cc-4909-9417-f51165e8ca68",
+        "name": "Canalizações",
+        "parent_id": "fb451d6a-11ee-41f2-9152-a8da49027af0",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "96548586-c453-4426-960e-b784929a9c5b",
+    "name": "BEM-ESTAR",
+    "parent_id": null,
+    "children": [
+      {
+        "id": "145f904f-8015-4e27-8d1f-d37918d28784",
+        "name": "Saúde e Terapias",
+        "parent_id": "96548586-c453-4426-960e-b784929a9c5b",
+        "children": [
+          {
+            "id": "db5a396e-2db0-401b-8db1-459d7cc00c9f",
+            "name": "Fisioterapia",
+            "parent_id": "145f904f-8015-4e27-8d1f-d37918d28784",
+            "children": []
+          },
+          {
+            "id": "468631c0-b0b8-48a0-bd9f-4b9c98386a3d",
+            "name": "Osteopatia",
+            "parent_id": "145f904f-8015-4e27-8d1f-d37918d28784",
+            "children": []
+          },
+          {
+            "id": "9c2c8f17-175a-4f90-8619-c03e58114faf",
+            "name": "Terapia da Fala",
+            "parent_id": "145f904f-8015-4e27-8d1f-d37918d28784",
+            "children": []
+          },
+          {
+            "id": "91a37af8-9348-408b-87ce-416c1efc7238",
+            "name": "Acupuntura",
+            "parent_id": "145f904f-8015-4e27-8d1f-d37918d28784",
+            "children": []
+          },
+          {
+            "id": "85618fd9-dfbd-47c0-943b-789c835d0fbb",
+            "name": "Homeopatia",
+            "parent_id": "145f904f-8015-4e27-8d1f-d37918d28784",
+            "children": []
+          },
+          {
+            "id": "a29d5dcb-0e78-4285-afea-11da4ef925df",
+            "name": "Reiki",
+            "parent_id": "145f904f-8015-4e27-8d1f-d37918d28784",
+            "children": []
+          },
+          {
+            "id": "a53ad109-8ae1-4a16-a504-940e72da87a1",
+            "name": "Massagens (Relaxamento",
+            "parent_id": "145f904f-8015-4e27-8d1f-d37918d28784",
+            "children": []
+          },
+          {
+            "id": "6b5d78a6-ff5c-4a9e-aecb-9d4f43fa6bba",
+            "name": "Desportiva",
+            "parent_id": "145f904f-8015-4e27-8d1f-d37918d28784",
+            "children": []
+          },
+          {
+            "id": "97b2e75d-001d-4c98-996d-c85ab6d6e500",
+            "name": "Drenagem Linfática)",
+            "parent_id": "145f904f-8015-4e27-8d1f-d37918d28784",
+            "children": []
+          },
+          {
+            "id": "c92c8110-6dc7-45c4-b2f9-f5aab680cf62",
+            "name": "Hipnoterapia",
+            "parent_id": "145f904f-8015-4e27-8d1f-d37918d28784",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "fef2f260-5745-46d3-ac49-e3d0db9a3ac1",
+        "name": "Estética e Beleza",
+        "parent_id": "96548586-c453-4426-960e-b784929a9c5b",
+        "children": [
+          {
+            "id": "314f2a1b-df34-4459-b2e9-7ee772a7bcea",
+            "name": "Cabeleireiros",
+            "parent_id": "fef2f260-5745-46d3-ac49-e3d0db9a3ac1",
+            "children": []
+          },
+          {
+            "id": "3143a6bb-5fe7-4ec3-86dc-3caa789a9e91",
+            "name": "Maquilhagem",
+            "parent_id": "fef2f260-5745-46d3-ac49-e3d0db9a3ac1",
+            "children": []
+          },
+          {
+            "id": "338a1220-6be3-4945-84d3-f88fdb9ef531",
+            "name": "Manicure e Pedicure",
+            "parent_id": "fef2f260-5745-46d3-ac49-e3d0db9a3ac1",
+            "children": []
+          },
+          {
+            "id": "5f622e57-b5fd-4402-a42e-4f7a36f11a8b",
+            "name": "Depilação",
+            "parent_id": "fef2f260-5745-46d3-ac49-e3d0db9a3ac1",
+            "children": []
+          },
+          {
+            "id": "18018fb0-1ba1-48c9-b185-24f34d490548",
+            "name": "Extensão de Pestanas",
+            "parent_id": "fef2f260-5745-46d3-ac49-e3d0db9a3ac1",
+            "children": []
+          },
+          {
+            "id": "1b6d1944-d059-4f73-b3c0-9482fea1daef",
+            "name": "Design de Sobrancelhas",
+            "parent_id": "fef2f260-5745-46d3-ac49-e3d0db9a3ac1",
+            "children": []
+          },
+          {
+            "id": "de11a03f-83c4-42f2-ba25-bb9873441a70",
+            "name": "Micropigmentação",
+            "parent_id": "fef2f260-5745-46d3-ac49-e3d0db9a3ac1",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "fc7645de-ceea-4e01-ae9c-25b4c962f187",
+        "name": "Cuidado de Pessoas",
+        "parent_id": "96548586-c453-4426-960e-b784929a9c5b",
+        "children": [
+          {
+            "id": "cc8eecd2-da02-42e2-a75c-fd9df1f95ab7",
+            "name": "Babysitting",
+            "parent_id": "fc7645de-ceea-4e01-ae9c-25b4c962f187",
+            "children": []
+          },
+          {
+            "id": "ce089597-c577-4752-a302-7903ca8f12fb",
+            "name": "Cuidado de Idosos",
+            "parent_id": "fc7645de-ceea-4e01-ae9c-25b4c962f187",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "0e55eb41-38fb-4d9e-aa1f-25ea4c833bf2",
+    "name": "EMPRESAS",
+    "parent_id": null,
+    "children": [
+      {
+        "id": "a142050e-44dc-454a-85bb-e371067d4ba0",
+        "name": "Marketing e Digital",
+        "parent_id": "0e55eb41-38fb-4d9e-aa1f-25ea4c833bf2",
+        "children": [
+          {
+            "id": "cb1047e8-adf2-4002-bedb-02e18ce4e88b",
+            "name": "Web Design",
+            "parent_id": "a142050e-44dc-454a-85bb-e371067d4ba0",
+            "children": []
+          },
+          {
+            "id": "2a87e717-53cc-4d58-948d-08b9a1f580e1",
+            "name": "Logótipos",
+            "parent_id": "a142050e-44dc-454a-85bb-e371067d4ba0",
+            "children": []
+          },
+          {
+            "id": "4c8a761c-0e91-4814-884c-83d919603587",
+            "name": "Gestão de Redes Sociais",
+            "parent_id": "a142050e-44dc-454a-85bb-e371067d4ba0",
+            "children": []
+          },
+          {
+            "id": "53b06f38-1746-46fb-9cc0-874c41975228",
+            "name": "Design Gráfico",
+            "parent_id": "a142050e-44dc-454a-85bb-e371067d4ba0",
+            "children": []
+          },
+          {
+            "id": "7fddb626-95c3-474c-b25f-997afd23a85f",
+            "name": "Edição de Vídeo",
+            "parent_id": "a142050e-44dc-454a-85bb-e371067d4ba0",
+            "children": []
+          },
+          {
+            "id": "8ba1f7b9-e92b-4f5b-bbda-1f47a9f004e9",
+            "name": "Desenvolvimento de Software e Apps",
+            "parent_id": "a142050e-44dc-454a-85bb-e371067d4ba0",
+            "children": []
+          },
+          {
+            "id": "826d4b7e-fdd4-4973-ace2-64091ac0e296",
+            "name": "Manutenção e Assistência Informática",
+            "parent_id": "a142050e-44dc-454a-85bb-e371067d4ba0",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "e9aaca19-fe71-4846-91d1-b78836b24725",
+        "name": "Gestão e Jurídico",
+        "parent_id": "0e55eb41-38fb-4d9e-aa1f-25ea4c833bf2",
+        "children": [
+          {
+            "id": "2676cb16-a1c0-478b-99bc-cbaec218c981",
+            "name": "Advogados",
+            "parent_id": "e9aaca19-fe71-4846-91d1-b78836b24725",
+            "children": []
+          },
+          {
+            "id": "abe3ba9f-d460-4a83-8ef7-e13e2bc7a1fc",
+            "name": "Consultoria de Negócios",
+            "parent_id": "e9aaca19-fe71-4846-91d1-b78836b24725",
+            "children": []
+          },
+          {
+            "id": "792f7988-45f0-470a-a592-c7b417931c23",
+            "name": "Recrutamento e RH",
+            "parent_id": "e9aaca19-fe71-4846-91d1-b78836b24725",
+            "children": []
+          },
+          {
+            "id": "33b0c204-07fa-4449-8038-d8642135e3dc",
+            "name": "Tradução (Simples",
+            "parent_id": "e9aaca19-fe71-4846-91d1-b78836b24725",
+            "children": []
+          },
+          {
+            "id": "486a9dbf-d8f5-485b-a8f2-9cd161e0290f",
+            "name": "Certificada)",
+            "parent_id": "e9aaca19-fe71-4846-91d1-b78836b24725",
+            "children": []
+          },
+          {
+            "id": "836cd202-3d8f-475a-886d-fe348e9dff75",
+            "name": "Revisão de Texto",
+            "parent_id": "e9aaca19-fe71-4846-91d1-b78836b24725",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "39be02f1-b36c-42c6-93e6-a089e9d2bad3",
+    "name": "EVENTOS",
+    "parent_id": null,
+    "children": [
+      {
+        "id": "06a62098-edac-4ddd-827d-0f2562b620e9",
+        "name": "Fotografia e Vídeo",
+        "parent_id": "39be02f1-b36c-42c6-93e6-a089e9d2bad3",
+        "children": [
+          {
+            "id": "e0c90a40-ea86-419e-93c5-305cbf93d1fc",
+            "name": "Casamento",
+            "parent_id": "06a62098-edac-4ddd-827d-0f2562b620e9",
+            "children": []
+          },
+          {
+            "id": "13d2b71a-7d53-4897-8d90-59687f2fa32f",
+            "name": "Batizado",
+            "parent_id": "06a62098-edac-4ddd-827d-0f2562b620e9",
+            "children": []
+          },
+          {
+            "id": "50f35be0-6549-45d3-aea4-cdd8c13368cc",
+            "name": "Fotografia de Produto",
+            "parent_id": "06a62098-edac-4ddd-827d-0f2562b620e9",
+            "children": []
+          },
+          {
+            "id": "637af434-2885-40f1-b2d3-bdd7001ca222",
+            "name": "Fotografia de Moda",
+            "parent_id": "06a62098-edac-4ddd-827d-0f2562b620e9",
+            "children": []
+          },
+          {
+            "id": "b98b877f-7c86-487e-bc48-d6ddb28c230e",
+            "name": "Fotografia Imobiliária",
+            "parent_id": "06a62098-edac-4ddd-827d-0f2562b620e9",
+            "children": []
+          },
+          {
+            "id": "3687f779-91b9-4953-8fd4-1974b6bb55f9",
+            "name": "Retrato",
+            "parent_id": "06a62098-edac-4ddd-827d-0f2562b620e9",
+            "children": []
+          },
+          {
+            "id": "5dc78e99-5368-4b72-9ab3-75231f002a30",
+            "name": "Edição de Fotografia",
+            "parent_id": "06a62098-edac-4ddd-827d-0f2562b620e9",
+            "children": []
+          },
+          {
+            "id": "3159cb23-7b5c-45aa-a72a-1e6ad1291b3d",
+            "name": "Videógrafos",
+            "parent_id": "06a62098-edac-4ddd-827d-0f2562b620e9",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "9da05b00-e6fb-44b2-be03-4734607ccad0",
+        "name": "Animação e Lazer",
+        "parent_id": "39be02f1-b36c-42c6-93e6-a089e9d2bad3",
+        "children": [
+          {
+            "id": "240a81e6-c240-4f7c-8917-86cc98d5bd03",
+            "name": "DJs",
+            "parent_id": "9da05b00-e6fb-44b2-be03-4734607ccad0",
+            "children": []
+          },
+          {
+            "id": "e5ca89f6-3146-476b-a666-bfe83bbb40c5",
+            "name": "Música para Eventos",
+            "parent_id": "9da05b00-e6fb-44b2-be03-4734607ccad0",
+            "children": []
+          },
+          {
+            "id": "c6c7702f-c6d0-4f8d-815c-ec7c9ec95737",
+            "name": "Mágicos",
+            "parent_id": "9da05b00-e6fb-44b2-be03-4734607ccad0",
+            "children": []
+          },
+          {
+            "id": "c23edf76-23b3-47e3-8222-92d78fb256d7",
+            "name": "Animadores Infantis",
+            "parent_id": "9da05b00-e6fb-44b2-be03-4734607ccad0",
+            "children": []
+          },
+          {
+            "id": "a3762388-e7d3-4af3-ae49-9f8a8af0e06b",
+            "name": "Aluguer de Insufláveis",
+            "parent_id": "9da05b00-e6fb-44b2-be03-4734607ccad0",
+            "children": []
+          },
+          {
+            "id": "a49bc718-32b3-494c-855f-11502ff267a6",
+            "name": "Aluguer de Equipamento de Som e Luz",
+            "parent_id": "9da05b00-e6fb-44b2-be03-4734607ccad0",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "daa00202-398d-4e38-aeeb-3de3d8942439",
+        "name": "Organização",
+        "parent_id": "39be02f1-b36c-42c6-93e6-a089e9d2bad3",
+        "children": [
+          {
+            "id": "a22a46cc-3ad3-406e-ba90-a975f81c3cf3",
+            "name": "Catering",
+            "parent_id": "daa00202-398d-4e38-aeeb-3de3d8942439",
+            "children": []
+          },
+          {
+            "id": "311425b4-49dc-4758-9ee9-56a6958f3ea1",
+            "name": "Bolos de Aniversário",
+            "parent_id": "daa00202-398d-4e38-aeeb-3de3d8942439",
+            "children": []
+          },
+          {
+            "id": "217cf12f-d136-464e-8c9d-4363e8486282",
+            "name": "Organização de Festas",
+            "parent_id": "daa00202-398d-4e38-aeeb-3de3d8942439",
+            "children": []
+          },
+          {
+            "id": "ba502f99-9ed0-406c-94a7-2e766c1a056d",
+            "name": "Organização de Casamentos",
+            "parent_id": "daa00202-398d-4e38-aeeb-3de3d8942439",
+            "children": []
+          },
+          {
+            "id": "966ef63b-65e2-4edc-9193-127adac668f6",
+            "name": "Aluguer de Espaços",
+            "parent_id": "daa00202-398d-4e38-aeeb-3de3d8942439",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fe578335-7977-49c3-a90a-2433b39a41d7",
+    "name": "OUTROS",
+    "parent_id": null,
+    "children": [
+      {
+        "id": "d2ddd9e8-7e58-457e-ad29-0c4ecae41441",
+        "name": "Animais",
+        "parent_id": "fe578335-7977-49c3-a90a-2433b39a41d7",
+        "children": [
+          {
+            "id": "4a0ce395-1812-4065-861d-f41080800e48",
+            "name": "Dog Walking",
+            "parent_id": "d2ddd9e8-7e58-457e-ad29-0c4ecae41441",
+            "children": []
+          },
+          {
+            "id": "dc8e21ce-e781-4c26-bea9-3541dfd51e6f",
+            "name": "Treino de Cães",
+            "parent_id": "d2ddd9e8-7e58-457e-ad29-0c4ecae41441",
+            "children": []
+          },
+          {
+            "id": "0f6455ac-53bb-4217-8fcc-8c152515f122",
+            "name": "Pet Sitting",
+            "parent_id": "d2ddd9e8-7e58-457e-ad29-0c4ecae41441",
+            "children": []
+          },
+          {
+            "id": "ad9f56f6-7183-436c-a1cd-71bd861c0339",
+            "name": "Tosquia",
+            "parent_id": "d2ddd9e8-7e58-457e-ad29-0c4ecae41441",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "d70c9eb9-f986-4d72-9b60-2ca3c09cb57c",
+        "name": "Reparações e Segurança",
+        "parent_id": "fe578335-7977-49c3-a90a-2433b39a41d7",
+        "children": [
+          {
+            "id": "58fea9b6-b586-4301-bd0a-958aa09ecdd3",
+            "name": "Reparação de Telemóveis",
+            "parent_id": "d70c9eb9-f986-4d72-9b60-2ca3c09cb57c",
+            "children": []
+          },
+          {
+            "id": "6728b2df-2e12-4003-8885-04b3765bcec1",
+            "name": "Reparação de Computadores",
+            "parent_id": "d70c9eb9-f986-4d72-9b60-2ca3c09cb57c",
+            "children": []
+          },
+          {
+            "id": "6409a42d-7661-4dac-8567-d5e8db38f528",
+            "name": "Investigação Privada",
+            "parent_id": "d70c9eb9-f986-4d72-9b60-2ca3c09cb57c",
+            "children": []
+          },
+          {
+            "id": "d4f37596-dffa-4777-a862-f0955a862135",
+            "name": "Alarmes e Segurança",
+            "parent_id": "d70c9eb9-f986-4d72-9b60-2ca3c09cb57c",
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+]

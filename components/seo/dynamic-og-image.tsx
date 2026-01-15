@@ -1,0 +1,137 @@
+import { ImageResponse } from "next/og"
+
+interface DynamicOGImageProps {
+  title: string
+  description?: string
+  category?: string
+  price?: string
+  rating?: number
+  location?: string
+}
+
+export function generateOGImage({ title, description, category, price, rating, location }: DynamicOGImageProps) {
+  return new ImageResponse(
+    <div
+      style={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#ffffff",
+        backgroundImage: "linear-gradient(45deg, #f0f9ff 0%, #e0f2fe 100%)",
+        fontSize: 32,
+        fontWeight: 600,
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          padding: "40px 60px 20px 60px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            fontSize: 36,
+            fontWeight: 700,
+            color: "#0ea5e9",
+          }}
+        >
+          🏠 Biskate
+        </div>
+        {category && (
+          <div
+            style={{
+              backgroundColor: "#0ea5e9",
+              color: "white",
+              padding: "8px 16px",
+              borderRadius: "20px",
+              fontSize: 18,
+            }}
+          >
+            {category}
+          </div>
+        )}
+      </div>
+
+      {/* Main Content */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          flex: 1,
+          padding: "0 60px",
+          textAlign: "center",
+        }}
+      >
+        <h1
+          style={{
+            fontSize: 48,
+            fontWeight: 700,
+            color: "#1e293b",
+            margin: "0 0 20px 0",
+            lineHeight: 1.2,
+          }}
+        >
+          {title}
+        </h1>
+
+        {description && (
+          <p
+            style={{
+              fontSize: 24,
+              color: "#64748b",
+              margin: "0 0 30px 0",
+              lineHeight: 1.4,
+            }}
+          >
+            {description}
+          </p>
+        )}
+
+        {/* Details */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "30px",
+            fontSize: 20,
+            color: "#475569",
+          }}
+        >
+          {price && <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>💰 {price}</div>}
+          {rating && <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>⭐ {rating}/5</div>}
+          {location && <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>📍 {location}</div>}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          padding: "20px 60px 40px 60px",
+          fontSize: 18,
+          color: "#64748b",
+        }}
+      >
+        Serviços locais em Portugal • biskate.pt
+      </div>
+    </div>,
+    {
+      width: 1200,
+      height: 630,
+    },
+  )
+}

@@ -1,0 +1,158 @@
+
+"use client"
+
+import { useState, useEffect } from "react"
+import { format } from "date-fns"
+import { pt } from "date-fns/locale"
+import { getLogs } from "@/app/actions/log"
+import { ActivityLog } from "@/lib/logger"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { CalendarIcon, Search, RefreshCw, AlertCircle } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+import { DateRange } from "react-day-picker"
+
+export default function SiteLogsPage() {
+    const [logs, setLogs] = useState<ActivityLog[]>([])
+    const [loading, setLoading] = useState(false)
+    const [search, setSearch] = useState("")
+    const [date, setDate] = useState<DateRange | undefined>(undefined)
+    const loadLogs = async () => {
+        setLoading(true)
+        try {
+            const data = await getLogs({
+                role: 'admin',
+                search: search,
+                startDate: date?.from,
+                endDate: date?.to,
+            })
+            setLogs(data as any) // Type assertion if needed due to strict types
+        } catch (error) {
+            console.error("Failed to load logs", error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        loadLogs()
+    }, [])
+
+    return (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold">Registo de Atividade do Site (Admin)</h1>
+                <Button onClick={loadLogs} variant="outline" size="icon">
+                    <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+                </Button>
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Filtros</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                            <Input
+                                placeholder="Pesquisar por ação, detalhes..."
+                                className="pl-9"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-[300px] justify-start text-left font-normal",
+                                        !date && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {date?.from ? (
+                                        date.to ? (
+                                            <>
+                                                {format(date.from, "LLL dd, y", { locale: pt })} -{" "}
+                                                {format(date.to, "LLL dd, y", { locale: pt })}
+                                            </>
+                                        ) : (
+                                            format(date.from, "LLL dd, y", { locale: pt })
+                                        )
+                                    ) : (
+                                        <span>Selecione um intervalo de datas</span>
+                                    )}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="range"
+                                    defaultMonth={date?.from}
+                                    selected={date}
+                                    onSelect={setDate}
+                                    numberOfMonths={2}
+                                />
+                            </PopoverContent>
+                        </Popover>
+                        <Button onClick={loadLogs}>Aplicar</Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardContent className="p-0">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Data/Hora</TableHead>
+                                <TableHead>Admin</TableHead>
+                                <TableHead>Ação</TableHead>
+                                <TableHead>Detalhes</TableHead>
+                                <TableHead>IP</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {logs.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                                        Nenhum registo encontrado.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                logs.map((log: any) => (
+                                    <TableRow key={log.id}>
+                                        <TableCell>
+                                            {format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss")}
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">{log.users?.raw_user_meta_data?.full_name || "N/A"}</span>
+                                                <span className="text-xs text-gray-500">{log.users?.email}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="font-semibold text-indigo-600">{log.action}</span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <pre className="text-xs bg-gray-50 p-2 rounded max-w-[300px] overflow-auto">
+                                                {JSON.stringify(log.details, null, 2)}
+                                            </pre>
+                                        </TableCell>
+                                        <TableCell className="text-xs text-gray-500">{log.ip_address || "-"}</TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}

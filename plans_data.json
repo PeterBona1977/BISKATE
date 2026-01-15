@@ -1,0 +1,89 @@
+[
+  {
+    "id": "bb615fbc-7d8a-4880-b43f-87fabeec22dc",
+    "plan_tier": "free",
+    "contact_views_limit": 1,
+    "proposals_limit": 1,
+    "gig_responses_limit": 1,
+    "has_search_boost": false,
+    "has_profile_highlight": false,
+    "badge_text": "FREE",
+    "reset_period": "weekly",
+    "features": {
+      "emergency_calls": false,
+      "priority_support": false,
+      "featured_homepage": false
+    },
+    "created_at": "2025-12-31T03:19:56.337117+00:00",
+    "updated_at": "2026-01-07T01:02:05.644+00:00",
+    "user_type": "provider",
+    "price": 0,
+    "currency": "EUR"
+  },
+  {
+    "id": "6d1a7acf-2227-44b3-b11d-636cb52a2c92",
+    "plan_tier": "essential",
+    "contact_views_limit": 60,
+    "proposals_limit": 30,
+    "gig_responses_limit": 30,
+    "has_search_boost": false,
+    "has_profile_highlight": false,
+    "badge_text": "BASIC",
+    "reset_period": "biweekly",
+    "features": {
+      "emergency_calls": false,
+      "priority_support": true,
+      "featured_homepage": false
+    },
+    "created_at": "2025-12-31T03:19:56.337117+00:00",
+    "updated_at": "2026-01-07T01:02:26.179+00:00",
+    "user_type": "provider",
+    "price": 20,
+    "currency": "EUR"
+  },
+  {
+    "id": "015b346b-60a1-4b01-8118-15d5a3a5e511",
+    "plan_tier": "pro",
+    "contact_views_limit": 120,
+    "proposals_limit": 60,
+    "gig_responses_limit": 60,
+    "has_search_boost": true,
+    "has_profile_highlight": true,
+    "badge_text": "PRO",
+    "reset_period": "biweekly",
+    "features": {
+      "analytics": true,
+      "emergency_calls": true,
+      "priority_support": true,
+      "featured_homepage": true
+    },
+    "created_at": "2025-12-31T03:19:56.337117+00:00",
+    "updated_at": "2026-01-07T01:02:33.936+00:00",
+    "user_type": "provider",
+    "price": 40,
+    "currency": "EUR"
+  },
+  {
+    "id": "eb4ae1c8-61ee-410e-a727-1bc4a86d75fb",
+    "plan_tier": "unlimited",
+    "contact_views_limit": 2147483647,
+    "proposals_limit": 2147483647,
+    "gig_responses_limit": 2147483647,
+    "has_search_boost": true,
+    "has_profile_highlight": true,
+    "badge_text": "VIP",
+    "reset_period": "monthly",
+    "features": {
+      "analytics": true,
+      "custom_branding": true,
+      "emergency_calls": true,
+      "priority_support": true,
+      "featured_homepage": true
+    },
+    "created_at": "2025-12-31T03:19:56.337117+00:00",
+    "updated_at": "2026-01-07T01:02:51.052+00:00",
+    "user_type": "provider",
+    "price": 150,
+    "currency": "EUR"
+  }
+]
