@@ -198,6 +198,9 @@ export async function testFirebaseConfig(config: {
         // 1. Testar FCM V1 (Service Account)
         if (config.serviceAccountJson) {
             try {
+                // Import client dynamically if needed, or static is fine since we are server side
+                const { FCMEdgeClient } = await import("@/lib/fcm/edge-client");
+
                 const serviceAccount = typeof config.serviceAccountJson === 'string'
                     ? JSON.parse(config.serviceAccountJson)
                     : config.serviceAccountJson
@@ -206,26 +209,17 @@ export async function testFirebaseConfig(config: {
                     serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n')
                 }
 
-                if (!serviceAccount.project_id || !serviceAccount.private_key) {
-                    results.v1 = { success: false, message: "JSON de Service Account inválido (project_id ou private_key em falta)" }
+                if (!serviceAccount.project_id || !serviceAccount.private_key || !serviceAccount.client_email) {
+                    results.v1 = { success: false, message: "JSON de Service Account inválido (project_id, private_key ou client_email em falta)" }
                 } else {
-                    // Podemos tentar inicializar uma app temporária
-                    const appName = `test-${Date.now()}`
-                    const admin = await import("firebase-admin")
+                    // Tentar obter um Access Token - isto valida a chave privada real
+                    await FCMEdgeClient.getAccessToken(serviceAccount);
 
-                    const testApp = admin.initializeApp({
-                        credential: admin.credential.cert(serviceAccount),
-                        projectId: config.projectId || serviceAccount.project_id
-                    }, appName)
-
-                    // Se chegou aqui, as credenciais são estruturalmente válidas
-                    results.v1 = { success: true, message: "Estrutura do Service Account válida e Firebase Admin inicializado para teste." }
-
-                    // Limpar app de teste
-                    await testApp.delete()
+                    results.v1 = { success: true, message: "Service Account validado com sucesso (Access Token obtido)." }
                 }
             } catch (e: any) {
-                results.v1 = { success: false, message: `Erro no Service Account: ${e.message}` }
+                console.error("Erro teste V1:", e);
+                results.v1 = { success: false, message: `Erro ao validar Service Account: ${e.message}` }
             }
         } else {
             results.v1 = { success: false, message: "Configuração do Service Account em falta" }
