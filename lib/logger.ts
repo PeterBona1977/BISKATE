@@ -22,12 +22,16 @@ export type ActivityLogFilter = {
     endDate?: Date
 }
 
-// Ensure you have these env vars or use your existing supabase client setup
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
 // Helper to get a service role client for logging (bypassing RLS for inserts if needed, or ensuring write access)
-const getAdminClient = () => createClient(supabaseUrl, supabaseServiceKey)
+const getAdminClient = () => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) {
+        // Fallback for build time
+        return createClient("https://placeholder.supabase.co", "placeholder")
+    }
+    return createClient(url, key)
+}
 
 export async function logActivity(
     userId: string,

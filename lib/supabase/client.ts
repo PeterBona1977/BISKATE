@@ -7,16 +7,23 @@ export function hasValidConfig(): boolean {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 }
 
-if (!hasValidConfig()) {
-  throw new Error("Missing Supabase environment variables")
-}
-
 // Supabase client for client-side usage
-export const createClient = () =>
-  createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+export const createClient = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!url || !anonKey) {
+    // During build time, Next.js might try to pre-render pages that import this.
+    // We return a dummy client or handle it to prevent build crashes.
+    console.warn("⚠️ Warning: Supabase environment variables are missing during initialization.")
+    return createBrowserClient<Database>(
+      "https://placeholder.supabase.co",
+      "placeholder"
+    )
+  }
+
+  return createBrowserClient<Database>(url, anonKey)
+}
 
 export const supabase = createClient()
 
