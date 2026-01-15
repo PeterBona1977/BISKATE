@@ -1,5 +1,8 @@
 
 import { notFound } from "next/navigation"
+
+export const runtime = "edge"
+export const dynamic = "force-dynamic"
 import { ArrowLeft, Book, Home, Heart, Briefcase, Calendar, MoreHorizontal, Zap } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"

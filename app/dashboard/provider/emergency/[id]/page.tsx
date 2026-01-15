@@ -1,4 +1,7 @@
 
+export const runtime = "edge"
+export const dynamic = "force-dynamic"
+
 import { EmergencyResponseView } from "@/components/provider/emergency-response-view"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 

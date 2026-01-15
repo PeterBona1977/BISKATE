@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin"
 import { NotificationServiceServer } from "@/lib/notifications/notification-service-server"
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export async function GET(request: NextRequest) {
     // Basic security: check for a cron secret if provided in env
