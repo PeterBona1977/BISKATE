@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase/admin"
 import { NotificationServiceServer } from "@/lib/notifications/notification-service-server"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
     // Basic security: check for a cron secret if provided in env
     // For local dev, we skip this or use a simple check
