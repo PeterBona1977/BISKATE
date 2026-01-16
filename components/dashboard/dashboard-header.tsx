@@ -18,7 +18,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { DashboardNav } from "./dashboard-nav"
 import { NotificationsDropdown } from "@/components/notifications/notifications-dropdown"
 import { usePathname, useRouter } from "next/navigation"
-import { Menu, User, Settings, LogOut, Circle, Briefcase } from "lucide-react"
+import { Menu, User, Settings, LogOut, Circle, Briefcase, Zap } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { supabase } from "@/lib/supabase/client"
@@ -180,9 +180,25 @@ export function DashboardHeader() {
                       {displayName}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {isProviderMode ? t("providerProfile") : (profile?.role === 'admin' ? t("adminProfile") : (profile?.role === 'provider' ? t("providerProfile") : t("clientProfile")))}
-                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {/* Role Badge */}
+                      <div className={cn(
+                        "text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border",
+                        isProviderMode
+                          ? "bg-purple-50 text-purple-700 border-purple-200"
+                          : "bg-blue-50 text-blue-700 border-blue-200"
+                      )}>
+                        {isProviderMode ? "Prestador" : "Cliente"}
+                      </div>
+
+                      {/* Subscription Badge (Provider Only) */}
+                      {isProviderMode && profile?.plan && (
+                        <div className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border bg-yellow-50 text-yellow-700 border-yellow-200 flex items-center gap-1">
+                          <Zap className="h-3 w-3 fill-current" />
+                          {profile.plan === 'pro' ? 'Pro' : (profile.plan === 'unlimited' ? 'Ilimitado' : 'Básico')}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
