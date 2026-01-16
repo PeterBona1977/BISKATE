@@ -219,30 +219,65 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
     const handleLocate = async () => {
         setIsLocating(true)
-        try {
-            const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(resolve, reject)
-            })
-            const { latitude, longitude } = pos.coords
-            setLocation({ lat: latitude, lng: longitude })
+        setAddressInput("A obter localização...")
 
-            if (window.google?.maps?.Geocoder) {
-                const geocoder = new window.google.maps.Geocoder()
-                geocoder.geocode({ location: { lat: latitude, lng: longitude } }, (results, status) => {
-                    if (status === "OK" && results && results[0]) {
-                        const address = results[0].formatted_address
-                        setAddressInput(address)
-                        setLocation(prev => prev ? { ...prev, address } : { lat: latitude, lng: longitude, address })
-                    } else {
-                        setAddressInput(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`)
-                    }
-                })
-            } else {
-                setAddressInput(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`)
+        try {
+            // Check if Geolocation is supported
+            if (!navigator.geolocation) {
+                throw new Error("Geolocalização não suportada pelo browser")
             }
-        } catch (err) {
-            console.error("Locate error", err)
-            // Silent fail on location in background, user can correct manually
+
+            const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    resolve,
+                    (err) => reject(err),
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                )
+            })
+
+            const { latitude, longitude } = pos.coords
+            console.log("📍 Coordinates:", latitude, longitude)
+
+            // Set basic coords first as fallback
+            setLocation({ lat: latitude, lng: longitude })
+            const coordString = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+
+            // Try Reverse Geocoding if Google API is available
+            if (typeof window !== "undefined" && window.google?.maps?.Geocoder) {
+                try {
+                    const geocoder = new window.google.maps.Geocoder()
+                    const response = await geocoder.geocode({ location: { lat: latitude, lng: longitude } })
+
+                    if (response.results && response.results[0]) {
+                        const address = response.results[0].formatted_address
+                        setAddressInput(address)
+                        setLocation({ lat: latitude, lng: longitude, address })
+                    } else {
+                        setAddressInput(coordString)
+                    }
+                } catch (geoErr) {
+                    console.error("Geocoding failed:", geoErr)
+                    setAddressInput(coordString)
+                }
+            } else {
+                console.warn("Google Maps API not loaded, using coordinates")
+                setAddressInput(coordString)
+            }
+
+        } catch (err: any) {
+            console.error("Locate error:", err)
+
+            let errorMsg = "Não foi possível obter a localização."
+            if (err.code === 1) errorMsg = "Permissão de localização negada."
+            else if (err.code === 2) errorMsg = "Localização indisponível."
+            else if (err.code === 3) errorMsg = "Tempo limite excedido."
+
+            setAddressInput(errorMsg)
+            toast({
+                title: "Erro de Localização",
+                description: "Verifique se o GPS está ativo e se deu permissão ao browser.",
+                variant: "destructive"
+            })
         } finally {
             setIsLocating(false)
         }
