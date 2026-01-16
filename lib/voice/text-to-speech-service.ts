@@ -102,7 +102,11 @@ export class TextToSpeechService {
     // 1. Try Google Cloud Neural TTS first (unless forced otherwise)
     if (!options.forceBrowser) {
       try {
-        const { audioContent, error } = await generateSpeech(text)
+        const result = await generateSpeech(text)
+
+        if (!result) throw new Error("Server action returned no data")
+
+        const { audioContent, error } = result
 
         if (audioContent) {
           await this.playCloudAudio(audioContent)

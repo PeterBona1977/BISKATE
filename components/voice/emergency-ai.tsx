@@ -354,6 +354,15 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     const startListening = () => {
         if (!recognitionRef.current) return
 
+        // Safety: If already listening, stop first to avoid 'InvalidStateError'
+        if (isListening) {
+            try {
+                recognitionRef.current.stop()
+            } catch (e) { /* ignore */ }
+            setIsListening(false)
+            return
+        }
+
         // Stop assistant from talking when user wants to speak
         ttsService.stop()
 
@@ -374,7 +383,13 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
         recognitionRef.current.onerror = () => setIsListening(false)
         recognitionRef.current.onend = () => setIsListening(false)
-        recognitionRef.current.start()
+
+        try {
+            recognitionRef.current.start()
+        } catch (e) {
+            console.error("Speech Recognition start error:", e)
+            setIsListening(false)
+        }
     }
 
     const stopListening = () => {
