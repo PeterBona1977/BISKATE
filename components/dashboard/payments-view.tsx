@@ -61,18 +61,28 @@ export function PaymentsView({ mode }: PaymentsViewProps) {
 
             if (error) throw error
 
-            setPayments(data || [])
+            const filteredTransactions = (data || []).filter(tx => {
+                const metadata = typeof tx.metadata === 'string' ? JSON.parse(tx.metadata) : tx.metadata;
+                return !metadata?.is_internal;
+            });
 
-            // Calcular estatísticas
-            const received = (data || [])
+            setPayments(filteredTransactions)
+
+            // Calcular estatísticas (excluindo transações internas de pass-through)
+            const statsTransactions = (data || []).filter(tx => {
+                const metadata = typeof tx.metadata === 'string' ? JSON.parse(tx.metadata) : tx.metadata;
+                return !metadata?.is_internal;
+            });
+
+            const received = statsTransactions
                 .filter((p) => p.type === "credit" && p.status === "completed")
                 .reduce((sum, p) => sum + Math.abs(p.amount), 0)
 
-            const sent = (data || [])
+            const sent = statsTransactions
                 .filter((p) => p.type === "debit" && p.status === "completed")
                 .reduce((sum, p) => sum + Math.abs(p.amount), 0)
 
-            const pending = (data || [])
+            const pending = statsTransactions
                 .filter((p) => p.status === "pending")
                 .reduce((sum, p) => sum + Math.abs(p.amount), 0)
 

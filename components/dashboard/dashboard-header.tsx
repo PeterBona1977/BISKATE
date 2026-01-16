@@ -142,7 +142,7 @@ export function DashboardHeader() {
                     )}
                   </div>
                   <div className="flex-1 overflow-y-auto">
-                    <DashboardNav />
+                    <DashboardNav viewMode={mode as any} />
                   </div>
                 </div>
               </SheetContent>

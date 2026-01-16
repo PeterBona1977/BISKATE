@@ -65,7 +65,7 @@ export function DashboardNav({ viewMode = "client" }: { viewMode?: "client" | "p
   const { user, profile } = useAuth()
 
   const isAdmin = profile?.role === "admin"
-  const isProvider = profile?.role === "provider"
+  const isProvider = profile?.role === "provider" || profile?.is_provider === true
   const isPendingProvider = profile?.role === "provider_pending"
 
   // If Admin, show Admin Navigation
