@@ -18,7 +18,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { DashboardNav } from "./dashboard-nav"
 import { NotificationsDropdown } from "@/components/notifications/notifications-dropdown"
 import { usePathname, useRouter } from "next/navigation"
-import { Menu, User, Settings, LogOut, Circle } from "lucide-react"
+import { Menu, User, Settings, LogOut, Circle, Briefcase } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { supabase } from "@/lib/supabase/client"
@@ -101,39 +101,43 @@ export function DashboardHeader() {
 
                     {/* Mobile Client/Provider Toggle */}
                     {profile?.role === "provider" && (
-                      <div className="bg-gray-100 p-1 rounded-lg grid grid-cols-2 gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            router.push("/dashboard")
-                            setMobileMenuOpen(false)
-                          }}
-                          className={cn(
-                            "h-7 text-xs font-medium rounded-md transition-all hover:bg-white/50",
-                            !isProviderMode
-                              ? "bg-white text-gray-900 shadow-sm"
-                              : "text-gray-500 hover:text-gray-900"
-                          )}
-                        >
-                          {t("clientProfile")}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            router.push("/dashboard/provider")
-                            setMobileMenuOpen(false)
-                          }}
-                          className={cn(
-                            "h-7 text-xs font-medium rounded-md transition-all hover:bg-white/50",
-                            isProviderMode
-                              ? "bg-white text-gray-900 shadow-sm"
-                              : "text-gray-500 hover:text-gray-900"
-                          )}
-                        >
-                          {t("providerProfile")}
-                        </Button>
+                      <div className="flex flex-col gap-2 bg-gray-50/50 p-2 rounded-xl border border-gray-100">
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Modo de Visualização</span>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            variant="ghost"
+                            onClick={() => {
+                              router.push("/dashboard")
+                              setMobileMenuOpen(false)
+                            }}
+                            className={cn(
+                              "h-14 flex flex-col items-center justify-center gap-1 rounded-xl transition-all border-2",
+                              !isProviderMode
+                                ? "bg-white text-blue-600 border-blue-100 shadow-sm"
+                                : "bg-transparent text-gray-400 border-transparent hover:bg-gray-100"
+                            )}
+                          >
+                            <User className={cn("h-5 w-5", !isProviderMode ? "fill-current" : "")} />
+                            <span className="text-[10px] font-bold leading-none">Painel de Cliente</span>
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            onClick={() => {
+                              router.push("/dashboard/provider")
+                              setMobileMenuOpen(false)
+                            }}
+                            className={cn(
+                              "h-14 flex flex-col items-center justify-center gap-1 rounded-xl transition-all border-2",
+                              isProviderMode
+                                ? "bg-white text-purple-600 border-purple-100 shadow-sm"
+                                : "bg-transparent text-gray-400 border-transparent hover:bg-gray-100"
+                            )}
+                          >
+                            <Briefcase className={cn("h-5 w-5", isProviderMode ? "fill-current" : "")} />
+                            <span className="text-[10px] font-bold leading-none">Painel de Prestador</span>
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>
