@@ -34,6 +34,8 @@ export default function LoginPage() {
 
       if (profile.role === "admin") {
         router.push("/admin")
+      } else if (profile.role === "provider" || profile.is_provider) {
+        router.push("/dashboard/provider")
       } else {
         router.push("/dashboard")
       }
