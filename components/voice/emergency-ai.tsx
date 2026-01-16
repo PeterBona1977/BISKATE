@@ -545,67 +545,57 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                                 {isLocating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Crosshair className="h-3 w-3" />}
                             </Button>
                         </div>
-                    </div>                            <Button
-                        size="icon"
-                        variant="ghost"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-red-500 hover:bg-red-50 rounded-md"
-                        onClick={handleLocate}
-                        disabled={isLocating}
-                    >
-                        {isLocating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Crosshair className="h-3 w-3" />}
-                    </Button>
-                </div>
-            </div>
-
-            {/* Input Controls */}
-            {step !== "broadcasting" && (
-                <div className="flex flex-col gap-3">
-                    <Button
-                        size="lg"
-                        className={cn(
-                            "h-16 rounded-2xl text-lg font-bold transition-all duration-300 shadow-lg relative overflow-hidden",
-                            isListening ? "bg-red-500 animate-pulse scale-95 ring-4 ring-red-200" :
-                                isSpeaking ? "bg-amber-500 hover:bg-amber-600" : "bg-red-600 hover:bg-red-700 shadow-red-200"
-                        )}
-                        onClick={isListening ? stopListening : isSpeaking ? () => ttsService.stop() : startListening}
-                        disabled={isProcessing}
-                    >
-                        {isListening ? (
-                            <>
-                                <MicOff className="mr-2 h-6 w-6" /> A OUVIR...
-                            </>
-                        ) : isSpeaking ? (
-                            <>
-                                <StopCircle className="mr-2 h-6 w-6" /> PARAR ÁUDIO
-                            </>
-                        ) : (
-                            <>
-                                <Mic className="mr-2 h-6 w-6" /> FALAR AGORA
-                            </>
-                        )}
-                    </Button>
-
-                    <div className="flex gap-2">
-                        <Input
-                            placeholder="Ou escreva aqui..."
-                            value={textInput}
-                            onChange={(e) => setTextInput(e.target.value)}
-                            // Submit on Enter
-                            onKeyDown={(e) => e.key === 'Enter' && processInput(textInput)}
-                            className="rounded-xl border-red-100 focus:ring-red-500 h-10"
-                        />
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            className="rounded-xl border-red-200 text-red-600 h-10 w-10 hover:bg-red-50"
-                            onClick={() => processInput(textInput)}
-                        >
-                            <Send className="h-4 w-4" />
-                        </Button>
                     </div>
+
+                    {/* Input Controls */}
+                    {step !== "broadcasting" && (
+                        <div className="flex flex-col gap-3">
+                            <Button
+                                size="lg"
+                                className={cn(
+                                    "h-16 rounded-2xl text-lg font-bold transition-all duration-300 shadow-lg relative overflow-hidden",
+                                    isListening ? "bg-red-500 animate-pulse scale-95 ring-4 ring-red-200" :
+                                        isSpeaking ? "bg-amber-500 hover:bg-amber-600" : "bg-red-600 hover:bg-red-700 shadow-red-200"
+                                )}
+                                onClick={isListening ? stopListening : isSpeaking ? () => ttsService.stop() : startListening}
+                                disabled={isProcessing}
+                            >
+                                {isListening ? (
+                                    <>
+                                        <MicOff className="mr-2 h-6 w-6" /> A OUVIR...
+                                    </>
+                                ) : isSpeaking ? (
+                                    <>
+                                        <StopCircle className="mr-2 h-6 w-6" /> PARAR ÁUDIO
+                                    </>
+                                ) : (
+                                    <>
+                                        <Mic className="mr-2 h-6 w-6" /> FALAR AGORA
+                                    </>
+                                )}
+                            </Button>
+
+                            <div className="flex gap-2">
+                                <Input
+                                    placeholder="Ou escreva aqui..."
+                                    value={textInput}
+                                    onChange={(e) => setTextInput(e.target.value)}
+                                    // Submit on Enter
+                                    onKeyDown={(e) => e.key === 'Enter' && processInput(textInput)}
+                                    className="rounded-xl border-red-100 focus:ring-red-500 h-10"
+                                />
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="rounded-xl border-red-200 text-red-600 h-10 w-10 hover:bg-red-50"
+                                    onClick={() => processInput(textInput)}
+                                >
+                                    <Send className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
-            )}
-        </div>
             </DialogContent >
         </Dialog >
     )
