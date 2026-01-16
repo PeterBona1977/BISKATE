@@ -512,82 +512,102 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                     </div>
 
                     {/* Location Bar */}
+                    {/* Location Bar */}
                     <div className="flex flex-col gap-2 px-1">
                         <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-1">
                             <MapPin className={cn("h-3 w-3", location ? "text-red-500" : "text-gray-300")} />
                             {isLocating ? "A determinar localização..." : "Localização da Emergência:"}
                         </div>
+
+                        {!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
+                            <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded mb-1 border border-red-100">
+                                ⚠️ Configuração em falta: Chave API Google Maps.
+                            </div>
+                        )}
+
                         <div className="relative group">
                             <Input
                                 id="emergency-address-input"
-                                placeholder="A detetar endereço..."
+                                placeholder={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? "Escreva a morada..." : "Insira a morada manualmente..."}
                                 value={addressInput}
                                 onChange={(e) => setAddressInput(e.target.value)}
-                                className="pl-3 pr-10 h-9 rounded-lg border-red-100 bg-white/50 focus:bg-white text-xs transition-colors"
+                                className="pl-3 pr-10 h-9 rounded-lg border-red-100 bg-white text-xs text-black"
+                                autoComplete="off" // Prevent browser autocomplete fighting with Google
                             />
                             <Button
                                 size="icon"
                                 variant="ghost"
                                 className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-red-500 hover:bg-red-50 rounded-md"
-                                onClick={handleLocate}
+                                onClick={() => handleLocate(0)}
                                 disabled={isLocating}
+                                type="button"
                             >
                                 {isLocating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Crosshair className="h-3 w-3" />}
                             </Button>
                         </div>
-                    </div>
-
-                    {/* Input Controls */}
-                    {step !== "broadcasting" && (
-                        <div className="flex flex-col gap-3">
-                            <Button
-                                size="lg"
-                                className={cn(
-                                    "h-16 rounded-2xl text-lg font-bold transition-all duration-300 shadow-lg relative overflow-hidden",
-                                    isListening ? "bg-red-500 animate-pulse scale-95 ring-4 ring-red-200" :
-                                        isSpeaking ? "bg-amber-500 hover:bg-amber-600" : "bg-red-600 hover:bg-red-700 shadow-red-200"
-                                )}
-                                onClick={isListening ? stopListening : isSpeaking ? () => ttsService.stop() : startListening}
-                                disabled={isProcessing}
-                            >
-                                {isListening ? (
-                                    <>
-                                        <MicOff className="mr-2 h-6 w-6" /> A OUVIR...
-                                    </>
-                                ) : isSpeaking ? (
-                                    <>
-                                        <StopCircle className="mr-2 h-6 w-6" /> PARAR ÁUDIO
-                                    </>
-                                ) : (
-                                    <>
-                                        <Mic className="mr-2 h-6 w-6" /> FALAR AGORA
-                                    </>
-                                )}
-                            </Button>
-
-                            <div className="flex gap-2">
-                                <Input
-                                    placeholder="Ou escreva aqui..."
-                                    value={textInput}
-                                    onChange={(e) => setTextInput(e.target.value)}
-                                    // Submit on Enter
-                                    onKeyDown={(e) => e.key === 'Enter' && processInput(textInput)}
-                                    className="rounded-xl border-red-100 focus:ring-red-500 h-10"
-                                />
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="rounded-xl border-red-200 text-red-600 h-10 w-10 hover:bg-red-50"
-                                    onClick={() => processInput(textInput)}
-                                >
-                                    <Send className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </div>
-                    )}
+                    </div>                            <Button
+                        size="icon"
+                        variant="ghost"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-red-500 hover:bg-red-50 rounded-md"
+                        onClick={handleLocate}
+                        disabled={isLocating}
+                    >
+                        {isLocating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Crosshair className="h-3 w-3" />}
+                    </Button>
                 </div>
-            </DialogContent>
-        </Dialog>
+            </div>
+
+            {/* Input Controls */}
+            {step !== "broadcasting" && (
+                <div className="flex flex-col gap-3">
+                    <Button
+                        size="lg"
+                        className={cn(
+                            "h-16 rounded-2xl text-lg font-bold transition-all duration-300 shadow-lg relative overflow-hidden",
+                            isListening ? "bg-red-500 animate-pulse scale-95 ring-4 ring-red-200" :
+                                isSpeaking ? "bg-amber-500 hover:bg-amber-600" : "bg-red-600 hover:bg-red-700 shadow-red-200"
+                        )}
+                        onClick={isListening ? stopListening : isSpeaking ? () => ttsService.stop() : startListening}
+                        disabled={isProcessing}
+                    >
+                        {isListening ? (
+                            <>
+                                <MicOff className="mr-2 h-6 w-6" /> A OUVIR...
+                            </>
+                        ) : isSpeaking ? (
+                            <>
+                                <StopCircle className="mr-2 h-6 w-6" /> PARAR ÁUDIO
+                            </>
+                        ) : (
+                            <>
+                                <Mic className="mr-2 h-6 w-6" /> FALAR AGORA
+                            </>
+                        )}
+                    </Button>
+
+                    <div className="flex gap-2">
+                        <Input
+                            placeholder="Ou escreva aqui..."
+                            value={textInput}
+                            onChange={(e) => setTextInput(e.target.value)}
+                            // Submit on Enter
+                            onKeyDown={(e) => e.key === 'Enter' && processInput(textInput)}
+                            className="rounded-xl border-red-100 focus:ring-red-500 h-10"
+                        />
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="rounded-xl border-red-200 text-red-600 h-10 w-10 hover:bg-red-50"
+                            onClick={() => processInput(textInput)}
+                        >
+                            <Send className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </div>
+            </DialogContent >
+        </Dialog >
     )
 }
 
