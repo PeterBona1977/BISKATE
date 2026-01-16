@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/contexts/auth-context"
 import { supabase } from "@/lib/supabase/client"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 import {
   Plus,
   Briefcase,
