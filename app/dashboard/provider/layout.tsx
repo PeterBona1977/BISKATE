@@ -18,16 +18,26 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
                 return
             }
 
-            // If user is NOT a provider (and hasn't applied yet), they should only access onboarding
-            if (!profile?.is_provider && pathname !== "/dashboard/provider/onboarding") {
-                router.push("/dashboard/provider/onboarding")
+            // STRICT ACCESS CONTROL
+            // 1. If not a provider at all -> Onboarding (to apply)
+            // 2. If provider but NOT approved (pending/rejected) -> Onboarding (to see status/re-apply)
+            // 3. Approved -> Allow access
+
+            const isProvider = profile?.is_provider
+            const status = profile?.provider_status
+
+            // Allow access to onboarding page regardless of status (handles its own logic)
+            if (pathname === "/dashboard/provider/onboarding") {
+                // Optional: If APPROVED, maybe redirect to main dashboard?
+                if (isProvider && status === 'approved') {
+                    router.push("/dashboard/provider")
+                }
+                return;
             }
 
-            // If user IS already a provider, they shouldn't see onboarding again (optional, depending on UX)
-            // but let's allow re-accessing onboarding if needed or simple redirect
-            // Usually, if they are pending/approved, onboarding is done.
-            if (profile?.is_provider && pathname === "/dashboard/provider/onboarding") {
-                router.push("/dashboard/provider")
+            // For all other provider pages, Require 'approved' status
+            if (!isProvider || status !== 'approved') {
+                router.push("/dashboard/provider/onboarding")
             }
         }
     }, [loading, user, profile, router, pathname])

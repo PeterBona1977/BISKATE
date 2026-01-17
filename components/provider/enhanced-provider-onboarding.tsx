@@ -355,11 +355,60 @@ export function EnhancedProviderOnboarding() {
     )
   }
 
+  // Check for status
+  const providerStatus = profile?.provider_status
+
+  if (!loading && providerStatus === 'pending') {
+    return (
+      <div className="max-w-2xl mx-auto py-12">
+        <Card className="border-l-4 border-l-yellow-500">
+          <CardHeader className="text-center">
+            <div className="mx-auto bg-yellow-100 p-3 rounded-full mb-4 w-fit">
+              <Loader2 className="h-8 w-8 text-yellow-600 animate-spin" />
+            </div>
+            <CardTitle className="text-2xl">Candidatura em Análise</CardTitle>
+            <CardDescription className="text-lg">
+              A sua candidatura para ser prestador está a ser analisada pela nossa equipa.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 text-center">
+            <p className="text-muted-foreground">
+              Este processo geralmente demora 24-48 horas. Receberá uma notificação assim que a sua conta for aprovada.
+            </p>
+            <div className="bg-muted p-4 rounded-lg text-sm text-left">
+              <h4 className="font-semibold mb-2 flex items-center">
+                <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                O que acontece agora?
+              </h4>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-2">
+                <li>A nossa equipa verifica os seus documentos de identidade</li>
+                <li>Analisamos o seu perfil e experiência</li>
+                <li>Confirmamos a validade dos seus dados de contacto</li>
+              </ul>
+            </div>
+            <Button variant="outline" onClick={() => router.push('/dashboard')}>
+              Voltar ao Painel de Cliente
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold">Torne-se um Prestador GigHub</h1>
+        {providerStatus === 'rejected' && (
+          <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200 max-w-2xl mx-auto flex items-start text-left">
+            <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">Candidatura Anterior Recusada</p>
+              <p className="text-sm mt-1">{profile.provider_rejection_reason || "Revise suas informações e tente novamente."}</p>
+            </div>
+          </div>
+        )}
         <p className="text-gray-600 mt-2">Complete o seu perfil para começar a receber gigs</p>
         <div className="mt-4">
           <Progress value={progress} className="w-full max-w-md mx-auto" />
