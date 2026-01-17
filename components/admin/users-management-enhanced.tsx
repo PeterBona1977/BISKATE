@@ -14,7 +14,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Users, Search, Edit, Trash2, Plus, Mail, Phone, MapPin, Calendar, Loader2 } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { deleteAdminUser } from "@/app/actions/admin"
+import { deleteAdminUser, updateAdminUser } from "@/app/actions/admin"
+import { useAuth } from "@/contexts/auth-context"
 
 interface Profile {
   id: string
@@ -29,6 +30,7 @@ interface Profile {
   created_at: string
   updated_at: string | null
   bio: string | null
+  permissions?: string[] | null
 }
 
 export function UsersManagementEnhanced() {
@@ -41,6 +43,7 @@ export function UsersManagementEnhanced() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const { toast } = useToast()
+  const { user } = useAuth()
 
   useEffect(() => {
     fetchProfiles()
@@ -79,13 +82,25 @@ export function UsersManagementEnhanced() {
 
   const updateProfile = async (profileId: string, updates: Partial<Profile>) => {
     try {
-      const { error } = await supabase.from("profiles").update(updates).eq("id", profileId)
+      if (!updates.role || !updates.plan) {
+        console.warn("Role and Plan are required for update")
+        return false
+      }
+
+      const { error } = await updateAdminUser(profileId, {
+        full_name: updates.full_name || "",
+        role: updates.role as "user" | "provider" | "admin",
+        plan: updates.plan as "free" | "essential" | "pro" | "unlimited",
+        permissions: updates.permissions || [],
+        executorId: user?.id,
+        emailForLog: updates.email
+      })
 
       if (error) {
         console.error("❌ Erro ao atualizar perfil:", error)
         toast({
           title: "Erro ao atualizar utilizador",
-          description: error.message,
+          description: error,
           variant: "destructive",
         })
         return false
@@ -381,6 +396,7 @@ function EditProfileForm({ profile, onSave, onCancel }: EditProfileFormProps) {
     location: profile.location || "",
     plan: profile.plan,
     bio: profile.bio || "",
+    permissions: profile.permissions || [],
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
