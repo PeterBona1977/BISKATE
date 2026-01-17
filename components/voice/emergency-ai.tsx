@@ -189,29 +189,19 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             // Initial fallback
             setLocation({ lat: latitude, lng: longitude })
 
-            // Use Google Maps Geocoding API directly (client-side)
-            const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-            if (apiKey) {
-                try {
-                    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}&language=pt-PT`
-                    const response = await fetch(geocodeUrl)
-                    const data = await response.json()
-
-                    if (data.status === "OK" && data.results && data.results[0]) {
-                        const address = data.results[0].formatted_address
-                        console.log("✅ Geocoded address:", address)
-                        setAddressInput(address)
-                        setLocation({ lat: latitude, lng: longitude, address })
-                    } else {
-                        console.warn("⚠️ Geocoding returned status:", data.status)
-                        setAddressInput(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`)
-                    }
-                } catch (err) {
-                    console.error("❌ Geocoding error:", err)
+            // Use the reliable Server Action for Geocoding (bypasses browser CORS)
+            try {
+                const data = await geocode({ lat: latitude, lng: longitude })
+                if (data && data.address) {
+                    console.log("✅ Geocoded address via Server Action:", data.address)
+                    setAddressInput(data.address)
+                    setLocation({ lat: latitude, lng: longitude, address: data.address })
+                } else {
+                    console.warn("⚠️ Geocoding returned no address:", data?.error)
                     setAddressInput(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`)
                 }
-            } else {
-                console.warn("⚠️ No Google Maps API key configured")
+            } catch (err) {
+                console.error("❌ Geocoding Server Action error:", err)
                 setAddressInput(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`)
             }
 
@@ -236,25 +226,14 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     const handleManualAddressBlur = async () => {
         if (!addressInput || addressInput.includes(",")) return // Skip if looks like coords
 
-        const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-        if (!apiKey) {
-            console.warn("No API key for forward geocoding")
-            return
-        }
-
         setIsLocating(true)
         try {
-            const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addressInput)}&key=${apiKey}&language=pt-PT`
-            const response = await fetch(geocodeUrl)
-            const data = await response.json()
-
-            if (data.status === "OK" && data.results && data.results[0]) {
-                const result = data.results[0]
-                const location = result.geometry.location
-                setLocation({ lat: location.lat, lng: location.lng, address: result.formatted_address })
-                console.log("📍 Forward geocoded:", result.formatted_address)
+            const data = await geocode({ address: addressInput })
+            if (data && data.lat && data.lng) {
+                setLocation({ lat: data.lat, lng: data.lng, address: data.address })
+                console.log("📍 Forward geocoded via Server Action:", data.address)
             } else {
-                console.warn("Forward geocoding status:", data.status)
+                console.warn("Forward geocoding returned no result:", data?.error)
             }
         } catch (error) {
             console.error("Forward geocoding error:", error)
