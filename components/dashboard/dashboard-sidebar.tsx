@@ -113,38 +113,36 @@ export function DashboardSidebar() {
                         <Logo />
 
                         {/* View Toggle for Providers */}
-                        {isProvider && (
-                            <div className="bg-gray-100 p-1 rounded-lg grid grid-cols-2 gap-1">
-                                <button
-                                    onClick={() => {
-                                        setViewMode("client")
-                                        router.push("/dashboard")
-                                    }}
-                                    className={cn(
-                                        "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                                        viewMode === "client"
-                                            ? "bg-white text-gray-900 shadow-sm"
-                                            : "text-gray-500 hover:text-gray-900"
-                                    )}
-                                >
-                                    {t("client")}
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setViewMode("provider")
-                                        router.push("/dashboard/provider")
-                                    }}
-                                    className={cn(
-                                        "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                                        viewMode === "provider"
-                                            ? "bg-white text-gray-900 shadow-sm"
-                                            : "text-gray-500 hover:text-gray-900"
-                                    )}
-                                >
-                                    {t("provider")}
-                                </button>
-                            </div>
-                        )}
+                        <div className="bg-gray-100 p-1 rounded-lg grid grid-cols-2 gap-1">
+                            <button
+                                onClick={() => {
+                                    setViewMode("client")
+                                    router.push("/dashboard")
+                                }}
+                                className={cn(
+                                    "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                    viewMode === "client"
+                                        ? "bg-white text-gray-900 shadow-sm"
+                                        : "text-gray-500 hover:text-gray-900"
+                                )}
+                            >
+                                {t("client")}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setViewMode("provider")
+                                    router.push("/dashboard/provider")
+                                }}
+                                className={cn(
+                                    "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                    viewMode === "provider"
+                                        ? "bg-white text-gray-900 shadow-sm"
+                                        : "text-gray-500 hover:text-gray-900"
+                                )}
+                            >
+                                {t("provider")}
+                            </button>
+                        </div>
 
                         {isProvider && viewMode === "provider" && (
                             <div className="flex flex-col space-y-2 pt-2">
