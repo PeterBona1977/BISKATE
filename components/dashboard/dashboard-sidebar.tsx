@@ -113,36 +113,48 @@ export function DashboardSidebar() {
                         <Logo />
 
                         {/* View Toggle for Providers */}
-                        <div className="bg-gray-100 p-1 rounded-lg grid grid-cols-2 gap-1">
-                            <button
-                                onClick={() => {
-                                    setViewMode("client")
-                                    router.push("/dashboard")
-                                }}
-                                className={cn(
-                                    "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                                    viewMode === "client"
-                                        ? "bg-white text-gray-900 shadow-sm"
-                                        : "text-gray-500 hover:text-gray-900"
-                                )}
+                        {isProvider ? (
+                            <div className="bg-gray-100 p-1 rounded-lg grid grid-cols-2 gap-1">
+                                <button
+                                    onClick={() => {
+                                        setViewMode("client")
+                                        router.push("/dashboard")
+                                    }}
+                                    className={cn(
+                                        "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                        viewMode === "client"
+                                            ? "bg-white text-gray-900 shadow-sm"
+                                            : "text-gray-500 hover:text-gray-900"
+                                    )}
+                                >
+                                    {t("client")}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setViewMode("provider")
+                                        router.push("/dashboard/provider")
+                                    }}
+                                    className={cn(
+                                        "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                        viewMode === "provider"
+                                            ? "bg-white text-gray-900 shadow-sm"
+                                            : "text-gray-500 hover:text-gray-900"
+                                    )}
+                                >
+                                    {t("provider")}
+                                </button>
+                            </div>
+                        ) : (
+                            <Button
+                                variant="default"
+                                size="sm"
+                                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md transition-all group"
+                                onClick={() => router.push("/dashboard/provider/onboarding")}
                             >
-                                {t("client")}
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setViewMode("provider")
-                                    router.push("/dashboard/provider")
-                                }}
-                                className={cn(
-                                    "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                                    viewMode === "provider"
-                                        ? "bg-white text-gray-900 shadow-sm"
-                                        : "text-gray-500 hover:text-gray-900"
-                                )}
-                            >
-                                {t("provider")}
-                            </button>
-                        </div>
+                                <Briefcase className="mr-2 h-4 w-4 group-hover:animate-bounce" />
+                                {t("becomeProvider") || "Tornar-se Prestador"}
+                            </Button>
+                        )}
 
                         {isProvider && viewMode === "provider" && (
                             <div className="flex flex-col space-y-2 pt-2">
