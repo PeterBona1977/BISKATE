@@ -10,7 +10,6 @@ import { toast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
 import { ttsService } from "@/lib/voice/text-to-speech-service"
 import { supabase } from "@/lib/supabase/client"
-import { geocode } from "@/app/actions/geo"
 
 interface SpeechRecognitionEvent extends Event {
     results: SpeechRecognitionResultList
@@ -189,11 +188,17 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             // Initial fallback
             setLocation({ lat: latitude, lng: longitude })
 
-            // Use the reliable Server Action for Geocoding (bypasses browser CORS)
+            // Use the reliable API Route for Geocoding (bypasses browser CORS and 405 Server Action issues)
             try {
-                const data = await geocode({ lat: latitude, lng: longitude })
+                const response = await fetch("/api/geo", {
+                    method: "POST",
+                    body: JSON.stringify({ lat: latitude, lng: longitude }),
+                    headers: { "Content-Type": "application/json" }
+                })
+                const data = await response.json()
+
                 if (data && data.address) {
-                    console.log("✅ Geocoded address via Server Action:", data.address)
+                    console.log("✅ Geocoded address via API Route:", data.address)
                     setAddressInput(data.address)
                     setLocation({ lat: latitude, lng: longitude, address: data.address })
                 } else {
@@ -201,7 +206,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                     setAddressInput(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`)
                 }
             } catch (err) {
-                console.error("❌ Geocoding Server Action error:", err)
+                console.error("❌ Geocoding API Route error:", err)
                 setAddressInput(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`)
             }
 
@@ -228,10 +233,16 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
         setIsLocating(true)
         try {
-            const data = await geocode({ address: addressInput })
+            const response = await fetch("/api/geo", {
+                method: "POST",
+                body: JSON.stringify({ address: addressInput }),
+                headers: { "Content-Type": "application/json" }
+            })
+            const data = await response.json()
+
             if (data && data.lat && data.lng) {
                 setLocation({ lat: data.lat, lng: data.lng, address: data.address })
-                console.log("📍 Forward geocoded via Server Action:", data.address)
+                console.log("📍 Forward geocoded via API Route:", data.address)
             } else {
                 console.warn("Forward geocoding returned no result:", data?.error)
             }
