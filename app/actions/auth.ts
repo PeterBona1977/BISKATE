@@ -23,7 +23,8 @@ export async function signUpUser(formData: FormData) {
                 full_name: fullName,
             },
             // We use a placeholder and replace it after we have the user ID
-            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/confirm?userId=USER_ID_PLACEHOLDER`
+            // Hardcode fallback to production if env var is missing or localhost in production
+            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL?.includes('localhost') ? process.env.NEXT_PUBLIC_APP_URL : (process.env.NEXT_PUBLIC_APP_URL || 'https://gighub.pages.dev')}/api/auth/confirm?userId=USER_ID_PLACEHOLDER`
         },
     })
 

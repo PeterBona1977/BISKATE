@@ -240,7 +240,7 @@ export class NotificationServiceServer {
                         plan_name: data.planName || data.plan_name || "",
                         amount: data.amount || "0",
                         platform_name: "GigHub",
-                        dashboard_link: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/provider`,
+                        dashboard_link: `${process.env.NEXT_PUBLIC_APP_URL?.includes('localhost') ? process.env.NEXT_PUBLIC_APP_URL : (process.env.NEXT_PUBLIC_APP_URL || 'https://gighub.pages.dev')}/dashboard/provider`,
                         ...data
                     }
                 })
