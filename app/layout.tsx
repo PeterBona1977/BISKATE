@@ -34,7 +34,15 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <meta name="app-version" content="v-debug-nuclear-2" />
+      </head>
       <body className={inter.className}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `console.log('🚀 APP VERSION: v-debug-nuclear-2');`
+          }}
+        />
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <AuthProvider>
