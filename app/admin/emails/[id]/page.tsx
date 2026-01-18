@@ -85,7 +85,8 @@ export default function EmailTemplateEditorPage() {
                 name: template.name,
                 slug: template.slug,
                 category: template.category,
-                trigger_key: template.trigger_key || null,
+                // Ensure trigger_key is null if it's an empty string or undefined
+                trigger_key: template.trigger_key && template.trigger_key.trim() !== "" ? template.trigger_key : null,
                 subject: template.subject,
                 body: template.body,
                 variables: template.variables,
@@ -109,9 +110,14 @@ export default function EmailTemplateEditorPage() {
             }
 
             router.push("/admin/emails")
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error saving template:", error)
-            alert("Erro ao guardar template")
+            // Show detailed error message
+            const errorMessage = error.message || "Erro desconhecido"
+            const errorDetails = error.details || ""
+            const errorHint = error.hint || ""
+
+            alert(`Erro ao guardar template: ${errorMessage}\n${errorDetails}\n${errorHint}`)
         } finally {
             setSaving(false)
         }
