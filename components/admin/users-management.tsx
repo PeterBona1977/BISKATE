@@ -256,8 +256,18 @@ export function UsersManagement() {
           description: "Utilizador apagado com sucesso.",
         })
       } else {
-        const errorMsg = result?.error || "Erro desconhecido"
-        console.error("❌ Admin: Delete error returned:", errorMsg)
+        // Handle undefined result or missing error message
+        const isResultUndefined = result === undefined || result === null;
+        let errorMsg = "Erro desconhecido";
+
+        if (isResultUndefined) {
+          errorMsg = "Sem resposta do servidor (Timeout?)";
+          console.error("❌ Admin: Delete result was NULL/UNDEFINED");
+        } else {
+          errorMsg = result.error || "Resposta inválida do servidor";
+          console.error("❌ Admin: Delete error returned:", result);
+        }
+
         toast({
           title: "Erro",
           description: `Erro ao apagar: ${errorMsg}. Se o utilizador desapareceu após refresh, ignore esta mensagem.`,

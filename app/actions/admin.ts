@@ -150,7 +150,7 @@ export async function updateAdminUser(userId: string, data: {
     }
 }
 
-export async function deleteAdminUser(userId: string, executorId?: string, userEmailForLog?: string) {
+export async function deleteAdminUser(userId: string, executorId?: string, userEmailForLog?: string): Promise<{ success: boolean; error?: string }> {
     try {
         console.log(`[DELETE_USER] 🚀 Starting deletion for ${userId} (${userEmailForLog})`)
 
@@ -162,7 +162,7 @@ export async function deleteAdminUser(userId: string, executorId?: string, userE
 
         if (authError) {
             console.error("[DELETE_USER] ❌ Auth Delete Error:", authError)
-            return { error: `Erro no sistema de autenticação: ${authError.message}` }
+            return { success: false, error: `Erro no sistema de autenticação: ${authError.message}` }
         }
         console.log(`[DELETE_USER] ✅ Auth deletion complete`)
 
@@ -204,7 +204,7 @@ export async function deleteAdminUser(userId: string, executorId?: string, userE
         return { success: true }
     } catch (err: any) {
         console.error("[DELETE_USER] ❌ UNEXPECTED CRITICAL ERROR:", err)
-        return { error: `Erro inesperado: ${err.message || 'Erro desconhecido'}` }
+        return { success: false, error: `Erro inesperado: ${err.message || 'Erro desconhecido'}` }
     }
 }
 
