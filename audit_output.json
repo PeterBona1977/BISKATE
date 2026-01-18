@@ -1,0 +1,200 @@
+[
+  {
+    "id": "8f08b046-2e91-4033-9a51-93eee243820d",
+    "name": "Admin Alert: Plan Upgrade",
+    "slug": "admin-plan-upgrade",
+    "trigger_key": "admin_plan_upgrade"
+  },
+  {
+    "id": "1333f07e-97d4-4562-9c49-1076784f79f9",
+    "name": "Alerta de Moderação (Admin)",
+    "slug": "admin-moderation-alert",
+    "trigger_key": "admin_moderation_alert"
+  },
+  {
+    "id": "4f832eb4-52b1-4471-8dbb-1049fbcccc3c",
+    "name": "Alerta de Segurança",
+    "slug": "security-alert-login",
+    "trigger_key": "multiple_login_failures"
+  },
+  {
+    "id": "1748f89d-080c-4abe-a033-ad07d405f786",
+    "name": "Bem-vindo (Email Confirmado)",
+    "slug": "welcome-confirmed",
+    "trigger_key": "welcome_email"
+  },
+  {
+    "id": "f071a7d1-610d-494c-91be-ca75ecd2793a",
+    "name": "Biskate Aprovado",
+    "slug": "gig-approved",
+    "trigger_key": "gig_approved"
+  },
+  {
+    "id": "61f6268d-e93a-4420-846a-fd192c94b446",
+    "name": "Biskate Criado",
+    "slug": "gig-created",
+    "trigger_key": "gig_created"
+  },
+  {
+    "id": "bacfe863-f089-41e0-925a-eb7d1239a528",
+    "name": "Biskate Rejeitado",
+    "slug": "gig-rejected",
+    "trigger_key": "gig_rejected"
+  },
+  {
+    "id": "19216e69-fef2-4ab2-9ea0-8b9aff7d5bac",
+    "name": "Candidatura a Prestador Recebida",
+    "slug": "provider-app-received",
+    "trigger_key": "provider_application_submitted"
+  },
+  {
+    "id": "651bac76-6dd4-402f-98d3-587e91ad6952",
+    "name": "Confirmação de Registo",
+    "slug": "user-registered",
+    "trigger_key": "user_registered"
+  },
+  {
+    "id": "17b4aa27-30cd-4402-a48e-8f1a6d8e6193",
+    "name": "Contacto Visualizado",
+    "slug": "contact-viewed",
+    "trigger_key": "contact_viewed"
+  },
+  {
+    "id": "aebf2909-14f1-4caa-881e-c950fab53516",
+    "name": "Crédito Utilizado",
+    "slug": "credit-used",
+    "trigger_key": "credit_used"
+  },
+  {
+    "id": "570edd05-04d6-41ca-9d87-330b4ee3d120",
+    "name": "Emergência Aceite",
+    "slug": "emergency-accepted",
+    "trigger_key": "emergency_request_accepted"
+  },
+  {
+    "id": "1b08fc98-cb6f-48d9-8f13-255f014d9e43",
+    "name": "Lembrete de Verificação",
+    "slug": "verification-reminder",
+    "trigger_key": "verification_reminder"
+  },
+  {
+    "id": "124638fd-ec17-4875-9276-cb544f325c9c",
+    "name": "New Message",
+    "slug": "new-message",
+    "trigger_key": "new_message"
+  },
+  {
+    "id": "a3bb132c-a2b7-49dc-a4ad-3b24cdd62afb",
+    "name": "Nova Candidatura (Admin)",
+    "slug": "admin-new-provider",
+    "trigger_key": "admin_provider_application"
+  },
+  {
+    "id": "237d0166-434f-4ee2-a3e0-19dca1dfb3d8",
+    "name": "Nova Proposta Recebida",
+    "slug": "new-proposal",
+    "trigger_key": "response_received"
+  },
+  {
+    "id": "997c3ae1-3d35-44ba-a0a2-b4e4e33ddc47",
+    "name": "Novo Feedback (Admin)",
+    "slug": "admin-new-feedback",
+    "trigger_key": "admin_new_feedback"
+  },
+  {
+    "id": "29a77769-1da6-45fa-bcfd-04e4a0ee58e8",
+    "name": "Novo Utilizador Confirmado (Admin)",
+    "slug": "admin-new-user",
+    "trigger_key": "admin_user_confirmed"
+  },
+  {
+    "id": "6938bc12-5f94-4107-b3fb-a270f7755ef4",
+    "name": "Obrigado pelo Feedback",
+    "slug": "feedback-thank-you",
+    "trigger_key": "feedback_received"
+  },
+  {
+    "id": "4376e507-6834-4425-8831-df6f7380acac",
+    "name": "Password Reset",
+    "slug": "password-reset",
+    "trigger_key": "password_reset"
+  },
+  {
+    "id": "149110d4-a383-4c1d-b2a6-c7d59ae70011",
+    "name": "Payment Received",
+    "slug": "payment-received",
+    "trigger_key": "payment_received"
+  },
+  {
+    "id": "389e5ba0-99a1-4dfe-9985-7db4f5276125",
+    "name": "Pedido de Emergência Recebido",
+    "slug": "emergency-created",
+    "trigger_key": "emergency_request_created"
+  },
+  {
+    "id": "8acbf985-ac51-44af-887b-ee7b87883357",
+    "name": "Perfil Completo",
+    "slug": "profile-completed",
+    "trigger_key": "profile_completed"
+  },
+  {
+    "id": "f1082ae1-b6a7-48ca-95c8-a87bbba33680",
+    "name": "Plan Upgrade Confirmation",
+    "slug": "plan-upgraded-provider",
+    "trigger_key": "plan_upgraded"
+  },
+  {
+    "id": "33b47a53-20ff-4bb3-9de2-b32282ce9ae4",
+    "name": "Prestador Aprovado",
+    "slug": "provider-approved",
+    "trigger_key": "provider_approved"
+  },
+  {
+    "id": "51a25057-561e-4805-a161-656071dbbf29",
+    "name": "Prestador Rejeitado",
+    "slug": "provider-rejected",
+    "trigger_key": "provider_rejected"
+  },
+  {
+    "id": "13e78fd5-c78d-4412-825d-ef4e8d3ea265",
+    "name": "Proposta Aceite",
+    "slug": "proposal-accepted",
+    "trigger_key": "response_accepted"
+  },
+  {
+    "id": "40c56f38-612d-4423-9c42-51de467ca412",
+    "name": "Proposta Rejeitada",
+    "slug": "proposal-rejected",
+    "trigger_key": "response_rejected"
+  },
+  {
+    "id": "bd42fccd-ad57-4270-b3fd-55b5c6753766",
+    "name": "Trabalho Concluído",
+    "slug": "gig-completed",
+    "trigger_key": "gig_completed"
+  },
+  {
+    "id": "0cdf8b7e-87f6-4774-898b-1c7dc555fe96",
+    "name": "Verificação Manual Necessária (Admin)",
+    "slug": "admin-manual-verification",
+    "trigger_key": "admin_manual_verification"
+  },
+  {
+    "id": "758fe07e-7521-4eec-bc79-e841fc7a70a3",
+    "name": "Wallet Topup Confirmation",
+    "slug": "wallet-topup-confirmation",
+    "trigger_key": "wallet_topup"
+  },
+  {
+    "id": "5a753a3e-d3e5-431e-8a08-87a3a3db512e",
+    "name": "Welcome Email",
+    "slug": "welcome",
+    "trigger_key": "email_verified"
+  },
+  {
+    "id": "cdb29d4a-e0e3-4ad8-ab98-1f3a8cdac843",
+    "name": "Withdrawal Requested",
+    "slug": "withdrawal-requested",
+    "trigger_key": "withdrawal_requested"
+  }
+]

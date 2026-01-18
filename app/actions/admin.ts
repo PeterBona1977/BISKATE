@@ -16,7 +16,7 @@ export async function createAdminUser(formData: {
         console.log("🚀 Server Action: Criando novo Administrador...", formData.email)
 
         // 1. Criar utilizador no Auth
-        const supabase = getSupabaseAdmin()
+        const supabase: any = getSupabaseAdmin()
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
             email: formData.email,
             password: "GigHubTemporary123!", // Senha temporária padrão
@@ -98,7 +98,7 @@ export async function updateAdminUser(userId: string, data: {
     try {
         console.log("🚀 Server Action: Atualizando utilizador...", userId)
 
-        const supabase = getSupabaseAdmin()
+        const supabase: any = getSupabaseAdmin()
         const { error } = await supabase
             .from("profiles")
             .update({
@@ -159,7 +159,7 @@ export async function deleteAdminUser(userId: string, executorId?: string, userE
             return { success: false, error: "Erro de configuração do servidor (Service Key missing)." };
         }
 
-        const supabase = getSupabaseAdmin()
+        const supabase: any = getSupabaseAdmin()
 
         // 1. Apagar do Auth
         console.log(`[DELETE_USER] 🗑️ Deleting from Auth...`)
@@ -299,7 +299,7 @@ export async function testFirebaseConfig(config: {
 
 export async function getPlatformSettings() {
     try {
-        const supabase = getSupabaseAdmin()
+        const supabase: any = getSupabaseAdmin()
         const { data, error } = await supabase
             .from("platform_integrations")
             .select("*")
@@ -338,7 +338,7 @@ export async function updatePlatformSettings(settings: {
     try {
         console.log("🚀 Server Action: Atualizando configurações globais...")
 
-        const supabase = getSupabaseAdmin()
+        const supabase: any = getSupabaseAdmin()
         const { data: existing } = await supabase
             .from("platform_integrations")
             .select("id")
