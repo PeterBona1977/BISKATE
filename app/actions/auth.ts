@@ -14,6 +14,23 @@ export async function signUpUser(formData: FormData) {
 
     // 1. Generate the verification link via Admin API
     const supabase: any = getSupabaseAdmin()
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    console.log(`[SIGNUP_DEBUG] NODE_ENV: ${process.env.NODE_ENV}`);
+    console.log(`[SIGNUP_DEBUG] NEXT_PUBLIC_APP_URL: ${appUrl}`);
+
+    // Force specific logic for debugging
+    let redirectBase = 'http://localhost:3000';
+    if (isProduction) {
+        redirectBase = 'https://gighub.pages.dev';
+    } else if (appUrl && !appUrl.includes('localhost')) {
+        redirectBase = appUrl;
+    }
+
+    const redirectToUrl = `${redirectBase}/api/auth/confirm?userId=USER_ID_PLACEHOLDER`;
+    console.log(`[SIGNUP_DEBUG] Generated redirectTo: ${redirectToUrl}`);
+
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
         type: "signup",
         email,
@@ -23,9 +40,7 @@ export async function signUpUser(formData: FormData) {
                 full_name: fullName,
             },
             // We use a placeholder and replace it after we have the user ID
-            // Hardcode fallback to production if env var is missing or localhost in production
-            // Ensure we use the production URL in production environment
-            redirectTo: `${process.env.NODE_ENV === 'production' ? 'https://gighub.pages.dev' : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')}/api/auth/confirm?userId=USER_ID_PLACEHOLDER`
+            redirectTo: redirectToUrl
         },
     })
 
