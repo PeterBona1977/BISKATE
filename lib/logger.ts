@@ -30,7 +30,12 @@ const getAdminClient = () => {
         // Fallback for build time
         return createClient("https://placeholder.supabase.co", "placeholder")
     }
-    return createClient(url, key)
+    return createClient(url, key, {
+        auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+        }
+    })
 }
 
 export async function logActivity(

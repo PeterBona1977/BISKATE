@@ -1,5 +1,6 @@
-
 "use server"
+
+export const runtime = "edge"
 
 import { getSupabaseAdmin } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
