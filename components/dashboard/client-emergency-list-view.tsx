@@ -11,6 +11,8 @@ import { Loader2, MapPin, Clock, ArrowRight, AlertTriangle, CheckCircle2, Zap } 
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
 import { cn } from "@/lib/utils"
+import { EmergencyAI } from "@/components/voice/emergency-ai"
+import { toast } from "@/hooks/use-toast"
 
 interface EmergencyRequest {
     id: string
@@ -27,6 +29,7 @@ export function ClientEmergencyListView() {
     const supabase = createClient()
     const [requests, setRequests] = useState<EmergencyRequest[]>([])
     const [loading, setLoading] = useState(true)
+    const [isEmergencyOpen, setIsEmergencyOpen] = useState(false)
 
     useEffect(() => {
         if (!user) return
@@ -140,7 +143,7 @@ export function ClientEmergencyListView() {
                 </div>
                 {activeRequests.length === 0 && (
                     <Button
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => setIsEmergencyOpen(true)}
                         className="bg-red-600 hover:bg-red-700 font-bold shadow-lg shadow-red-100"
                     >
                         <Zap className="mr-2 h-4 w-4 fill-current" />
@@ -185,7 +188,22 @@ export function ClientEmergencyListView() {
                     )}
                 </TabsContent>
             </Tabs>
-        </div>
+
+
+            <EmergencyAI
+                isOpen={isEmergencyOpen}
+                onClose={() => setIsEmergencyOpen(false)}
+                onSuccess={(requestId) => {
+                    toast({
+                        title: "Emergência Iniciada",
+                        description: "O seu pedido de socorro foi enviado. Aguarde por um profissional.",
+                    })
+                    // Optimistically add to list or just wait for subscription
+                    // The subscription will catch it, but we can also redirect to details
+                    router.push(`/dashboard/emergency/${requestId}`)
+                }}
+            />
+        </div >
     )
 }
 
