@@ -1,7 +1,7 @@
 
 "use server"
 
-import { supabaseAdmin } from "@/lib/supabase/admin"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
 import { logActivity } from "@/lib/logger"
 
@@ -17,7 +17,8 @@ export async function createAdminUser(formData: {
         console.log("🚀 Server Action: Criando novo Administrador...", formData.email)
 
         // 1. Criar utilizador no Auth
-        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        const supabase = getSupabaseAdmin()
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
             email: formData.email,
             password: "GigHubTemporary123!", // Senha temporária padrão
             email_confirm: true,
@@ -41,7 +42,10 @@ export async function createAdminUser(formData: {
         // Pequeno delay para garantir que o trigger processou
         await new Promise(resolve => setTimeout(resolve, 1000))
 
-        const { error: profileError } = await supabaseAdmin
+        // Pequeno delay para garantir que o trigger processou
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        const { error: profileError } = await supabase
             .from("profiles")
             .update({
                 full_name: formData.full_name,
@@ -95,7 +99,8 @@ export async function updateAdminUser(userId: string, data: {
     try {
         console.log("🚀 Server Action: Atualizando utilizador...", userId)
 
-        const { error } = await supabaseAdmin
+        const supabase = getSupabaseAdmin()
+        const { error } = await supabase
             .from("profiles")
             .update({
                 full_name: data.full_name,
@@ -112,7 +117,7 @@ export async function updateAdminUser(userId: string, data: {
         }
 
         // 2. Sincronizar com o Auth Metadata para que apareça no Dashboard do Supabase
-        const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        const { error: authError } = await supabase.auth.admin.updateUserById(userId, {
             user_metadata: { full_name: data.full_name }
         })
 
@@ -150,8 +155,10 @@ export async function deleteAdminUser(userId: string, executorId?: string, userE
     try {
         console.log("🚀 Server Action: Apagando utilizador...", userId)
 
+        const supabase = getSupabaseAdmin()
+
         // 1. Apagar do Auth
-        const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+        const { error: authError } = await supabase.auth.admin.deleteUser(userId)
 
         if (authError) {
             console.error("❌ Erro ao apagar utilizador do Auth:", authError)
@@ -159,7 +166,7 @@ export async function deleteAdminUser(userId: string, executorId?: string, userE
         }
 
         // 2. Tentar apagar do Profile (caso não haja cascade)
-        await supabaseAdmin.from("profiles").delete().eq("id", userId)
+        await supabase.from("profiles").delete().eq("id", userId)
 
         // Log activity
         if (executorId) {
@@ -265,7 +272,8 @@ export async function testFirebaseConfig(config: {
 
 export async function getPlatformSettings() {
     try {
-        const { data, error } = await supabaseAdmin
+        const supabase = getSupabaseAdmin()
+        const { data, error } = await supabase
             .from("platform_integrations")
             .select("*")
             .eq("service_name", "general_settings")
@@ -303,7 +311,8 @@ export async function updatePlatformSettings(settings: {
     try {
         console.log("🚀 Server Action: Atualizando configurações globais...")
 
-        const { data: existing } = await supabaseAdmin
+        const supabase = getSupabaseAdmin()
+        const { data: existing } = await supabase
             .from("platform_integrations")
             .select("id")
             .eq("service_name", "general_settings")
@@ -311,7 +320,7 @@ export async function updatePlatformSettings(settings: {
 
         let error;
         if (existing) {
-            const { error: updateError } = await supabaseAdmin
+            const { error: updateError } = await supabase
                 .from("platform_integrations")
                 .update({
                     config: settings,
@@ -320,7 +329,7 @@ export async function updatePlatformSettings(settings: {
                 .eq("id", existing.id)
             error = updateError
         } else {
-            const { error: insertError } = await supabaseAdmin
+            const { error: insertError } = await supabase
                 .from("platform_integrations")
                 .insert({
                     service_name: "general_settings",
