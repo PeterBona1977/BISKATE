@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase/admin"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
 import { FCMEdgeClient, FCMServiceAccount } from "@/lib/fcm/edge-client"
 
 interface FirebaseConfig {
@@ -28,7 +28,8 @@ export class PushNotificationServiceServer {
             console.log(`📲 Preparing to send push notification to user ${userId} (V1 Edge-Compatible)`)
 
             // 1. Fetch active user tokens
-            const { data: tokens, error: tokenError } = await supabaseAdmin
+            const supabase = getSupabaseAdmin()
+            const { data: tokens, error: tokenError } = await supabase
                 .from("user_device_tokens")
                 .select("token, id")
                 .eq("user_id", userId)
@@ -45,7 +46,7 @@ export class PushNotificationServiceServer {
             }
 
             // 2. Fetch Firebase Configuration
-            const { data: configData, error: configError } = await supabaseAdmin
+            const { data: configData, error: configError } = await supabase
                 .from("platform_integrations")
                 .select("config, is_enabled")
                 .eq("service_name", "firebase")
@@ -136,7 +137,7 @@ export class PushNotificationServiceServer {
 
             // Deactivate invalid tokens
             if (failedTokenIds.length > 0) {
-                await supabaseAdmin
+                await supabase
                     .from("user_device_tokens")
                     .update({ is_active: false })
                     .in("id", failedTokenIds)

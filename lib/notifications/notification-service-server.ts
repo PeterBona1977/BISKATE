@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase/admin"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
 import { sendEmailByTrigger } from "@/lib/email/client"
 import { PushNotificationServiceServer } from "@/lib/notifications/push-notification-server"
 
@@ -149,7 +149,8 @@ export class NotificationServiceServer {
         // Create in-app notification (non-blocking) using admin client
         if (userId) {
             try {
-                const { error } = await supabaseAdmin.from("notifications").insert({
+                const supabase = getSupabaseAdmin()
+                const { error } = await supabase.from("notifications").insert({
                     user_id: userId,
                     title,
                     message,
@@ -192,7 +193,8 @@ export class NotificationServiceServer {
         // Correction: If email is missing but we have userId, let's fetch it from profiles
         if (!email && userId) {
             try {
-                const { data: profileData, error: profileError } = await supabaseAdmin
+                const supabase = getSupabaseAdmin()
+                const { data: profileData, error: profileError } = await supabase
                     .from("profiles")
                     .select("email")
                     .eq("id", userId)
@@ -202,7 +204,7 @@ export class NotificationServiceServer {
                     email = profileData.email
                     // Also ensure userName is available if missing
                     if (!data.userName) {
-                        const { data: nameData } = await supabaseAdmin
+                        const { data: nameData } = await supabase
                             .from("profiles")
                             .select("full_name")
                             .eq("id", userId)
@@ -257,8 +259,9 @@ export class NotificationServiceServer {
         console.log(`📢 Notifying admins for trigger: ${trigger}`)
 
         try {
+            const supabase = getSupabaseAdmin()
             // 1. Fetch all admin users
-            const { data: admins, error } = await supabaseAdmin
+            const { data: admins, error } = await supabase
                 .from("profiles")
                 .select("id, email, full_name")
                 .eq("role", "admin")
@@ -284,7 +287,7 @@ export class NotificationServiceServer {
                 }
 
                 // In-app notification
-                const { error: insertError } = await supabaseAdmin.from("notifications").insert({
+                const { error: insertError } = await supabase.from("notifications").insert({
                     user_id: admin.id,
                     title,
                     message,

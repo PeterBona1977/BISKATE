@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 // Lazy-load Resend client to prevent client-side instantiation
 let resendClient: Resend | null = null;
@@ -196,7 +196,8 @@ export async function sendEmail({ to, templateName, variables }: SendEmailParams
         // Actually, `lib/supabase/client.ts` usually exports the client.
         // I'll stick to the plan but add a check.
 
-        const { data: template, error: templateError } = await supabaseAdmin
+        const supabase = getSupabaseAdmin();
+        const { data: template, error: templateError } = await supabase
             .from("email_templates")
             .select("*")
             .eq("slug", templateName)
@@ -246,10 +247,11 @@ export async function sendEmail({ to, templateName, variables }: SendEmailParams
         });
 
         if (error) {
-            console.error("Resend error:", error);
-            throw error;
+            console.error("❌ Resend API Error:", error);
+            return { success: false, error };
         }
 
+        console.log("✅ Resend API Success:", data);
         return { success: true, data };
     } catch (error) {
         console.error("Failed to send email:", error);
@@ -275,10 +277,11 @@ async function sendEmailWithContent({ to, subject, html }: { to: string, subject
         });
 
         if (error) {
-            console.error("Resend error (raw):", error);
-            throw error;
+            console.error("❌ Resend API Error (raw):", error);
+            return { success: false, error };
         }
 
+        console.log("✅ Resend API Success (raw):", data);
         return { success: true, data };
     } catch (error) {
         console.error("Failed to send raw email:", error);
@@ -303,7 +306,8 @@ export async function sendEmailByTrigger({
         console.log(`📧 Sending email for trigger: ${trigger} to ${to}`);
 
         // 1. Fetch template by trigger_key
-        const { data: template, error: templateError } = await supabaseAdmin
+        const supabase = getSupabaseAdmin();
+        const { data: template, error: templateError } = await supabase
             .from("email_templates")
             .select("*")
             .eq("trigger_key", trigger)
