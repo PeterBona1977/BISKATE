@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Upload, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase/client"
+import { GooglePlacesInput } from "@/components/shared/google-places-input"
 
 import { useTranslations } from "next-intl"
 
@@ -166,10 +167,11 @@ export function ClientProfile() {
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">{t("fields.location")}</label>
-                            <Input
+                            <GooglePlacesInput
                                 value={location}
-                                onChange={(e) => setLocation(e.target.value)}
+                                onChange={(value) => setLocation(value)}
                                 placeholder={t("fields.locationPlaceholder")}
+                                disabled={loading}
                             />
                         </div>
                         <div className="md:col-span-2 space-y-2">
