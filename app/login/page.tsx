@@ -12,7 +12,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { logClientActivity } from "@/app/actions/log"
+import { LoginForm } from "@/components/auth/login-form"
 import Link from "next/link"
+
+export const dynamic = "force-dynamic"
+export const runtime = "edge"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")

@@ -14,6 +14,9 @@ import { AlertCircle, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { signUpUser } from "@/app/actions/auth"
 
+export const dynamic = "force-dynamic"
+export const runtime = "edge"
+
 export default function RegisterPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")

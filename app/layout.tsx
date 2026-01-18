@@ -11,6 +11,8 @@ import { getLocale, getMessages } from 'next-intl/server';
 
 const inter = Inter({ subsets: ["latin"] })
 
+export const runtime = "edge"
+
 export const metadata: Metadata = {
   title: "GigHub - Freelance Platform",
   description: "Connect with skilled professionals for your projects",
