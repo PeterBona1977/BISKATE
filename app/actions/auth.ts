@@ -1,6 +1,6 @@
 "use server"
 
-import { supabaseAdmin } from "@/lib/supabase/admin"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
 import { NotificationServiceServer } from "@/lib/notifications/notification-service-server"
 
 export async function signUpUser(formData: FormData) {
@@ -13,7 +13,8 @@ export async function signUpUser(formData: FormData) {
     }
 
     // 1. Generate the verification link via Admin API
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+    const supabase = getSupabaseAdmin()
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
         type: "signup",
         email,
         password,
@@ -44,7 +45,7 @@ export async function signUpUser(formData: FormData) {
     // 2. Initialize verification tracking in the profile
     // Small delay to allow trigger to create the profile
     await new Promise(resolve => setTimeout(resolve, 1000))
-    await supabaseAdmin
+    await supabase
         .from("profiles")
         .update({
             verification_attempts: 1,
