@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
             .eq("id", userId)
             .single()
 
-        await NotificationServiceServer.triggerNotification("welcome_email", {
+        await NotificationServiceServer.triggerNotification("email_verified", {
             userId: userId,
             userName: profile?.full_name || user.user_metadata?.full_name || "Utilizador",
             userEmail: user.email,
