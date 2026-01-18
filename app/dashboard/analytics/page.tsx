@@ -10,13 +10,13 @@ import { useUser } from "@/hooks/use-user"
 import { BarChart3, Eye, MessageSquare, Star, Calendar, Users, Target } from "lucide-react"
 
 interface AnalyticsData {
-  totalBiskates: number
+  totalGigs: number
   totalViews: number
   totalResponses: number
   averageRating: number
   responseRate: number
   topCategories: Array<{ category: string; count: number }>
-  monthlyStats: Array<{ month: string; biskates: number; responses: number }>
+  monthlyStats: Array<{ month: string; gigs: number; responses: number }>
   recentActivity: Array<{ type: string; description: string; date: string }>
 }
 
@@ -35,7 +35,7 @@ export default function AnalyticsPage() {
     try {
       // Simular dados de analytics (em produção, estes viriam da base de dados)
       const mockData: AnalyticsData = {
-        totalBiskates: 12,
+        totalGigs: 12,
         totalViews: 1247,
         totalResponses: 89,
         averageRating: 4.6,
@@ -47,16 +47,16 @@ export default function AnalyticsPage() {
           { category: "Consultoria", count: 1 },
         ],
         monthlyStats: [
-          { month: "Jan", biskates: 2, responses: 15 },
-          { month: "Fev", biskates: 3, responses: 22 },
-          { month: "Mar", biskates: 4, responses: 31 },
-          { month: "Abr", biskates: 3, responses: 21 },
+          { month: "Jan", gigs: 2, responses: 15 },
+          { month: "Fev", gigs: 3, responses: 22 },
+          { month: "Mar", gigs: 4, responses: 31 },
+          { month: "Abr", gigs: 3, responses: 21 },
         ],
         recentActivity: [
-          { type: "response", description: 'Nova resposta ao seu biskate "Design de Logo"', date: "2024-01-15" },
+          { type: "response", description: 'Nova resposta ao seu Gig "Design de Logo"', date: "2024-01-15" },
           {
             type: "view",
-            description: 'Seu biskate "Website Corporativo" foi visualizado 15 vezes',
+            description: 'Seu Gig "Website Corporativo" foi visualizado 15 vezes',
             date: "2024-01-14",
           },
           { type: "rating", description: "Recebeu avaliação de 5 estrelas", date: "2024-01-13" },
@@ -76,7 +76,7 @@ export default function AnalyticsPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-          <p className="text-muted-foreground">Acompanhe o desempenho dos seus biskates</p>
+          <p className="text-muted-foreground">Acompanhe o desempenho dos seus Gigs</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
@@ -99,7 +99,7 @@ export default function AnalyticsPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-          <p className="text-muted-foreground">Acompanhe o desempenho dos seus biskates</p>
+          <p className="text-muted-foreground">Acompanhe o desempenho dos seus Gigs</p>
         </div>
         <Card>
           <CardContent className="p-6">
@@ -114,15 +114,15 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-        <p className="text-muted-foreground">Acompanhe o desempenho dos seus biskates</p>
+        <p className="text-muted-foreground">Acompanhe o desempenho dos seus Gigs</p>
       </div>
 
       {/* Estatísticas Principais */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title="Total de Biskates"
-          value={analytics.totalBiskates.toString()}
-          description="Biskates publicados"
+          title="Total de Gigs"
+          value={analytics.totalGigs.toString()}
+          description="Gigs publicados"
           icon={BarChart3}
         />
         <StatsCard
@@ -201,7 +201,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Performance Mensal</CardTitle>
-              <CardDescription>Biskates publicados e respostas recebidas por mês</CardDescription>
+              <CardDescription>Gigs publicados e respostas recebidas por mês</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -209,7 +209,7 @@ export default function AnalyticsPage() {
                   <div key={index} className="flex items-center justify-between">
                     <div className="font-medium">{stat.month}</div>
                     <div className="flex items-center gap-4">
-                      <Badge variant="outline">{stat.biskates} biskates</Badge>
+                      <Badge variant="outline">{stat.gigs} Gigs</Badge>
                       <Badge variant="secondary">{stat.responses} respostas</Badge>
                     </div>
                   </div>
@@ -224,9 +224,9 @@ export default function AnalyticsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                Biskates por Categoria
+                Gigs por Categoria
               </CardTitle>
-              <CardDescription>Distribuição dos seus biskates por categoria</CardDescription>
+              <CardDescription>Distribuição dos seus Gigs por categoria</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -234,7 +234,7 @@ export default function AnalyticsPage() {
                   <div key={index} className="flex items-center justify-between">
                     <div className="font-medium">{category.category}</div>
                     <div className="flex items-center gap-2">
-                      <Progress value={(category.count / analytics.totalBiskates) * 100} className="w-20" />
+                      <Progress value={(category.count / analytics.totalGigs) * 100} className="w-20" />
                       <span className="text-sm text-muted-foreground w-8">{category.count}</span>
                     </div>
                   </div>

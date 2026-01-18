@@ -72,7 +72,7 @@ export default function ProposalsPage() {
         console.error("Erro ao carregar gigs:", gigsError)
         toast({
           title: "Erro",
-          description: "Não foi possível carregar seus biskates",
+          description: "Não foi possível carregar os seus Gigs",
           variant: "destructive",
         })
         return
@@ -232,7 +232,7 @@ export default function ProposalsPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Minhas Propostas</h1>
-        <p className="text-gray-600 mt-2">Gerencie as propostas recebidas para os seus biskates</p>
+        <p className="text-gray-600 mt-2">Gerencie as propostas recebidas para os seus Gigs</p>
       </div>
 
       {/* Stats Cards */}
@@ -307,12 +307,12 @@ export default function ProposalsPage() {
                 </h3>
                 <p className="text-gray-600 mb-6">
                   {selectedTab === "all"
-                    ? "Quando receber propostas para os seus biskates, elas aparecerão aqui"
+                    ? "Quando receber propostas para os seus Gigs, elas aparecerão aqui"
                     : "Não há propostas nesta categoria no momento"}
                 </p>
                 {selectedTab === "all" && (
                   <Link href="/dashboard/create-gig">
-                    <Button>Criar Primeiro Biskate</Button>
+                    <Button>Criar Primeiro Gig</Button>
                   </Link>
                 )}
               </CardContent>
@@ -368,7 +368,7 @@ export default function ProposalsPage() {
                         <Link href={`/dashboard/gigs/${proposal.gig_id}`}>
                           <Button variant="outline" size="sm">
                             <Eye className="h-4 w-4 mr-2" />
-                            Ver Biskate
+                            Ver Gig
                           </Button>
                         </Link>
                       </div>

@@ -46,6 +46,7 @@ export async function logActivity(
     ipAddress?: string
 ) {
     try {
+        console.log(`[LOGGER] 📝 Logging ${action} for user ${userId}...`)
         const supabase = getAdminClient()
         const { error } = await supabase.from("activity_logs").insert({
             user_id: userId,
@@ -56,12 +57,12 @@ export async function logActivity(
         })
 
         if (error) {
-            console.error("❌ Error logging activity (Supabase Insert):", error)
+            console.error("[LOGGER] ❌ Error logging activity (Supabase):", error.message)
         } else {
-            console.log("✅ Activity logged successfully:", action)
+            console.log("[LOGGER] ✅ Activity recorded:", action)
         }
-    } catch (err) {
-        console.error("Unexpected error logging activity:", err)
+    } catch (err: any) {
+        console.error("[LOGGER] ❌ UNEXPECTED ERROR:", err.message || err)
     }
 }
 

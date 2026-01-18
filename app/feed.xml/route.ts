@@ -4,14 +4,14 @@ import { siteConfig, getFullUrl } from "@/lib/config/site-config"
 export async function GET() {
   const rssItems = [
     {
-      title: "Bem-vindo ao Biskate",
+      title: "Bem-vindo ao GigHub",
       description: "Conecte-se com prestadores de serviços locais de forma rápida e segura.",
       link: getFullUrl("/"),
       pubDate: new Date("2024-01-15").toUTCString(),
       guid: getFullUrl("/welcome"),
     },
     {
-      title: "Como funciona o Biskate",
+      title: "Como funciona o GigHub",
       description: "Descubra como encontrar e contratar serviços na sua comunidade.",
       link: getFullUrl("/como-funciona"),
       pubDate: new Date("2024-01-20").toUTCString(),
@@ -19,21 +19,21 @@ export async function GET() {
     },
     {
       title: "Torne-se um Prestador de Serviços",
-      description: "Ganhe dinheiro oferecendo seus serviços através do Biskate.",
+      description: "Ganhe dinheiro oferecendo seus serviços através do GigHub.",
       link: getFullUrl("/prestador"),
       pubDate: new Date("2024-01-25").toUTCString(),
       guid: getFullUrl("/prestador"),
     },
     {
       title: "Dicas de Segurança",
-      description: "Como usar o Biskate de forma segura e proteger-se de fraudes.",
+      description: "Como usar o GigHub de forma segura e proteger-se de fraudes.",
       link: getFullUrl("/seguranca"),
       pubDate: new Date("2024-02-01").toUTCString(),
       guid: getFullUrl("/seguranca"),
     },
     {
       title: "Categorias de Serviços Disponíveis",
-      description: "Explore todas as categorias de serviços disponíveis no Biskate.",
+      description: "Explore todas as categorias de serviços disponíveis no GigHub.",
       link: getFullUrl("/categorias"),
       pubDate: new Date("2024-02-10").toUTCString(),
       guid: getFullUrl("/categorias"),
@@ -49,8 +49,8 @@ export async function GET() {
     <language>pt-PT</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${getFullUrl("/feed.xml")}" rel="self" type="application/rss+xml"/>
-    <managingEditor>${siteConfig.contact.email} (Biskate Team)</managingEditor>
-    <webMaster>${siteConfig.contact.email} (Biskate Team)</webMaster>
+    <managingEditor>${siteConfig.contact.email} (GigHub Team)</managingEditor>
+    <webMaster>${siteConfig.contact.email} (GigHub Team)</webMaster>
     <category>Serviços</category>
     <category>Comunidade</category>
     <category>Trabalho</category>
@@ -71,7 +71,7 @@ export async function GET() {
       <link>${item.link}</link>
       <guid isPermaLink="true">${item.guid}</guid>
       <pubDate>${item.pubDate}</pubDate>
-      <category>Biskate</category>
+      <category>GigHub</category>
     </item>`,
       )
       .join("")}

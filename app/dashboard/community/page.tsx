@@ -19,7 +19,7 @@ export default function CommunityPage() {
 
   const communityStats = {
     totalUsers: 1247,
-    activeBiskates: 89,
+    activeGigs: 89,
     categories: 12,
     newThisWeek: 23,
   }
@@ -32,7 +32,7 @@ export default function CommunityPage() {
       location: "Lisboa",
       rating: 4.9,
       avatar: "/placeholder.svg?height=40&width=40",
-      biskatesCount: 15,
+      gigsCount: 15,
       followers: 234,
     },
     {
@@ -42,7 +42,7 @@ export default function CommunityPage() {
       location: "Porto",
       rating: 4.8,
       avatar: "/placeholder.svg?height=40&width=40",
-      biskatesCount: 22,
+      gigsCount: 22,
       followers: 189,
     },
     {
@@ -52,12 +52,12 @@ export default function CommunityPage() {
       location: "Braga",
       rating: 4.9,
       avatar: "/placeholder.svg?height=40&width=40",
-      biskatesCount: 18,
+      gigsCount: 18,
       followers: 156,
     },
   ]
 
-  const popularBiskates = [
+  const popularGigs = [
     {
       id: 1,
       title: "Criação de Logo Profissional",
@@ -91,22 +91,22 @@ export default function CommunityPage() {
     {
       id: 1,
       user: "Pedro Oliveira",
-      action: "publicou um novo biskate",
-      biskate: "Consultoria em SEO",
+      action: "publicou um novo Gig",
+      gig: "Consultoria em SEO",
       time: "há 2 horas",
     },
     {
       id: 2,
       user: "Sofia Rodrigues",
-      action: "respondeu ao biskate",
-      biskate: "Tradução de Documentos",
+      action: "respondeu ao Gig",
+      gig: "Tradução de Documentos",
       time: "há 4 horas",
     },
     {
       id: 3,
       user: "Miguel Ferreira",
       action: "atualizou o perfil",
-      biskate: "",
+      gig: "",
       time: "há 6 horas",
     },
   ]
@@ -128,7 +128,7 @@ export default function CommunityPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Comunidade</h1>
-        <p className="text-muted-foreground">Descubra profissionais talentosos e biskates populares</p>
+        <p className="text-muted-foreground">Descubra profissionais talentosos e Gigs populares</p>
       </div>
 
       {/* Estatísticas da Comunidade */}
@@ -146,11 +146,11 @@ export default function CommunityPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Biskates Ativos</CardTitle>
+            <CardTitle className="text-sm font-medium">Gigs Ativos</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{communityStats.activeBiskates}</div>
+            <div className="text-2xl font-bold">{communityStats.activeGigs}</div>
             <p className="text-xs text-muted-foreground">Disponíveis agora</p>
           </CardContent>
         </Card>
@@ -181,7 +181,7 @@ export default function CommunityPage() {
       <Tabs defaultValue="featured" className="space-y-4">
         <TabsList>
           <TabsTrigger value="featured">Utilizadores em Destaque</TabsTrigger>
-          <TabsTrigger value="biskates">Biskates Populares</TabsTrigger>
+          <TabsTrigger value="gigs">Gigs Populares</TabsTrigger>
           <TabsTrigger value="activity">Atividade Recente</TabsTrigger>
         </TabsList>
 
@@ -214,7 +214,7 @@ export default function CommunityPage() {
                     </div>
                     <div className="flex items-center text-sm">
                       <Star className="h-4 w-4 mr-1 text-yellow-500" />
-                      {user.rating} • {user.biskatesCount} biskates • {user.followers} seguidores
+                      {user.rating} • {user.gigsCount} Gigs • {user.followers} seguidores
                     </div>
                     <Button className="w-full" variant="outline">
                       Ver Perfil
@@ -226,9 +226,9 @@ export default function CommunityPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="biskates" className="space-y-4">
+        <TabsContent value="gigs" className="space-y-4">
           <div className="grid gap-4">
-            {popularBiskates.map((biskate) => (
+            {popularGigs.map((gig) => (
               <Card key={biskate.id}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -245,16 +245,16 @@ export default function CommunityPage() {
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                       <div className="flex items-center">
                         <MessageCircle className="h-4 w-4 mr-1" />
-                        {biskate.responses} respostas
+                        {gig.responses} respostas
                       </div>
                       <div className="flex items-center">
                         <Heart className="h-4 w-4 mr-1" />
-                        {biskate.likes} likes
+                        {gig.likes} likes
                       </div>
                     </div>
                   </div>
                   <Button className="w-full mt-4" variant="outline">
-                    Ver Biskate
+                    Ver Gig
                   </Button>
                 </CardContent>
               </Card>
@@ -283,7 +283,7 @@ export default function CommunityPage() {
                     <div className="flex-1">
                       <p className="text-sm">
                         <span className="font-medium">{activity.user}</span> {activity.action}
-                        {activity.biskate && <span className="font-medium"> "{activity.biskate}"</span>}
+                        {activity.gig && <span className="font-medium"> "{activity.gig}"</span>}
                       </p>
                       <p className="text-xs text-muted-foreground">{activity.time}</p>
                     </div>

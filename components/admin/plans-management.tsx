@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { Package, Plus, Trash2, Loader2, ExternalLink, Edit } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 export function PlansManagement() {
     const [plans, setPlans] = useState<any[]>([])
@@ -27,6 +28,7 @@ export function PlansManagement() {
         description: ""
     })
     const { toast } = useToast()
+    const t = useTranslations("Admin.Plans")
 
     useEffect(() => {
         fetchPlans()
@@ -114,7 +116,7 @@ export function PlansManagement() {
     }
 
     const formatCurrency = (amount: number, currency: string) => {
-        return new Intl.NumberFormat("en-GB", {
+        return new Intl.NumberFormat("pt-PT", {
             style: "currency",
             currency: currency.toUpperCase()
         }).format(amount / 100)
@@ -124,29 +126,29 @@ export function PlansManagement() {
         <div className="space-y-4 pt-4">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-xl font-semibold">Subscription Plans</h2>
-                    <p className="text-sm text-gray-500 text-muted-foreground">Manage products and recurring prices on Stripe</p>
+                    <h2 className="text-xl font-semibold">{t("title")}</h2>
+                    <p className="text-sm text-gray-500 text-muted-foreground">{t("description")}</p>
                 </div>
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                     <DialogTrigger asChild>
                         <Button className="flex items-center gap-2">
                             <Plus className="h-4 w-4" />
-                            New Plan
+                            {t("newPlan")}
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Create New Plan</DialogTitle>
+                            <DialogTitle>{t("createTitle")}</DialogTitle>
                             <DialogDescription>
-                                Add a new product with recurring price to your Stripe.
+                                {t("createDescription")}
                             </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleCreatePlan} className="space-y-4 py-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Plan Name</Label>
+                                <Label htmlFor="name">{t("form.name")}</Label>
                                 <Input
                                     id="name"
-                                    placeholder="Ex: GigHub Pro"
+                                    placeholder={t("form.namePlaceholder")}
                                     required
                                     value={newPlan.name}
                                     onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })}
@@ -154,7 +156,7 @@ export function PlansManagement() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="amount">Price (€)</Label>
+                                    <Label htmlFor="amount">{t("form.price")}</Label>
                                     <Input
                                         id="amount"
                                         type="number"
@@ -166,7 +168,7 @@ export function PlansManagement() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="interval">Interval</Label>
+                                    <Label htmlFor="interval">{t("form.interval")}</Label>
                                     <Select
                                         value={newPlan.interval}
                                         onValueChange={(val) => setNewPlan({ ...newPlan, interval: val })}
@@ -175,25 +177,25 @@ export function PlansManagement() {
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="week">Weekly</SelectItem>
-                                            <SelectItem value="biweekly">Bi-weekly</SelectItem>
-                                            <SelectItem value="month">Monthly</SelectItem>
-                                            <SelectItem value="year">Yearly</SelectItem>
+                                            <SelectItem value="week">{t("form.weekly")}</SelectItem>
+                                            <SelectItem value="biweekly">{t("form.biweekly")}</SelectItem>
+                                            <SelectItem value="month">{t("form.monthly")}</SelectItem>
+                                            <SelectItem value="year">{t("form.yearly")}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="description">Description</Label>
+                                <Label htmlFor="description">{t("form.description")}</Label>
                                 <Input
                                     id="description"
-                                    placeholder="Ex: Unlimited proposals and features"
+                                    placeholder={t("form.descriptionPlaceholder")}
                                     value={newPlan.description}
                                     onChange={(e) => setNewPlan({ ...newPlan, description: e.target.value })}
                                 />
                             </div>
                             <DialogFooter>
-                                <Button type="submit">Create Plan</Button>
+                                <Button type="submit">{t("actions.create")}</Button>
                             </DialogFooter>
                         </form>
                     </DialogContent>
@@ -205,19 +207,19 @@ export function PlansManagement() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Plan</TableHead>
-                                <TableHead>Source</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Frequency</TableHead>
-                                <TableHead>Creation Date</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead>{t("table.plan")}</TableHead>
+                                <TableHead>{t("table.source")}</TableHead>
+                                <TableHead>{t("table.price")}</TableHead>
+                                <TableHead>{t("table.frequency")}</TableHead>
+                                <TableHead>{t("table.creationDate")}</TableHead>
+                                <TableHead className="text-right">{t("table.actions")}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading ? (
-                                <TableRow><TableCell colSpan={5} className="text-center py-8"><Loader2 className="h-6 w-6 animate-spin mx-auto mr-2" /> Loading plans...</TableCell></TableRow>
+                                <TableRow><TableCell colSpan={5} className="text-center py-8"><Loader2 className="h-6 w-6 animate-spin mx-auto mr-2" /> {t("status.loading")}</TableCell></TableRow>
                             ) : plans.length === 0 ? (
-                                <TableRow><TableCell colSpan={5} className="text-center py-8 text-gray-500">No plans configured.</TableCell></TableRow>
+                                <TableRow><TableCell colSpan={5} className="text-center py-8 text-gray-500">{t("status.empty")}</TableCell></TableRow>
                             ) : (
                                 plans.map((plan) => (
                                     <TableRow key={plan.id}>
@@ -243,18 +245,18 @@ export function PlansManagement() {
                                         <TableCell>
                                             <Badge variant="outline" className="capitalize">
                                                 {plan.interval === "week" && plan.intervalCount === 2
-                                                    ? "Bi-weekly"
+                                                    ? t("form.biweekly")
                                                     : plan.interval === "week"
-                                                        ? "Weekly"
+                                                        ? t("form.weekly")
                                                         : plan.interval === "month"
-                                                            ? "Monthly"
+                                                            ? t("form.monthly")
                                                             : plan.interval === "year"
-                                                                ? "Yearly"
-                                                                : "Recurring"}
+                                                                ? t("form.yearly")
+                                                                : t("form.recurring")}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-sm text-gray-500">
-                                            {new Date(plan.created * 1000).toLocaleDateString("en-GB")}
+                                            {new Date(plan.created * 1000).toLocaleDateString("pt-PT")}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
@@ -287,7 +289,7 @@ export function PlansManagement() {
                                                         </Button>
                                                     </>
                                                 ) : (
-                                                    <span className="text-xs text-muted-foreground italic mr-2">Managed in DB</span>
+                                                    <span className="text-xs text-muted-foreground italic mr-2">{t("status.managedInDB")}</span>
                                                 )}
                                             </div>
                                         </TableCell>
@@ -302,15 +304,15 @@ export function PlansManagement() {
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit Plan</DialogTitle>
+                        <DialogTitle>{t("editTitle")}</DialogTitle>
                         <DialogDescription>
-                            Update the product name and description on Stripe. To change the price, archive this one and create a new one.
+                            {t("editDescription")}
                         </DialogDescription>
                     </DialogHeader>
                     {editingPlan && (
                         <form onSubmit={handleUpdatePlan} className="space-y-4 py-4">
                             <div className="space-y-2">
-                                <Label htmlFor="edit-name">Plan Name</Label>
+                                <Label htmlFor="edit-name">{t("form.name")}</Label>
                                 <Input
                                     id="edit-name"
                                     required
@@ -319,7 +321,7 @@ export function PlansManagement() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="edit-description">Description</Label>
+                                <Label htmlFor="edit-description">{t("form.description")}</Label>
                                 <Input
                                     id="edit-description"
                                     value={editingPlan.description || ""}
@@ -327,7 +329,7 @@ export function PlansManagement() {
                                 />
                             </div>
                             <DialogFooter>
-                                <Button type="submit">Save Changes</Button>
+                                <Button type="submit">{t("actions.save")}</Button>
                             </DialogFooter>
                         </form>
                     )}

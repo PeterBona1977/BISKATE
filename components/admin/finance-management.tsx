@@ -23,6 +23,7 @@ import {
     Package,
     Users
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import {
     BarChart,
@@ -47,6 +48,7 @@ export function FinanceManagement() {
         endDate: ""
     })
     const { toast } = useToast()
+    const t = useTranslations("Admin.Finance")
 
     useEffect(() => {
         fetchFinanceData()
@@ -92,8 +94,8 @@ export function FinanceManagement() {
         } catch (error) {
             console.error("Error fetching finance data:", error)
             toast({
-                title: "Error loading financial data",
-                description: "Could not load information from Stripe.",
+                title: t("errors.loadingData"),
+                description: t("errors.loadingStripe"),
                 variant: "destructive"
             })
         } finally {
@@ -102,7 +104,7 @@ export function FinanceManagement() {
     }
 
     const handleRefund = async (paymentIntentId: string) => {
-        if (!confirm("Are you sure you want to issue a full refund for this transaction?")) return
+        if (!confirm(t("actions.confirmRefund"))) return
 
         try {
             const res = await fetch("/api/admin/finance/payments", {
@@ -115,13 +117,13 @@ export function FinanceManagement() {
             if (result.error) throw new Error(result.error)
 
             toast({
-                title: "Refund issued",
-                description: "The refund was successfully processed on Stripe."
+                title: t("actions.refundSuccess"),
+                description: t("actions.refundSuccessDesc")
             })
             fetchFinanceData()
         } catch (error: any) {
             toast({
-                title: "Error issuing refund",
+                title: t("errors.refund"),
                 description: error.message,
                 variant: "destructive"
             })
@@ -129,7 +131,7 @@ export function FinanceManagement() {
     }
 
     const handleCancelSubscription = async (subscriptionId: string) => {
-        if (!confirm("Are you sure you want to cancel this subscription?")) return
+        if (!confirm(t("actions.confirmCancel"))) return
 
         try {
             const res = await fetch("/api/admin/finance/subscriptions", {
@@ -142,13 +144,13 @@ export function FinanceManagement() {
             if (result.error) throw new Error(result.error)
 
             toast({
-                title: "Subscription cancelled",
-                description: "The subscription was cancelled on Stripe."
+                title: t("actions.cancelSuccess"),
+                description: t("actions.cancelSuccessDesc")
             })
             fetchFinanceData()
         } catch (error: any) {
             toast({
-                title: "Error cancelling subscription",
+                title: t("errors.cancel"),
                 description: error.message,
                 variant: "destructive"
             })
@@ -159,23 +161,23 @@ export function FinanceManagement() {
         switch (status) {
             case "succeeded":
             case "active":
-                return <Badge className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1 w-fit"><CheckCircle2 className="h-3 w-3" /> Completed</Badge>
+                return <Badge className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1 w-fit"><CheckCircle2 className="h-3 w-3" /> {t("status.completed")}</Badge>
             case "processing":
             case "trialing":
-                return <Badge className="bg-blue-100 text-blue-800 border-blue-200 flex items-center gap-1 w-fit"><Clock className="h-3 w-3" /> Processing</Badge>
+                return <Badge className="bg-blue-100 text-blue-800 border-blue-200 flex items-center gap-1 w-fit"><Clock className="h-3 w-3" /> {t("status.processing")}</Badge>
             case "requires_payment_method":
             case "past_due":
-                return <Badge className="bg-orange-100 text-orange-800 border-orange-200 flex items-center gap-1 w-fit"><AlertTriangle className="h-3 w-3" /> Pending</Badge>
+                return <Badge className="bg-orange-100 text-orange-800 border-orange-200 flex items-center gap-1 w-fit"><AlertTriangle className="h-3 w-3" /> {t("status.pending")}</Badge>
             case "canceled":
             case "failed":
-                return <Badge className="bg-red-100 text-red-800 border-red-200 flex items-center gap-1 w-fit"><XCircle className="h-3 w-3" /> Cancelled</Badge>
+                return <Badge className="bg-red-100 text-red-800 border-red-200 flex items-center gap-1 w-fit"><XCircle className="h-3 w-3" /> {t("status.cancelled")}</Badge>
             default:
                 return <Badge variant="outline" className="w-fit">{status}</Badge>
         }
     }
 
     const formatCurrency = (amount: number, currency: string) => {
-        return new Intl.NumberFormat("en-GB", {
+        return new Intl.NumberFormat("pt-PT", {
             style: "currency",
             currency: currency.toUpperCase()
         }).format(amount / 100)
@@ -209,12 +211,12 @@ export function FinanceManagement() {
         <div className="space-y-6">
             <div className="flex items-start justify-between md:items-center flex-col md:flex-row gap-4 md:gap-0">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Financial Management</h1>
-                    <p className="text-gray-500 mt-2">Monitor and manage Stripe payments and subscriptions</p>
+                    <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+                    <p className="text-gray-500 mt-2">{t("description")}</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                        <Label htmlFor="start-date" className="text-xs">From</Label>
+                        <Label htmlFor="start-date" className="text-xs">{t("from")}</Label>
                         <Input
                             id="start-date"
                             type="date"
@@ -222,7 +224,7 @@ export function FinanceManagement() {
                             value={dateRange.startDate}
                             onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
                         />
-                        <Label htmlFor="end-date" className="text-xs">To</Label>
+                        <Label htmlFor="end-date" className="text-xs">{t("to")}</Label>
                         <Input
                             id="end-date"
                             type="date"
@@ -236,7 +238,7 @@ export function FinanceManagement() {
                     </Button>
                     <Button>
                         <Download className="h-4 w-4 mr-2" />
-                        Export
+                        {t("export")}
                     </Button>
                 </div>
             </div>
@@ -244,25 +246,25 @@ export function FinanceManagement() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="bg-emerald-50 border-emerald-100">
                     <CardContent className="pt-6">
-                        <div className="text-emerald-600 text-sm font-medium">Total Revenue (Period)</div>
+                        <div className="text-emerald-600 text-sm font-medium">{t("totalRevenue")}</div>
                         <div className="text-2xl font-bold text-emerald-900">{formatCurrency(totalRevenue, 'eur')}</div>
                     </CardContent>
                 </Card>
                 <Card className="bg-blue-50 border-blue-100">
                     <CardContent className="pt-6">
-                        <div className="text-blue-600 text-sm font-medium">Active Subscriptions</div>
+                        <div className="text-blue-600 text-sm font-medium">{t("activeSubscriptions")}</div>
                         <div className="text-2xl font-bold text-blue-900">{activeSubs}</div>
                     </CardContent>
                 </Card>
                 <Card className="bg-purple-50 border-purple-100">
                     <CardContent className="pt-6">
-                        <div className="text-purple-600 text-sm font-medium">Total Transactions</div>
+                        <div className="text-purple-600 text-sm font-medium">{t("totalTransactions")}</div>
                         <div className="text-2xl font-bold text-purple-900">{payments.length}</div>
                     </CardContent>
                 </Card>
                 <Card className="bg-amber-50 border-amber-100">
                     <CardContent className="pt-6">
-                        <div className="text-amber-600 text-sm font-medium">Pending / Others</div>
+                        <div className="text-amber-600 text-sm font-medium">{t("pendingOthers")}</div>
                         <div className="text-2xl font-bold text-amber-900">
                             {payments.filter(p => p.status !== "succeeded").length}
                         </div>
@@ -272,8 +274,8 @@ export function FinanceManagement() {
 
             <Card className="p-6">
                 <CardHeader className="px-0 pt-0">
-                    <CardTitle className="text-lg">Revenue Overview</CardTitle>
-                    <CardDescription>Successful payments in the period</CardDescription>
+                    <CardTitle className="text-lg">{t("revenueOverview")}</CardTitle>
+                    <CardDescription>{t("successfulPayments")}</CardDescription>
                 </CardHeader>
                 <div className="h-[250px] w-full">
                     {chartData.length > 0 ? (
@@ -295,7 +297,7 @@ export function FinanceManagement() {
                                 <Tooltip
                                     cursor={{ fill: '#f8fafc' }}
                                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                    formatter={(value: number) => [`${value.toFixed(2)}€`, 'Revenue']}
+                                    formatter={(value: any) => [`${Number(value || 0).toFixed(2)}€`, 'Revenue'] as [any, any]}
                                 />
                                 <Bar
                                     dataKey="amount"
@@ -307,7 +309,7 @@ export function FinanceManagement() {
                         </ResponsiveContainer>
                     ) : (
                         <div className="flex items-center justify-center h-full text-gray-400 border-2 border-dashed rounded-lg">
-                            Insufficient data to generate chart
+                            {t("insufficientData")}
                         </div>
                     )}
                 </div>
@@ -317,15 +319,15 @@ export function FinanceManagement() {
                 <TabsList className="grid w-full max-w-lg grid-cols-3">
                     <TabsTrigger value="payments" className="flex items-center gap-2">
                         <History className="h-4 w-4" />
-                        Transactions
+                        {t("tabs.transactions")}
                     </TabsTrigger>
                     <TabsTrigger value="subscriptions" className="flex items-center gap-2">
                         <Users className="h-4 w-4" />
-                        Users
+                        {t("tabs.users")}
                     </TabsTrigger>
                     <TabsTrigger value="plans" className="flex items-center gap-2">
                         <Package className="h-4 w-4" />
-                        Plans
+                        {t("tabs.plans")}
                     </TabsTrigger>
                 </TabsList>
 
@@ -338,13 +340,13 @@ export function FinanceManagement() {
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle>Payment History</CardTitle>
-                                    <CardDescription>Transactions processed in the selected period</CardDescription>
+                                    <CardTitle>{t("history.title")}</CardTitle>
+                                    <CardDescription>{t("history.description")}</CardDescription>
                                 </div>
                                 <div className="relative w-64">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
                                     <Input
-                                        placeholder="Search ID, Email..."
+                                        placeholder={t("history.search")}
                                         className="pl-8"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -356,19 +358,19 @@ export function FinanceManagement() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Date</TableHead>
-                                        <TableHead>Customer</TableHead>
-                                        <TableHead>Amount</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Source</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
+                                        <TableHead>{t("history.table.date")}</TableHead>
+                                        <TableHead>{t("history.table.customer")}</TableHead>
+                                        <TableHead>{t("history.table.amount")}</TableHead>
+                                        <TableHead>{t("history.table.status")}</TableHead>
+                                        <TableHead>{t("history.table.source")}</TableHead>
+                                        <TableHead className="text-right">{t("history.table.actions")}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {loading ? (
-                                        <TableRow><TableCell colSpan={6} className="text-center py-8 text-gray-500">Loading transactions...</TableCell></TableRow>
+                                        <TableRow><TableCell colSpan={6} className="text-center py-8 text-gray-500">{t("history.loading")}</TableCell></TableRow>
                                     ) : payments.length === 0 ? (
-                                        <TableRow><TableCell colSpan={6} className="text-center py-8 text-gray-500">No transactions found in period.</TableCell></TableRow>
+                                        <TableRow><TableCell colSpan={6} className="text-center py-8 text-gray-500">{t("history.empty")}</TableCell></TableRow>
                                     ) : (
                                         payments.filter(p =>
                                             p.id.includes(searchTerm) ||
@@ -377,7 +379,7 @@ export function FinanceManagement() {
                                         ).map((payment) => (
                                             <TableRow key={payment.id}>
                                                 <TableCell className="text-sm">
-                                                    {new Date(payment.created * 1000).toLocaleDateString("en-GB")}
+                                                    {new Date(payment.created * 1000).toLocaleDateString("pt-PT")}
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="text-sm font-medium">{payment.receipt_email || "N/A"}</div>
@@ -391,9 +393,9 @@ export function FinanceManagement() {
                                                 </TableCell>
                                                 <TableCell>
                                                     <Badge variant="outline" className="text-[10px] py-0 h-5">
-                                                        {payment.source === 'internal' ? 'Internal' :
-                                                            payment.source === 'stripe_pi' ? 'Card' :
-                                                                payment.source === 'stripe_invoice' ? 'Sub' : 'Stripe'}
+                                                        {payment.source === 'internal' ? 'Interno' :
+                                                            payment.source === 'stripe_pi' ? 'Cartão' :
+                                                                payment.source === 'stripe_invoice' ? 'Subscrição' : 'Stripe'}
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell className="text-right">
@@ -410,7 +412,7 @@ export function FinanceManagement() {
                                                                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                                                 onClick={() => handleRefund(payment.id)}
                                                             >
-                                                                Refund
+                                                                {t("actions.refund")}
                                                             </Button>
                                                         )}
                                                     </div>
@@ -427,25 +429,25 @@ export function FinanceManagement() {
                 <TabsContent value="subscriptions" className="space-y-4 pt-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>User Subscriptions</CardTitle>
-                            <CardDescription>Management of active plans and invoice history</CardDescription>
+                            <CardTitle>{t("subscriptions.title")}</CardTitle>
+                            <CardDescription>{t("subscriptions.description")}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>User</TableHead>
-                                        <TableHead>Plan</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Next Invoice</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
+                                        <TableHead>{t("subscriptions.table.user")}</TableHead>
+                                        <TableHead>{t("subscriptions.table.plan")}</TableHead>
+                                        <TableHead>{t("subscriptions.table.status")}</TableHead>
+                                        <TableHead>{t("subscriptions.table.nextInvoice")}</TableHead>
+                                        <TableHead className="text-right">{t("subscriptions.table.actions")}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {loading ? (
-                                        <TableRow><TableCell colSpan={5} className="text-center py-8 text-gray-500">Loading subscriptions...</TableCell></TableRow>
+                                        <TableRow><TableCell colSpan={5} className="text-center py-8 text-gray-500">{t("subscriptions.loading")}</TableCell></TableRow>
                                     ) : subscriptions.length === 0 ? (
-                                        <TableRow><TableCell colSpan={5} className="text-center py-8 text-gray-500">No subscriptions found.</TableCell></TableRow>
+                                        <TableRow><TableCell colSpan={5} className="text-center py-8 text-gray-500">{t("subscriptions.empty")}</TableCell></TableRow>
                                     ) : (
                                         subscriptions.map((sub) => (
                                             <TableRow key={sub.id}>
@@ -463,8 +465,8 @@ export function FinanceManagement() {
                                                 </TableCell>
                                                 <TableCell className="text-sm">
                                                     {sub.current_period_end
-                                                        ? new Date(sub.current_period_end * 1000).toLocaleDateString("en-GB")
-                                                        : "No expiry set"}
+                                                        ? new Date(sub.current_period_end * 1000).toLocaleDateString("pt-PT")
+                                                        : "Sem expiração definida"}
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     <div className="flex justify-end gap-2">
@@ -480,7 +482,7 @@ export function FinanceManagement() {
                                                                 className="text-red-600 hover:text-red-700"
                                                                 onClick={() => handleCancelSubscription(sub.id)}
                                                             >
-                                                                Cancel
+                                                                {t("actions.cancel")}
                                                             </Button>
                                                         )}
                                                     </div>

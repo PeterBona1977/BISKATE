@@ -152,36 +152,59 @@ export async function updateAdminUser(userId: string, data: {
 
 export async function deleteAdminUser(userId: string, executorId?: string, userEmailForLog?: string) {
     try {
-        console.log("🚀 Server Action: Apagando utilizador...", userId)
+        console.log(`[DELETE_USER] 🚀 Starting deletion for ${userId} (${userEmailForLog})`)
 
         const supabase = getSupabaseAdmin()
 
         // 1. Apagar do Auth
+        console.log(`[DELETE_USER] 🗑️ Deleting from Auth...`)
         const { error: authError } = await supabase.auth.admin.deleteUser(userId)
 
         if (authError) {
-            console.error("❌ Erro ao apagar utilizador do Auth:", authError)
-            return { error: `Erro ao apagar utilizador do sistema de autenticação: ${authError.message}` }
+            console.error("[DELETE_USER] ❌ Auth Delete Error:", authError)
+            return { error: `Erro no sistema de autenticação: ${authError.message}` }
+        }
+        console.log(`[DELETE_USER] ✅ Auth deletion complete`)
+
+        // 2. Tentar apagar do Profile (failsafe case no cascade)
+        console.log(`[DELETE_USER] 🗑️ Cleaning up profile manually (if still exists)...`)
+        const { error: profError } = await supabase.from("profiles").delete().eq("id", userId)
+        if (profError) {
+            console.warn("[DELETE_USER] ⚠️ Profile Cleanup Warning (safe to ignore if cascade active):", profError.message)
+        } else {
+            console.log(`[DELETE_USER] ✅ Profile cleanup complete`)
         }
 
-        // 2. Tentar apagar do Profile (caso não haja cascade)
-        await supabase.from("profiles").delete().eq("id", userId)
-
-        // Log activity
+        // 3. Log activity
         if (executorId) {
-            await logActivity(
-                executorId,
-                "admin",
-                "DELETE_USER_ADMIN",
-                { targetUserId: userId, targetUserEmail: userEmailForLog }
-            )
+            console.log(`[DELETE_USER] 📝 Logging activity for executor ${executorId}...`)
+            try {
+                await logActivity(
+                    executorId,
+                    "admin",
+                    "DELETE_USER_ADMIN",
+                    { targetUserId: userId, targetUserEmail: userEmailForLog }
+                )
+                console.log(`[DELETE_USER] ✅ Activity log sent`)
+            } catch (logErr) {
+                console.error("[DELETE_USER] ⚠️ Logging failure (non-blocking):", logErr)
+            }
         }
 
-        revalidatePath("/admin/users")
+        // 4. Revalidate
+        console.log(`[DELETE_USER] 🔄 Revalidating path...`)
+        try {
+            revalidatePath("/admin/users")
+            console.log(`[DELETE_USER] ✅ Path revalidated`)
+        } catch (revError) {
+            console.error("[DELETE_USER] ⚠️ Revalidate failure (non-blocking):", revError)
+        }
+
+        console.log(`[DELETE_USER] 🎉 Deletion sequence finished successfully`)
         return { success: true }
-    } catch (err) {
-        console.error("❌ Erro inesperado ao apagar:", err)
-        return { error: "Erro inesperado ao apagar utilizador." }
+    } catch (err: any) {
+        console.error("[DELETE_USER] ❌ UNEXPECTED CRITICAL ERROR:", err)
+        return { error: `Erro inesperado: ${err.message || 'Erro desconhecido'}` }
     }
 }
 

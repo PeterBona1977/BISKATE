@@ -575,6 +575,8 @@
             "finance": "Finanças",
             "plans": "Planos & Limites",
             "settings": "Definições",
+            "siteLogs": "Logs do Site",
+            "userLogs": "Logs de Utilizadores",
             "signOut": "Sair"
         },
         "Header": {
@@ -629,6 +631,128 @@
                     "title": "Atividade da Plataforma",
                     "description": "Atividade e monitorização de desempenho"
                 }
+            }
+        },
+        "Finance": {
+            "title": "Gestão Financeira",
+            "description": "Monitorize e gira os pagamentos e subscrições Stripe",
+            "from": "De",
+            "to": "Até",
+            "export": "Exportar",
+            "totalRevenue": "Receita Total (Período)",
+            "activeSubscriptions": "Subscrições Ativas",
+            "totalTransactions": "Total de Transações",
+            "pendingOthers": "Pendentes / Outros",
+            "revenueOverview": "Visão Geral da Receita",
+            "successfulPayments": "Pagamentos bem-sucedidos no período",
+            "insufficientData": "Dados insuficientes para gerar o gráfico",
+            "tabs": {
+                "transactions": "Transações",
+                "users": "Utilizadores",
+                "plans": "Planos"
+            },
+            "history": {
+                "title": "Histórico de Pagamentos",
+                "description": "Transações processadas no período selecionado",
+                "search": "Procurar ID, Email...",
+                "loading": "A carregar transações...",
+                "empty": "Nenhuma transação encontrada no período.",
+                "table": {
+                    "date": "Data",
+                    "customer": "Cliente",
+                    "amount": "Montante",
+                    "status": "Estado",
+                    "source": "Origem",
+                    "actions": "Ações"
+                }
+            },
+            "subscriptions": {
+                "title": "Subscrições de Utilizadores",
+                "description": "Gestão de planos ativos e histórico de faturas",
+                "loading": "A carregar subscrições...",
+                "empty": "Nenhuma subscrição encontrada.",
+                "table": {
+                    "user": "Utilizador",
+                    "plan": "Plano",
+                    "status": "Estado",
+                    "nextInvoice": "Próxima Fatura",
+                    "actions": "Ações"
+                }
+            },
+            "status": {
+                "completed": "Concluído",
+                "processing": "A processar",
+                "pending": "Pendente",
+                "cancelled": "Cancelado"
+            },
+            "actions": {
+                "refund": "Reembolsar",
+                "cancel": "Cancelar",
+                "confirmRefund": "Tem a certeza que deseja emitir um reembolso total para esta transação?",
+                "confirmCancel": "Tem a certeza que deseja cancelar esta subscrição?",
+                "refundSuccess": "Reembolso emitido",
+                "refundSuccessDesc": "O reembolso foi processado com sucesso no Stripe.",
+                "cancelSuccess": "Subscrição cancelada",
+                "cancelSuccessDesc": "A subscrição foi cancelada no Stripe."
+            },
+            "errors": {
+                "loadingData": "Erro ao carregar dados financeiros",
+                "loadingStripe": "Não foi possível carregar informações do Stripe.",
+                "refund": "Erro ao emitir reembolso",
+                "cancel": "Erro ao cancelar subscrição"
+            }
+        },
+        "Plans": {
+            "title": "Planos de Subscrição",
+            "description": "Gira produtos e preços recorrentes no Stripe",
+            "newPlan": "Novo Plano",
+            "createTitle": "Criar Novo Plano",
+            "createDescription": "Adicione um novo produto com preço recorrente ao seu Stripe.",
+            "editTitle": "Editar Plano",
+            "editDescription": "Atualize o nome e descrição do produto no Stripe. Para alterar o preço, arquive este e crie um novo.",
+            "form": {
+                "name": "Nome do Plano",
+                "namePlaceholder": "Ex: GigHub Pro",
+                "price": "Preço (€)",
+                "interval": "Intervalo",
+                "description": "Descrição",
+                "descriptionPlaceholder": "Ex: Propostas e funcionalidades ilimitadas",
+                "weekly": "Semanal",
+                "biweekly": "Quinzenal",
+                "monthly": "Mensal",
+                "yearly": "Anual",
+                "recurring": "Recorrente"
+            },
+            "table": {
+                "plan": "Plano",
+                "source": "Origem",
+                "price": "Preço",
+                "frequency": "Frequência",
+                "creationDate": "Data de Criação",
+                "actions": "Ações"
+            },
+            "status": {
+                "loading": "A carregar planos...",
+                "empty": "Nenhum plano configurado.",
+                "managedInDB": "Gerido na DB"
+            },
+            "actions": {
+                "create": "Criar Plano",
+                "save": "Guardar Alterações",
+                "archive": "Arquivar",
+                "confirmArchive": "Tem a certeza que deseja arquivar este plano? Deixará de estar disponível para novas subscrições.",
+                "createSuccess": "Plano criado",
+                "createSuccessDesc": "O novo plano foi criado com sucesso no Stripe.",
+                "updateSuccess": "Plano atualizado",
+                "updateSuccessDesc": "A informação do plano foi atualizada no Stripe.",
+                "archiveSuccess": "Plano arquivado",
+                "archiveSuccessDesc": "O plano foi desativado com sucesso."
+            },
+            "errors": {
+                "create": "Erro ao criar plano",
+                "update": "Erro ao atualizar plano",
+                "archive": "Erro ao arquivar plano",
+                "loadingData": "Erro ao carregar planos"
             }
         }
     },

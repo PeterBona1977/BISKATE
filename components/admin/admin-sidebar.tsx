@@ -179,12 +179,12 @@ export function AdminSidebar({ isOpen = true, onClose }: AdminSidebarProps) {
       icon: Settings,
     },
     {
-      title: "Logs do Site",
+      title: t("siteLogs"),
       href: "/admin/logs/site",
       icon: Shield,
     },
     {
-      title: "Logs de Utilizadores",
+      title: t("userLogs"),
       href: "/admin/logs/users",
       icon: Users,
     },

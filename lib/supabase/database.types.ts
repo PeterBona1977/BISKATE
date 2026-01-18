@@ -47,6 +47,12 @@ export interface Database {
           provider_application_date: string | null
           provider_emergency_calls: boolean | null
           provider_location: string | null
+          responses_used: number | null
+          proposals_used: number | null
+          gig_responses_used: number | null
+          responses_reset_date: string | null
+          proposals_reset_date: string | null
+          gig_responses_reset_date: string | null
         }
         Insert: {
           id: string
@@ -87,6 +93,12 @@ export interface Database {
           provider_rejection_reason?: string | null
           provider_application_date?: string | null
           provider_location?: string | null
+          responses_used?: number | null
+          proposals_used?: number | null
+          gig_responses_used?: number | null
+          responses_reset_date?: string | null
+          proposals_reset_date?: string | null
+          gig_responses_reset_date?: string | null
         }
         Update: {
           id?: string
@@ -127,6 +139,12 @@ export interface Database {
           provider_rejection_reason?: string | null
           provider_application_date?: string | null
           provider_location?: string | null
+          responses_used?: number | null
+          proposals_used?: number | null
+          gig_responses_used?: number | null
+          responses_reset_date?: string | null
+          proposals_reset_date?: string | null
+          gig_responses_reset_date?: string | null
         }
       }
       conversations: {
@@ -240,6 +258,53 @@ export interface Database {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+        }
+      }
+      gigs: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          category: string
+          price: number
+          location: string
+          estimated_time: string
+          is_premium: boolean
+          status: "pending" | "approved" | "rejected" | "in_progress" | "completed" | "cancelled"
+          rejection_reason: string | null
+          author_id: string
+          created_at: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          description: string
+          category: string
+          price: number
+          location: string
+          estimated_time: string
+          is_premium?: boolean
+          status?: "pending" | "approved" | "rejected" | "in_progress" | "completed" | "cancelled"
+          rejection_reason?: string | null
+          author_id: string
+          created_at?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          category?: string
+          price?: number
+          location?: string
+          estimated_time?: string
+          is_premium?: boolean
+          status?: "pending" | "approved" | "rejected" | "in_progress" | "completed" | "cancelled"
+          rejection_reason?: string | null
+          author_id?: string
+          created_at?: string
+          updated_at?: string | null
         }
       }
       gig_responses: {
@@ -626,6 +691,93 @@ export interface Database {
           created_at?: string
           reviewed_at?: string | null
           rejection_reason?: string | null
+        }
+      }
+      activity_logs: {
+        Row: {
+          id: string
+          user_id: string | null
+          action: string
+          details: Json
+          ip_address: string | null
+          user_role: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          action: string
+          details?: Json
+          ip_address?: string | null
+          user_role?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          action?: string
+          details?: Json
+          ip_address?: string | null
+          user_role?: string | null
+          created_at?: string
+        }
+      }
+      platform_integrations: {
+        Row: {
+          id: string
+          service_name: string
+          config: Json
+          is_enabled: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          service_name: string
+          config?: Json
+          is_enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          service_name?: string
+          config?: Json
+          is_enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      user_device_tokens: {
+        Row: {
+          id: string
+          user_id: string
+          token: string
+          device_info: Json
+          is_active: boolean
+          last_used_at: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          token: string
+          device_info?: Json
+          is_active?: boolean
+          last_used_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          token?: string
+          device_info?: Json
+          is_active?: boolean
+          last_used_at?: string
+          created_at?: string
+          updated_at?: string
         }
       }
     }

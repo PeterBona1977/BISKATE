@@ -1,14 +1,14 @@
 export const siteConfig = {
-  name: "Biskate",
-  title: "Biskate - Plataforma de Serviços Locais em Portugal",
+  name: "GigHub",
+  title: "GigHub - Plataforma de Serviços Locais em Portugal",
   description:
     "Conecte-se com prestadores de serviços locais de forma rápida e segura. Limpeza, reparações, jardinagem e muito mais em Portugal.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://v0-biskate.vercel.app",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://gighub.pt",
 
   // SEO específico
   seo: {
     defaultImage: "/og-image.png",
-    twitterHandle: "@biskate_app",
+    twitterHandle: "@gighub_app",
     keywords: [
       "serviços locais portugal",
       "prestadores de serviços",
@@ -16,6 +16,7 @@ export const siteConfig = {
       "reparações casa",
       "jardinagem portugal",
       "serviços comunidade",
+      "gighub portugal",
     ],
   },
 
@@ -30,18 +31,18 @@ export const siteConfig = {
 
   // Contacto
   contact: {
-    email: "hello@biskate.pt",
+    email: "support@gighub.pt",
     phone: "+351-XXX-XXX-XXX",
     address: "Portugal",
   },
 
   // Redes sociais
   social: {
-    twitter: "https://twitter.com/biskate_app",
-    facebook: "https://facebook.com/biskate",
-    instagram: "https://instagram.com/biskate_app",
-    pinterest: "https://pinterest.com/biskate_app",
-    linkedin: "https://linkedin.com/company/biskate",
+    twitter: "https://twitter.com/gighub_app",
+    facebook: "https://facebook.com/gighub",
+    instagram: "https://instagram.com/gighub_app",
+    pinterest: "https://pinterest.com/gighub_app",
+    linkedin: "https://linkedin.com/company/gighub",
   },
 }
 

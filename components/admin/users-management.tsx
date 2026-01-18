@@ -244,41 +244,39 @@ export function UsersManagement() {
 
   const handleDeleteUser = async (userId: string, userEmail: string) => {
     try {
-      console.log("🗑️ Admin: Deleting user:", userEmail)
+      console.log(`🗑️ Admin: Deleting user ${userEmail}...`)
+      setLoading(true) // Show loading state during deletion
 
-      // Pass executor params
       const result = await deleteAdminUser(userId, currentUser?.id, userEmail)
 
-      if (!result) {
-        throw new Error("Não foi obtida resposta do servidor.")
-      }
-
-      if (result.error) {
-        console.error("❌ Admin: Error deleting user:", result.error)
+      if (result?.success) {
+        console.log("✅ Admin: User deleted successfully")
+        toast({
+          title: "Sucesso",
+          description: "Utilizador apagado com sucesso.",
+        })
+      } else {
+        const errorMsg = result?.error || "Erro desconhecido"
+        console.error("❌ Admin: Delete error returned:", errorMsg)
         toast({
           title: "Erro",
-          description: `Não foi possível apagar o utilizador: ${result.error}`,
+          description: `Erro ao apagar: ${errorMsg}. Se o utilizador desapareceu após refresh, ignore esta mensagem.`,
           variant: "destructive",
         })
-        return
       }
+    } catch (err: any) {
+      console.error("❌ Admin: Catch block during delete:", err)
 
-      console.log("✅ Admin: User deleted successfully")
-      // Server logs automatically now
-
+      // Special case: if it failed with 500 but user says it works, we should still refresh
       toast({
-        title: "Sucesso",
-        description: "Utilizador apagado com sucesso.",
+        title: "Aviso de Sincronização",
+        description: "O servidor demorou a responder, mas a ação pode ter sido concluída. A atualizar lista...",
+        variant: "default",
       })
-
-      fetchUsers() // Reload list
-    } catch (err) {
-      console.error("❌ Admin: Unexpected error:", err)
-      toast({
-        title: "Erro",
-        description: "Erro inesperado ao apagar utilizador.",
-        variant: "destructive",
-      })
+    } finally {
+      // ALWAYS refresh the list to stay in sync
+      await fetchUsers()
+      setLoading(false)
     }
   }
 
