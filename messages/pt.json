@@ -554,8 +554,12 @@
             "contact": "Contacto"
         },
         "legal": {
-            "copyright": "© 2024 GigHub. Todos os direitos reservados."
-        }
+            "copyright": "© 2024 GigHub. Todos os direitos reservados.",
+            "privacy": "Política de Privacidade",
+            "terms": "Termos de Serviço",
+            "cookies": "Política de Cookies"
+        },
+        "copyright": "© 2024 GigHub. Todos os direitos reservados."
     },
     "Admin": {
         "Sidebar": {
