@@ -10,6 +10,20 @@ const intlMiddleware = createMiddleware({
 });
 
 export async function middleware(request: NextRequest) {
+  // SHORT-CIRCUIT: Explicitly ignore all static assets to prevent 500 errors
+  // This is a safety net in case the matcher misses something (like query params)
+  if (
+    request.nextUrl.pathname.endsWith(".js") ||
+    request.nextUrl.pathname.endsWith(".css") ||
+    request.nextUrl.pathname.endsWith(".png") ||
+    request.nextUrl.pathname.endsWith(".jpg") ||
+    request.nextUrl.pathname.endsWith(".ico") ||
+    request.nextUrl.pathname.includes("webpack") ||
+    request.nextUrl.pathname.includes("main.js")
+  ) {
+    return NextResponse.next()
+  }
+
   // Initialize response
   let response = NextResponse.next();
 
@@ -148,6 +162,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|js|css)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|js|css)(?:\\?.*)?$).*)",
   ],
 }
