@@ -577,7 +577,7 @@ export function EnhancedProviderOnboarding() {
                 id="bio"
                 placeholder="Descreva sua experiência, habilidades e serviços oferecidos..."
                 value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
                 rows={5}
                 required
               />
@@ -591,7 +591,7 @@ export function EnhancedProviderOnboarding() {
                   type="tel"
                   placeholder="+351 912 345 678"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   required
                 />
               </div>
@@ -602,11 +602,55 @@ export function EnhancedProviderOnboarding() {
                   id="location"
                   placeholder="Sua cidade/região (ex: Lisboa, Porto)"
                   value={formData.location}
-                  onChange={(value) => setFormData({ ...formData, location: value })}
+                  onChange={(value) => setFormData(prev => ({ ...prev, location: value }))}
                   required
                 />
               </div>
             </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="experienceYears">Anos de Experiência</Label>
+                <Input
+                  id="experienceYears"
+                  type="number"
+                  min="0"
+                  value={formData.experienceYears}
+                  onChange={(e) => setFormData(prev => ({ ...prev, experienceYears: Number(e.target.value) }))}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="hourlyRate">Valor Horário (€)</Label>
+                <Input
+                  id="hourlyRate"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.hourlyRate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, hourlyRate: Number(e.target.value) }))}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="availability">Disponibilidade</Label>
+              <Select
+                value={formData.availability}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, availability: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="available">Disponível</SelectItem>
+                  <SelectItem value="busy">Ocupado (Pouca disponibilidade)</SelectItem>
+                  <SelectItem value="unavailable">Indisponível</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="website">Website (opcional)</Label>
               <Input
@@ -614,12 +658,12 @@ export function EnhancedProviderOnboarding() {
                 type="url"
                 placeholder="https://seusite.com"
                 value={formData.website}
-                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
               />
             </div>
           </CardContent>
           <CardFooter className="flex justify-end">
-            <Button onClick={handleNext} disabled={!formData.bio || !formData.phone}>
+            <Button onClick={handleNext} disabled={!formData.bio || !formData.phone || !formData.location || !formData.hourlyRate}>
               Próximo
             </Button>
           </CardFooter>
