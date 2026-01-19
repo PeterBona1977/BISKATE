@@ -82,6 +82,10 @@ export function EnhancedProviderOnboarding() {
   const totalSteps = 6
   const progress = (currentStep / totalSteps) * 100
 
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [specialties, setSpecialties] = useState<Specialty[]>([])
+
   useEffect(() => {
     loadInitialData()
   }, [user?.id])
