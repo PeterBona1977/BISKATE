@@ -57,7 +57,15 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
             const { data: subData } = await supabase.from("subcategories").select("*").order("name")
             const { data: servData } = await supabase.from("services").select("*").order("name")
 
-            if (catData) setCategories(catData)
+            if (catData && subData) {
+                // Filter categories: Only show those that have at least one subcategory
+                // This hides legacy "service-level" categories from the main list
+                const parentIds = new Set(subData.map(s => s.category_id))
+                const validCategories = catData.filter(c => parentIds.has(c.id))
+
+                setCategories(validCategories)
+            }
+            // if (catData) setCategories(catData) // Removed simple set
             if (subData) setSubcategories(subData)
             if (servData) setServices(servData)
         } catch (error) {
