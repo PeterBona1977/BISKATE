@@ -90,13 +90,24 @@ export function EnhancedProviderOnboarding() {
 
   const totalSteps = 6
   const progress = (currentStep / totalSteps) * 100
-
-  // Duplicate state removal - consolidate selectedServices up top if needed, but for now just deleting this block and I will add selectedServices to the main block in a separate call or ensure it is there.
-  // Actually, wait, the previous tool added lines 85-87. Lines 60 and 70 already had selectedCategories and specialties. 
-  // So I should remove lines 85, 87. And keep 86 (selectedServices) but move it up?
-  // Or just replace this whole block with just selectedServices?
-  // Let's replace 85-87 with JUST selectedServices.
   const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [serviceDetails, setServiceDetails] = useState<{ id: string; name: string }[]>([])
+
+  useEffect(() => {
+    if (currentStep === 6 && selectedServices.length > 0) {
+      const fetchServiceDetails = async () => {
+        const { data } = await supabase
+          .from("services")
+          .select("id, name")
+          .in("id", selectedServices)
+
+        if (data) {
+          setServiceDetails(data)
+        }
+      }
+      fetchServiceDetails()
+    }
+  }, [currentStep, selectedServices])
 
   useEffect(() => {
     loadInitialData()
@@ -701,7 +712,7 @@ export function EnhancedProviderOnboarding() {
               onServicesChange={setSelectedServices}
             />
 
-            {selectedServices.length === 0 && (
+            {(!selectedServices || selectedServices.length === 0) && (
               <p className="text-amber-600 text-sm mt-4 flex items-center">
                 <AlertCircle className="h-4 w-4 mr-1" />
                 Selecione pelo menos um serviço
@@ -712,7 +723,7 @@ export function EnhancedProviderOnboarding() {
             <Button variant="outline" onClick={handlePrevious}>
               Anterior
             </Button>
-            <Button onClick={handleNext} disabled={selectedServices.length === 0}>
+            <Button onClick={handleNext} disabled={!selectedServices || selectedServices.length === 0}>
               Próximo
             </Button>
           </CardFooter>
@@ -1153,16 +1164,39 @@ export function EnhancedProviderOnboarding() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium mb-2">Categorias Selecionadas</h4>
+                  <h4 className="font-medium mb-2">Serviços Selecionados ({serviceDetails.length})</h4>
                   <div className="flex flex-wrap gap-2">
-                    {selectedCategories.map((categoryId) => {
-                      const category = categories.find((c) => c.id === categoryId)
-                      return (
-                        <Badge key={categoryId} variant="outline">
-                          {category?.name}
+                    {serviceDetails.length > 0 ? (
+                      serviceDetails.map((service) => (
+                        <Badge key={service.id} variant="secondary">
+                          {service.name}
                         </Badge>
-                      )
-                    })}
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">Nenhum serviço selecionado</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium mb-2">Documentos Carregados</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="bg-gray-50 p-2 rounded">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">Identificação</p>
+                      <p className="text-sm">{documents.id.length} ficheiro(s)</p>
+                    </div>
+                    <div className="bg-gray-50 p-2 rounded">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">Morada</p>
+                      <p className="text-sm">{documents.address.length} ficheiro(s)</p>
+                    </div>
+                    <div className="bg-gray-50 p-2 rounded">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">Outros</p>
+                      <p className="text-sm">{documents.others.length} ficheiro(s)</p>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500">
+                    {documents.id.map(f => f.name).join(", ")}
+                    {documents.address.length > 0 && ", " + documents.address.map(f => f.name).join(", ")}
                   </div>
                 </div>
 
