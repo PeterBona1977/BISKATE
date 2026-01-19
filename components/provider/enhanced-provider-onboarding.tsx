@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { supabase } from "@/lib/supabase/client"
 import { AlertCircle, CheckCircle, Loader2, User, Briefcase, FileText, Star, Plus, X, Upload, Trash2, Check } from "lucide-react"
 import type { Database } from "@/lib/supabase/database.types"
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete"
 
 type Category = Database["public"]["Tables"]["categories"]["Row"]
 
@@ -456,11 +457,11 @@ export function EnhancedProviderOnboarding() {
 
               <div className="space-y-2">
                 <Label htmlFor="location">Localização *</Label>
-                <Input
+                <AddressAutocomplete
                   id="location"
-                  placeholder="Sua cidade/região"
+                  placeholder="Sua cidade/região (ex: Lisboa, Porto)"
                   value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  onChange={(value) => setFormData({ ...formData, location: value })}
                   required
                 />
               </div>
