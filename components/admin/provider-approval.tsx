@@ -82,8 +82,9 @@ export function ProviderApproval() {
       if (providersError) throw providersError
 
       // Buscar documentos e portfolio para cada prestador
+      const profiles = providersData as unknown as Provider[]
       const providersWithDetails = await Promise.all(
-        providersData.map(async (provider) => {
+        profiles.map(async (provider) => {
           const { data: documents, error: docsError } = await supabase
             .from("provider_documents")
             .select("*")
@@ -167,8 +168,8 @@ export function ProviderApproval() {
 
   const togglePhoneVerification = async (providerId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from("profiles")
+      const { error } = await (supabase
+        .from("profiles") as any)
         .update({ phone_verified: !currentStatus })
         .eq("id", providerId)
 
@@ -188,8 +189,8 @@ export function ProviderApproval() {
 
   const updateDocumentStatus = async (providerId: string, docId: string, status: string, reason?: string) => {
     try {
-      const { error } = await supabase
-        .from("provider_documents")
+      const { error } = await (supabase
+        .from("provider_documents") as any)
         .update({ status, rejection_reason: reason })
         .eq("id", docId)
 
@@ -333,7 +334,7 @@ export function ProviderApproval() {
                         </div>
                       </div>
 
-                      )}
+
 
                       {/* Professional Info */}
                       <div className="grid grid-cols-2 gap-4">
