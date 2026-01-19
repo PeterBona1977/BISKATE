@@ -124,7 +124,7 @@ export function EnhancedProviderOnboarding() {
 
         if (specialtiesData) {
           setSpecialties(
-            specialtiesData.map((s) => ({
+            (specialtiesData as any[]).map((s) => ({
               name: s.specialty_name,
               level: s.experience_level as any,
               years: s.years_experience,
@@ -137,7 +137,7 @@ export function EnhancedProviderOnboarding() {
 
         if (portfolioData) {
           setPortfolio(
-            portfolioData.map((p) => ({
+            (portfolioData as any[]).map((p) => ({
               title: p.title,
               description: p.description || "",
               imageUrl: p.image_url || "",
@@ -250,7 +250,7 @@ export function EnhancedProviderOnboarding() {
           provider_id: user.id,
           category_id: categoryId,
         }))
-        await supabase.from("provider_categories").insert(categoryInserts)
+        await supabase.from("provider_categories").insert(categoryInserts as any)
       }
 
       // 3. Salvar especialidades
