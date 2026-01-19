@@ -35,7 +35,13 @@ import type { Database } from "@/lib/supabase/database.types"
 import { useRouter } from "next/navigation"
 import { createAdminUser, updateAdminUser, deleteAdminUser } from "@/app/actions/admin"
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"]
+type Profile = Database["public"]["Tables"]["profiles"]["Row"] & {
+  plan?: string | null
+  permissions?: string[] | null
+  responses_used?: number | null
+  email?: string | null
+  created_at: string
+}
 
 export function UsersManagement() {
   const [users, setUsers] = useState<Profile[]>([])
@@ -80,7 +86,7 @@ export function UsersManagement() {
     fetchUsers()
   }, [])
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (): Promise<Profile[] | null> => {
     try {
       console.log("🔍 Admin: Fetching ALL users...")
       setLoading(true)
@@ -104,12 +110,12 @@ export function UsersManagement() {
           description: `Erro: ${error.message}. Verifique se tem permissões de administrador.`,
           variant: "destructive",
         })
-        return
+        return null
       }
 
       console.log(`✅ Admin: ${data?.length || 0} users loaded`)
 
-      setUsers(data || [])
+      setUsers((data as unknown as Profile[]) || [])
 
       // Additional check for debugging
       if (!data || data.length === 0) {
@@ -120,6 +126,7 @@ export function UsersManagement() {
           variant: "destructive",
         })
       }
+      return (data as unknown as Profile[]) || []
     } catch (err) {
       console.error("❌ Admin: Unexpected error:", err)
       toast({
@@ -127,6 +134,7 @@ export function UsersManagement() {
         description: "Erro inesperado ao carregar utilizadores. Verifique a consola para detalhes.",
         variant: "destructive",
       })
+      return null
     } finally {
       setLoading(false)
     }
@@ -156,7 +164,7 @@ export function UsersManagement() {
         plan: editForm.plan as any,
         permissions: editForm.permissions,
         executorId: currentUser?.id, // Pass admin ID
-        emailForLog: editingUser.email // Pass email for logging context
+        emailForLog: editingUser.email || undefined // Pass email for logging context
       })
 
       if (result.error) {
@@ -261,6 +269,21 @@ export function UsersManagement() {
         let errorMsg = "Erro desconhecido";
 
         if (isResultUndefined) {
+          console.warn("⚠️ Admin: Delete confirmation timed out. Verifying deletion...")
+
+          // Verify if user is actually gone
+          const updatedUsers = await fetchUsers()
+          const userExists = updatedUsers?.some(u => u.id === userId)
+
+          if (!userExists) {
+            console.log("✅ Admin: User deletion verified (despite timeout)")
+            toast({
+              title: "Sucesso",
+              description: "Utilizador apagado com sucesso (verificado após demora).",
+            })
+            return
+          }
+
           errorMsg = "Sem resposta do servidor (Timeout?)";
           console.error("❌ Admin: Delete result was NULL/UNDEFINED");
         } else {
