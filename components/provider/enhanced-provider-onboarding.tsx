@@ -14,7 +14,7 @@ import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
 import { supabase } from "@/lib/supabase/client"
-import { AlertCircle, CheckCircle, Loader2, User, Briefcase, FileText, Star, Plus, X, Upload, Trash2, Check } from "lucide-react"
+import { AlertCircle, CheckCircle, Loader2, User, Briefcase, FileText, Star, Plus, X, Upload, Trash2, Check, MapPin } from "lucide-react"
 import type { Database } from "@/lib/supabase/database.types"
 import { AddressAutocomplete } from "@/components/ui/address-autocomplete"
 import { ServiceSelector } from "@/components/provider/service-selector"
@@ -78,9 +78,9 @@ export function EnhancedProviderOnboarding() {
   const [specialties, setSpecialties] = useState<Specialty[]>([])
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([])
   const [documents, setDocuments] = useState<{
-    id: File[]
-    address: File[]
-    others: File[]
+    id: (File | { name: string; url?: string })[]
+    address: (File | { name: string; url?: string })[]
+    others: (File | { name: string; url?: string })[]
   }>({
     id: [],
     address: [],
@@ -174,6 +174,27 @@ export function EnhancedProviderOnboarding() {
             })),
           )
         }
+
+        // Carregar documentos existentes
+        const { data: docsData } = await supabase.from("provider_documents").select("*").eq("provider_id", user.id)
+
+        if (docsData) {
+          const loadedDocs = docsData as any[]
+          const newDocs = {
+            id: [] as any[],
+            address: [] as any[],
+            others: [] as any[]
+          }
+
+          loadedDocs.forEach(doc => {
+            const fileObj = { name: doc.document_name, url: doc.document_url }
+            if (doc.document_type === 'id') newDocs.id.push(fileObj)
+            else if (doc.document_type === 'address') newDocs.address.push(fileObj)
+            else newDocs.others.push(fileObj)
+          })
+
+          setDocuments(newDocs)
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar dados:", error)
@@ -231,6 +252,24 @@ export function EnhancedProviderOnboarding() {
     const updated = [...portfolio]
     updated[index] = { ...updated[index], [field]: value }
     setPortfolio(updated)
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "id" | "address" | "others") => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files)
+      setDocuments((prev) => ({
+        ...prev,
+        [type]: [...prev[type], ...newFiles],
+      }))
+    }
+  }
+
+  const removeDocument = (type: "id" | "address" | "others", index: number) => {
+    setDocuments((prev) => {
+      const newFiles = [...prev[type]]
+      newFiles.splice(index, 1)
+      return { ...prev, [type]: newFiles }
+    })
   }
 
   const uploadFile = async (file: File, bucket: string, path: string) => {
@@ -298,7 +337,7 @@ export function EnhancedProviderOnboarding() {
       if (portfolio.length > 0) {
         for (const item of portfolio) {
           // 4.1 Insert Item
-          const { data: insertedItem, error: itemError } = await supabase
+          const { data: insertedItemData, error: itemError } = await supabase
             .from("portfolio_items")
             .insert({
               provider_id: user.id,
@@ -308,8 +347,9 @@ export function EnhancedProviderOnboarding() {
               completion_date: item.completionDate || null,
               client_name: item.clientName,
             } as any)
-            .select()
             .single()
+
+          const insertedItem = insertedItemData as any
 
           if (itemError || !insertedItem) {
             console.error("Error inserting portfolio item:", itemError)
@@ -355,42 +395,67 @@ export function EnhancedProviderOnboarding() {
       const docInserts: any[] = []
 
       // Process ID documents
-      for (const file of documents.id) {
-        const path = `providers/${user.id}/id_${Date.now()}_${file.name}`
-        const url = await uploadFile(file, "documents", path)
-        docInserts.push({
-          provider_id: user.id,
-          document_type: "id",
-          document_name: file.name,
-          document_url: url,
-          status: "pending"
-        })
+      for (const doc of documents.id) {
+        let url = (doc as any).url
+        let name = doc.name
+
+        // Check if it's a new File needing upload
+        if (doc instanceof File) {
+          const path = `providers/${user.id}/id_${Date.now()}_${doc.name}`
+          url = await uploadFile(doc, "documents", path)
+        }
+
+        if (url) {
+          docInserts.push({
+            provider_id: user.id,
+            document_type: "id",
+            document_name: name,
+            document_url: url,
+            status: "pending"
+          })
+        }
       }
 
       // Process Address documents
-      for (const file of documents.address) {
-        const path = `providers/${user.id}/address_${Date.now()}_${file.name}`
-        const url = await uploadFile(file, "documents", path)
-        docInserts.push({
-          provider_id: user.id,
-          document_type: "address",
-          document_name: file.name,
-          document_url: url,
-          status: "pending"
-        })
+      for (const doc of documents.address) {
+        let url = (doc as any).url
+        let name = doc.name
+
+        if (doc instanceof File) {
+          const path = `providers/${user.id}/address_${Date.now()}_${doc.name}`
+          url = await uploadFile(doc, "documents", path)
+        }
+
+        if (url) {
+          docInserts.push({
+            provider_id: user.id,
+            document_type: "address",
+            document_name: name,
+            document_url: url,
+            status: "pending"
+          })
+        }
       }
 
       // Process Other documents
-      for (const file of documents.others) {
-        const path = `providers/${user.id}/other_${Date.now()}_${file.name}`
-        const url = await uploadFile(file, "documents", path)
-        docInserts.push({
-          provider_id: user.id,
-          document_type: "other",
-          document_name: file.name,
-          document_url: url,
-          status: "pending"
-        })
+      for (const doc of documents.others) {
+        let url = (doc as any).url
+        let name = doc.name
+
+        if (doc instanceof File) {
+          const path = `providers/${user.id}/other_${Date.now()}_${doc.name}`
+          url = await uploadFile(doc, "documents", path)
+        }
+
+        if (url) {
+          docInserts.push({
+            provider_id: user.id,
+            document_type: "other",
+            document_name: name,
+            document_url: url,
+            status: "pending"
+          })
+        }
       }
 
       if (docInserts.length > 0) {
@@ -861,96 +926,90 @@ export function EnhancedProviderOnboarding() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className={!documents.id ? "border-dashed" : "border-primary"}>
+                {/* ID Document Card */}
+                <Card className={documents.id.length === 0 ? "border-dashed" : "border-primary"}>
                   <CardHeader>
-                    <CardTitle className="text-sm flex items-center">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Documento de Identidade
+                    <CardTitle className="text-base flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      Documento de Identificação *
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex flex-col items-center justify-center py-4 border-2 border-dashed rounded-lg">
-                      {documents.id ? (
-                        <div className="text-center">
-                          <Check className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                          <p className="text-sm font-medium">{documents.id.name}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="mt-2 text-destructive"
-                            onClick={() => setDocuments({ ...documents, id: null })}
-                          >
-                            Remover
+                  <CardContent>
+                    <div className="space-y-4">
+                      {documents.id.map((file, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2 bg-muted rounded">
+                          <div className="flex items-center overflow-hidden">
+                            <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
+                            <span className="text-sm truncate">{file.name}</span>
+                          </div>
+                          <Button variant="ghost" size="sm" onClick={() => removeDocument("id", idx)}>
+                            <X className="h-4 w-4" />
                           </Button>
                         </div>
-                      ) : (
-                        <>
-                          <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                          <p className="text-sm text-muted-foreground text-center">
-                            Clique para enviar CC ou Passaporte
-                          </p>
+                      ))}
+
+                      <div className="flex items-center justify-center w-full">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Upload className="w-8 h-8 mb-4 text-gray-500" />
+                            <p className="text-sm text-gray-500">
+                              <span className="font-semibold">Clique para enviar</span>
+                            </p>
+                            <p className="text-xs text-gray-500">CC, Passaporte ou Carta de Condução</p>
+                          </div>
                           <input
                             type="file"
-                            className="hidden"
-                            id="id-upload"
                             accept="image/*,.pdf"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0]
-                              if (file) setDocuments({ ...documents, id: file })
-                            }}
+                            multiple
+                            className="hidden"
+                            onChange={(e) => handleFileChange(e, "id")}
                           />
-                          <Button variant="outline" size="sm" className="mt-2" asChild>
-                            <label htmlFor="id-upload">Selecionar Ficheiro</label>
-                          </Button>
-                        </>
-                      )}
+                        </label>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className={!documents.address ? "border-dashed" : "border-primary"}>
+                {/* Address Document Card */}
+                <Card className={documents.address.length === 0 ? "border-dashed" : "border-primary"}>
                   <CardHeader>
-                    <CardTitle className="text-sm flex items-center">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Comprovativo de Morada
+                    <CardTitle className="text-base flex items-center">
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Comprovativo de Morada *
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex flex-col items-center justify-center py-4 border-2 border-dashed rounded-lg">
-                      {documents.address ? (
-                        <div className="text-center">
-                          <Check className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                          <p className="text-sm font-medium">{documents.address.name}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="mt-2 text-destructive"
-                            onClick={() => setDocuments({ ...documents, address: null })}
-                          >
-                            Remover
+                  <CardContent>
+                    <div className="space-y-4">
+                      {documents.address.map((file, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2 bg-muted rounded">
+                          <div className="flex items-center overflow-hidden">
+                            <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
+                            <span className="text-sm truncate">{file.name}</span>
+                          </div>
+                          <Button variant="ghost" size="sm" onClick={() => removeDocument("address", idx)}>
+                            <X className="h-4 w-4" />
                           </Button>
                         </div>
-                      ) : (
-                        <>
-                          <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                          <p className="text-sm text-muted-foreground text-center">
-                            Fatura ou documento oficial recente
-                          </p>
+                      ))}
+
+                      <div className="flex items-center justify-center w-full">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Upload className="w-8 h-8 mb-4 text-gray-500" />
+                            <p className="text-sm text-gray-500">
+                              <span className="font-semibold">Clique para enviar</span>
+                            </p>
+                            <p className="text-xs text-gray-500">Fatura ou documento oficial</p>
+                          </div>
                           <input
                             type="file"
-                            className="hidden"
-                            id="address-upload"
                             accept="image/*,.pdf"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0]
-                              if (file) setDocuments({ ...documents, address: file })
-                            }}
+                            multiple
+                            className="hidden"
+                            onChange={(e) => handleFileChange(e, "address")}
                           />
-                          <Button variant="outline" size="sm" className="mt-2" asChild>
-                            <label htmlFor="address-upload">Selecionar Ficheiro</label>
-                          </Button>
-                        </>
-                      )}
+                        </label>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
