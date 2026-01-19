@@ -26,6 +26,17 @@ interface Provider {
   created_at: string
   documents: Document[]
   portfolio: PortfolioItem[]
+  specialties: Specialty[]
+  hourly_rate: number | null
+  provider_experience_years: number | null
+  provider_availability: string | null
+}
+
+interface Specialty {
+  id: string
+  specialty_name: string
+  experience_level: string
+  years_experience: number
 }
 
 interface Document {
@@ -88,10 +99,18 @@ export function ProviderApproval() {
 
           if (portfolioError) console.error("Error fetching portfolio", portfolioError)
 
+          const { data: specialties, error: specialtiesError } = await supabase
+            .from("provider_specialties")
+            .select("*")
+            .eq("provider_id", provider.id)
+
+          if (specialtiesError) console.error("Error fetching specialties", specialtiesError)
+
           return {
             ...provider,
             documents: documents || [],
-            portfolio: portfolio || []
+            portfolio: portfolio || [],
+            specialties: specialties || []
           }
         }),
       )
@@ -312,6 +331,43 @@ export function ProviderApproval() {
                             {getStatusBadge(selectedProvider.provider_status)}
                           </div>
                         </div>
+                      </div>
+
+                      )}
+
+                      {/* Professional Info */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-muted p-3 rounded-lg">
+                          <p className="text-xs text-muted-foreground uppercase">Hourly Rate</p>
+                          <p className="font-medium text-lg">{selectedProvider.hourly_rate ? `€${selectedProvider.hourly_rate}/h` : "Not set"}</p>
+                        </div>
+                        <div className="bg-muted p-3 rounded-lg">
+                          <p className="text-xs text-muted-foreground uppercase">Experience</p>
+                          <p className="font-medium text-lg">{selectedProvider.provider_experience_years || 0} years</p>
+                        </div>
+                        <div className="bg-muted p-3 rounded-lg">
+                          <p className="text-xs text-muted-foreground uppercase">Availability</p>
+                          <p className="font-medium text-lg capitalize">{selectedProvider.provider_availability || "Not set"}</p>
+                        </div>
+                      </div>
+
+                      {/* Specialties Section */}
+                      <div>
+                        <h3 className="font-medium mb-2">Specialties & Skills</h3>
+                        {(!selectedProvider.specialties || selectedProvider.specialties.length === 0) ? (
+                          <p className="text-muted-foreground text-sm">No specialties listed.</p>
+                        ) : (
+                          <div className="flex flex-wrap gap-2">
+                            {selectedProvider.specialties.map(s => (
+                              <Badge key={s.id} variant="outline" className="flex flex-col items-start gap-1 py-1 px-3 h-auto">
+                                <span className="font-bold">{s.specialty_name}</span>
+                                <span className="text-xs text-muted-foreground font-normal">
+                                  {s.experience_level} • {s.years_experience}y exp
+                                </span>
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       {selectedProvider.bio && (

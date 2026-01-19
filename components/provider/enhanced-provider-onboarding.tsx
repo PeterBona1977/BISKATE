@@ -18,6 +18,7 @@ import { AlertCircle, CheckCircle, Loader2, User, Briefcase, FileText, Star, Plu
 import type { Database } from "@/lib/supabase/database.types"
 import { AddressAutocomplete } from "@/components/ui/address-autocomplete"
 import { ServiceSelector } from "@/components/provider/service-selector"
+import { triggerNotificationAction } from "@/app/actions/notifications"
 
 // Use any for complex Supabase types to avoid deep nesting issues during rapid dev
 type Category = any // Database["public"]["Tables"]["categories"]["Row"]
@@ -474,6 +475,13 @@ export function EnhancedProviderOnboarding() {
       // 6. Inicializar stats
       // @ts-ignore - RPC arguments might be inferred incorrectly
       await supabase.rpc("initialize_provider_stats", { provider_uuid: user.id })
+
+      // 7. Notificar Admin
+      await triggerNotificationAction("provider_application_submitted", {
+        providerId: user.id,
+        providerName: formData.bio ? "Novo Prestador" : "Prestador", // Fallback name
+        providerEmail: user.email
+      })
 
       toast({
         title: "Candidatura enviada!",
