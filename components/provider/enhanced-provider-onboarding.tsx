@@ -82,9 +82,12 @@ export function EnhancedProviderOnboarding() {
   const totalSteps = 6
   const progress = (currentStep / totalSteps) * 100
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  // Duplicate state removal - consolidate selectedServices up top if needed, but for now just deleting this block and I will add selectedServices to the main block in a separate call or ensure it is there.
+  // Actually, wait, the previous tool added lines 85-87. Lines 60 and 70 already had selectedCategories and specialties. 
+  // So I should remove lines 85, 87. And keep 86 (selectedServices) but move it up?
+  // Or just replace this whole block with just selectedServices?
+  // Let's replace 85-87 with JUST selectedServices.
   const [selectedServices, setSelectedServices] = useState<string[]>([])
-  const [specialties, setSpecialties] = useState<Specialty[]>([])
 
   useEffect(() => {
     loadInitialData()
