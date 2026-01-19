@@ -166,7 +166,7 @@ export function EnhancedProviderOnboarding() {
             (portfolioData as any[]).map((p) => ({
               title: p.title,
               description: p.description || "",
-              imageUrl: p.image_url || "",
+              media: p.image_url ? [{ type: "image", url: p.image_url, name: "Project Image" }] : [],
               projectUrl: p.project_url || "",
               technologies: p.technologies || [],
               completionDate: p.completion_date || "",
@@ -296,17 +296,59 @@ export function EnhancedProviderOnboarding() {
       await supabase.from("portfolio_items").delete().eq("provider_id", user.id)
 
       if (portfolio.length > 0) {
-        const portfolioInserts = portfolio.map((item) => ({
-          provider_id: user.id,
-          title: item.title,
-          description: item.description,
-          image_url: item.imageUrl,
-          project_url: item.projectUrl,
-          technologies: item.technologies,
-          completion_date: item.completionDate || null,
-          client_name: item.clientName,
-        }))
-        await supabase.from("portfolio_items").insert(portfolioInserts as any)
+        for (const item of portfolio) {
+          // 4.1 Insert Item
+          const { data: insertedItem, error: itemError } = await supabase
+            .from("portfolio_items")
+            .insert({
+              provider_id: user.id,
+              title: item.title,
+              description: item.description,
+              project_url: item.projectUrl,
+              completion_date: item.completionDate || null,
+              client_name: item.clientName,
+            } as any)
+            .select()
+            .single()
+
+          if (itemError || !insertedItem) {
+            console.error("Error inserting portfolio item:", itemError)
+            continue
+          }
+
+          // 4.2 Handle Media
+          if (item.media && item.media.length > 0) {
+            for (const media of item.media) {
+              let mediaUrl = media.url
+
+              // If it's a new file (has file object), upload it
+              if (media.file) {
+                const fileExt = media.file.name.split('.').pop()
+                const fileName = `portfolio/${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
+
+                const { error: uploadError } = await supabase.storage
+                  .from("portfolio") // Assuming 'portfolio' bucket exists
+                  .upload(fileName, media.file)
+
+                if (uploadError) {
+                  console.error("Upload error:", uploadError)
+                  continue
+                }
+
+                const { data: { publicUrl } } = supabase.storage.from("portfolio").getPublicUrl(fileName)
+                mediaUrl = publicUrl
+              }
+
+              // Insert Media Record
+              await supabase.from("portfolio_media").insert({
+                portfolio_item_id: insertedItem.id,
+                url: mediaUrl,
+                media_type: media.type,
+                file_name: media.name
+              } as any)
+            }
+          }
+        }
       }
 
       // 5. Salvar documentos
