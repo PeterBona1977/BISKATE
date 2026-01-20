@@ -31,6 +31,10 @@ interface FormData {
   hourlyRate: number
   availability: string
   location: string
+  countryCode: string
+  postalCode: string
+  radiusKm: number
+  performsEmergency: boolean
 }
 
 interface Specialty {
@@ -75,6 +79,10 @@ export function EnhancedProviderOnboarding() {
     hourlyRate: 0,
     availability: "available",
     location: "",
+    countryCode: "+351",
+    postalCode: "",
+    radiusKm: 30,
+    performsEmergency: false
   })
   const [specialties, setSpecialties] = useState<Specialty[]>([])
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([])
@@ -91,10 +99,11 @@ export function EnhancedProviderOnboarding() {
   const totalSteps = 6
   const progress = (currentStep / totalSteps) * 100
   const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [activeEmergencyServices, setActiveEmergencyServices] = useState<string[]>([]) // Services marked as emergency
   const [serviceDetails, setServiceDetails] = useState<{ id: string; name: string }[]>([])
 
   useEffect(() => {
-    if (currentStep === 6 && selectedServices.length > 0) {
+    if (selectedServices.length > 0) {
       const fetchServiceDetails = async () => {
         const { data } = await supabase
           .from("services")
@@ -106,8 +115,10 @@ export function EnhancedProviderOnboarding() {
         }
       }
       fetchServiceDetails()
+    } else {
+      setServiceDetails([])
     }
-  }, [currentStep, selectedServices])
+  }, [selectedServices])
 
   useEffect(() => {
     loadInitialData()
@@ -134,14 +145,19 @@ export function EnhancedProviderOnboarding() {
 
       // Carregar dados existentes se já for prestador
       if (profile?.is_provider) {
+        const p = profile as any;
         setFormData({
-          bio: profile.provider_bio || "",
-          website: profile.provider_website || "",
-          phone: profile.provider_phone || "",
-          experienceYears: profile.provider_experience_years || 0,
-          hourlyRate: profile.provider_hourly_rate || 0,
-          availability: profile.provider_availability || "available",
-          location: profile.location || "",
+          bio: p.provider_bio || "",
+          website: p.provider_website || "",
+          phone: p.provider_phone || "",
+          experienceYears: p.provider_experience_years || 0,
+          hourlyRate: p.provider_hourly_rate || 0,
+          availability: p.provider_availability || "available",
+          location: p.location || "",
+          countryCode: p.phone_country_code || "+351",
+          postalCode: p.postal_code || "",
+          radiusKm: p.service_radius_km || 30,
+          performsEmergency: p.performs_emergency_services || false,
         })
 
         // Carregar especialidades existentes (Legacy)
@@ -163,11 +179,16 @@ export function EnhancedProviderOnboarding() {
         // Carregar serviços selecionados (New)
         const { data: servicesData } = await supabase
           .from("provider_services")
-          .select("service_id")
+          .select("service_id, is_emergency")
           .eq("provider_id", user.id)
 
         if (servicesData) {
           setSelectedServices(servicesData.map((s: any) => s.service_id))
+          setActiveEmergencyServices(
+            servicesData
+              .filter((s: any) => s.is_emergency)
+              .map((s: any) => s.service_id)
+          )
         }
 
         // Carregar portfolio existente
@@ -312,9 +333,13 @@ export function EnhancedProviderOnboarding() {
         updated_at: new Date().toISOString(),
         bio: formData.bio,
         website: formData.website,
-        phone: formData.phone,
         location: formData.location,
         hourly_rate: formData.hourlyRate,
+        service_radius_km: formData.radiusKm,
+        performs_emergency_services: formData.performsEmergency,
+        postal_code: formData.postalCode,
+        phone_country_code: formData.countryCode,
+        phone: `${formData.countryCode} ${formData.phone}`,
       }
 
       await updateProfile(profileUpdate)
@@ -326,6 +351,7 @@ export function EnhancedProviderOnboarding() {
         const serviceInserts = selectedServices.map((serviceId) => ({
           provider_id: user.id,
           service_id: serviceId,
+          is_emergency: activeEmergencyServices.includes(serviceId)
         }))
         await supabase.from("provider_services").insert(serviceInserts as any)
       }
@@ -475,12 +501,18 @@ export function EnhancedProviderOnboarding() {
         }
       }
 
+      // console.log("DEBUG: docInserts to be saved:", docInserts);
+
       if (docInserts.length > 0) {
         // Only delete old docs if we are sure? Actually, deleting all pending docs for this provider before re-inserting is probably safer for this flow
         // But maybe we should only delete if we are in a 're-submission' flow. 
         // For now, consistent with previous logic: wipe and replace
         await supabase.from("provider_documents").delete().eq("provider_id", user.id)
         await supabase.from("provider_documents").insert(docInserts as any)
+
+
+      } else {
+        console.log("DEBUG: docInserts is empty, skipping DB insert");
       }
 
       // 6. Inicializar stats
@@ -610,25 +642,71 @@ export function EnhancedProviderOnboarding() {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="phone">Telefone *</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+351 912 345 678"
-                  value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  required
-                />
+                <div className="flex gap-2">
+                  <Select
+                    value={formData.countryCode}
+                    onValueChange={(val) => setFormData(prev => ({ ...prev, countryCode: val }))}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue placeholder="País" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="+351">🇵🇹 +351</SelectItem>
+                      <SelectItem value="+55">🇧🇷 +55</SelectItem>
+                      <SelectItem value="+34">🇪🇸 +34</SelectItem>
+                      <SelectItem value="+33">🇫🇷 +33</SelectItem>
+                      <SelectItem value="+44">🇬🇧 +44</SelectItem>
+                      <SelectItem value="+1">🇺🇸 +1</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="912 345 678"
+                    value={formData.phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    className="flex-1"
+                    required
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Localização *</Label>
-                <AddressAutocomplete
-                  id="location"
-                  placeholder="Sua cidade/região (ex: Lisboa, Porto)"
-                  value={formData.location}
-                  onChange={(value) => setFormData(prev => ({ ...prev, location: value }))}
-                  required
+                <Label htmlFor="postalCode">Código Postal / Localização *</Label>
+                <div className="relative">
+                  <AddressAutocomplete
+                    id="postalCode"
+                    placeholder="Digite seu Código Postal ou Localidade"
+                    value={formData.postalCode}
+                    onChange={(value) => setFormData(prev => ({ ...prev, postalCode: value, location: value }))}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Indique o seu código postal e selecione a sugestão correta.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label>Raio de Ação: {formData.radiusKm} km</Label>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="100"
+                  step="5"
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  value={formData.radiusKm}
+                  onChange={(e) => setFormData(prev => ({ ...prev, radiusKm: Number(e.target.value) }))}
                 />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>5 km</span>
+                  <span>50 km</span>
+                  <span>100 km</span>
+                </div>
               </div>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
@@ -687,7 +765,7 @@ export function EnhancedProviderOnboarding() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-end">
-            <Button onClick={handleNext} disabled={!formData.bio || !formData.phone || !formData.location || !formData.hourlyRate}>
+            <Button onClick={handleNext} disabled={!formData.bio || !formData.phone || !formData.postalCode || !formData.hourlyRate}>
               Próximo
             </Button>
           </CardFooter>
@@ -717,6 +795,46 @@ export function EnhancedProviderOnboarding() {
                 <AlertCircle className="h-4 w-4 mr-1" />
                 Selecione pelo menos um serviço
               </p>
+            )}
+            {selectedServices.length > 0 && (
+              <div className="mt-6 border-t pt-4">
+                <h4 className="font-medium mb-3">Configurar Serviços Selecionados</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Assinale abaixo os serviços nos quais você oferece atendimento de <strong>Urgência/Emergência 24h</strong>.
+                </p>
+                <div className="space-y-3">
+                  {serviceDetails.map(service => (
+                    <div key={service.id} className="flex items-center justify-between p-3 bg-gray-50 rounded border">
+                      <span className="font-medium">{service.name}</span>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`emergency-${service.id}`}
+                          className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          checked={activeEmergencyServices.includes(service.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setActiveEmergencyServices(prev => [...prev, service.id])
+                            } else {
+                              setActiveEmergencyServices(prev => prev.filter(id => id !== service.id))
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`emergency-${service.id}`} className="text-sm cursor-pointer flex items-center">
+                          {activeEmergencyServices.includes(service.id) ? (
+                            <span className="text-red-600 font-semibold flex items-center">
+                              <AlertCircle className="w-3 h-3 mr-1" />
+                              Emergência 24h
+                            </span>
+                          ) : (
+                            <span className="text-gray-500">Normal</span>
+                          )}
+                        </Label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </CardContent>
           <CardFooter className="flex justify-between mt-4">
@@ -1160,6 +1278,12 @@ export function EnhancedProviderOnboarding() {
                     <p>
                       <strong>Taxa Horária:</strong> {formData.hourlyRate}€/hora
                     </p>
+                    <p>
+                      <strong>Raio de Ação:</strong> {formData.radiusKm} km
+                    </p>
+                    <p>
+                      <strong>Código Postal:</strong> {formData.postalCode}
+                    </p>
                   </div>
                 </div>
 
@@ -1168,8 +1292,11 @@ export function EnhancedProviderOnboarding() {
                   <div className="flex flex-wrap gap-2">
                     {serviceDetails.length > 0 ? (
                       serviceDetails.map((service) => (
-                        <Badge key={service.id} variant="secondary">
+                        <Badge key={service.id} variant="secondary" className="flex items-center gap-1">
                           {service.name}
+                          {activeEmergencyServices.includes(service.id) && (
+                            <AlertCircle className="h-3 w-3 text-red-500 ml-1" />
+                          )}
                         </Badge>
                       ))
                     ) : (
@@ -1201,7 +1328,7 @@ export function EnhancedProviderOnboarding() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium mb-2">Especialidades ({specialties.length})</h4>
+                  <h4 className="font-medium mb-2">Habilidades Adicionais ({specialties.length})</h4>
                   <div className="space-y-2">
                     {specialties.map((specialty, index) => (
                       <div key={index} className="bg-gray-50 p-2 rounded">
@@ -1226,6 +1353,23 @@ export function EnhancedProviderOnboarding() {
                   </div>
                 </div>
               </div>
+
+              {activeEmergencyServices.length > 0 && (
+                <div className="bg-red-50 p-4 rounded-lg flex items-start text-red-800 border border-red-200">
+                  <AlertCircle className="h-5 w-5 mr-3 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold">Serviços de Emergência ({activeEmergencyServices.length})</h4>
+                    <p className="text-sm mt-1">
+                      Você indicou disponibilidade de emergência 24h para: {
+                        serviceDetails
+                          .filter(s => activeEmergencyServices.includes(s.id))
+                          .map(s => s.name)
+                          .join(", ")
+                      }
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="flex items-start space-x-3">
@@ -1258,6 +1402,6 @@ export function EnhancedProviderOnboarding() {
           </Card>
         )
       }
-    </div >
+    </div>
   )
 }

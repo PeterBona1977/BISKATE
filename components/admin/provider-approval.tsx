@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { CheckCircle, XCircle, Eye, User, FileText, Phone, Check, ShieldCheck } from "lucide-react"
+import { CheckCircle, XCircle, Eye, User, FileText, Phone, Check, ShieldCheck, MapPin, Briefcase } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -30,6 +30,10 @@ interface Provider {
   hourly_rate: number | null
   provider_experience_years: number | null
   provider_availability: string | null
+  services: ProviderService[]
+  service_radius_km?: number
+  postal_code?: string
+  performs_emergency_services?: boolean
 }
 
 interface Specialty {
@@ -37,6 +41,14 @@ interface Specialty {
   specialty_name: string
   experience_level: string
   years_experience: number
+}
+
+interface ProviderService {
+  service_id: string
+  is_emergency?: boolean // Added per user request
+  services: {
+    name: string
+  }
 }
 
 interface Document {
@@ -94,11 +106,19 @@ export function ProviderApproval() {
           if (docsError) console.error("Error fetching docs", docsError)
 
           const { data: portfolio, error: portfolioError } = await supabase
-            .from("provider_portfolio")
+            .from("portfolio_items")
             .select("*")
             .eq("provider_id", provider.id)
 
           if (portfolioError) console.error("Error fetching portfolio", portfolioError)
+
+          const { data: services, error: servicesError } = await supabase
+            .from("provider_services")
+            .select("service_id, is_emergency, services(name)")
+            .eq("provider_id", provider.id)
+            .eq("provider_id", provider.id)
+
+          if (servicesError) console.error("Error fetching services", servicesError)
 
           const { data: specialties, error: specialtiesError } = await supabase
             .from("provider_specialties")
@@ -111,7 +131,8 @@ export function ProviderApproval() {
             ...provider,
             documents: documents || [],
             portfolio: portfolio || [],
-            specialties: specialties || []
+            specialties: specialties || [],
+            services: services || []
           }
         }),
       )
@@ -256,171 +277,204 @@ export function ProviderApproval() {
 
   const ProviderCard = ({ provider }: { provider: Provider }) => {
     return (
-      <Card key={provider.id} className="mb-4">
+      <Card key={provider.id} className="mb-4 hover:shadow-md transition-shadow">
         <CardContent className="p-6">
           <div className="flex items-start justify-between">
             <div className="flex items-start space-x-4">
-              <Avatar className="h-12 w-12">
+              <Avatar className="h-14 w-14 border-2 border-muted">
                 <AvatarImage src={provider.avatar_url || ""} />
-                <AvatarFallback>{provider.full_name?.charAt(0) || provider.email.charAt(0)}</AvatarFallback>
+                <AvatarFallback className="text-lg">{provider.full_name?.charAt(0).toUpperCase() || provider.email.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h3 className="font-semibold">{provider.full_name || "Name not provided"}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-lg">{provider.full_name || "Name not provided"}</h3>
+                  {getStatusBadge(provider.provider_status)}
+                </div>
                 <p className="text-sm text-muted-foreground">{provider.email}</p>
-                {provider.phone && (
-                  <div className="flex items-center text-xs text-muted-foreground mt-1">
-                    <Phone className="w-3 h-3 mr-1" />
-                    {provider.phone}
-                    {provider.phone_verified && <ShieldCheck className="w-3 h-3 ml-1 text-green-600" />}
+
+                <div className="flex items-center gap-4 mt-2">
+                  {provider.phone && (
+                    <div className="flex items-center text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                      <Phone className="w-3 h-3 mr-1" />
+                      {provider.phone}
+                      {provider.phone_verified && <CheckCircle className="w-3 h-3 ml-1 text-green-600" title="Verified" />}
+                    </div>
+                  )}
+                  <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    {new Date(provider.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+
+                {/* Quick Emergency Indicator on Card */}
+                {provider.services?.some(s => s.is_emergency) && (
+                  <div className="mt-2 inline-flex items-center text-xs font-semibold text-red-700 bg-red-50 px-2 py-1 rounded border border-red-100">
+                    <ShieldCheck className="w-3 h-3 mr-1" />
+                    Emergency Provider
                   </div>
                 )}
-                {provider.bio && <p className="text-sm mt-2 line-clamp-2">{provider.bio}</p>}
-                <div className="flex items-center space-x-4 mt-2">
-                  <span className="text-xs text-muted-foreground">
-                    Registered on {new Date(provider.created_at).toLocaleDateString()}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{provider.documents.length} document(s)</span>
-                </div>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              {getStatusBadge(provider.provider_status)}
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" onClick={() => setSelectedProvider(provider)}>
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Details
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Provider Details</DialogTitle>
-                    <DialogDescription>Full details of the service provider.</DialogDescription>
-                  </DialogHeader>
-                  {selectedProvider && (
-                    <div className="space-y-6">
-                      {/* Header Info */}
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="h-16 w-16">
-                          <AvatarImage src={selectedProvider.avatar_url || ""} />
-                          <AvatarFallback>
-                            {selectedProvider.full_name?.charAt(0) || selectedProvider.email.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h2 className="text-xl font-semibold">{selectedProvider.full_name || "Name not provided"}</h2>
-                          <p className="text-muted-foreground">{selectedProvider.email}</p>
 
-                          <div className="flex items-center space-x-4 mt-1">
-                            {selectedProvider.phone && (
-                              <div className="flex items-center text-sm">
-                                <Phone className="w-4 h-4 mr-1 text-muted-foreground" />
-                                {selectedProvider.phone}
-                              </div>
-                            )}
-                            <div className="flex items-center space-x-2">
-                              <Label htmlFor="phone-verify" className="text-sm">Phone Verified:</Label>
-                              <Switch
-                                id="phone-verify"
-                                checked={selectedProvider.phone_verified}
-                                onCheckedChange={() => togglePhoneVerification(selectedProvider.id, selectedProvider.phone_verified)}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="mt-2">
-                            {getStatusBadge(selectedProvider.provider_status)}
-                          </div>
-                        </div>
-                      </div>
-
-
-
-                      {/* Professional Info */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-muted p-3 rounded-lg">
-                          <p className="text-xs text-muted-foreground uppercase">Hourly Rate</p>
-                          <p className="font-medium text-lg">{selectedProvider.hourly_rate ? `€${selectedProvider.hourly_rate}/h` : "Not set"}</p>
-                        </div>
-                        <div className="bg-muted p-3 rounded-lg">
-                          <p className="text-xs text-muted-foreground uppercase">Experience</p>
-                          <p className="font-medium text-lg">{selectedProvider.provider_experience_years || 0} years</p>
-                        </div>
-                        <div className="bg-muted p-3 rounded-lg">
-                          <p className="text-xs text-muted-foreground uppercase">Availability</p>
-                          <p className="font-medium text-lg capitalize">{selectedProvider.provider_availability || "Not set"}</p>
-                        </div>
-                      </div>
-
-                      {/* Specialties Section */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" onClick={() => setSelectedProvider(provider)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Review Application
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
+                <DialogHeader className="p-6 pb-2 border-b bg-muted/10">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-16 w-16 border-2 border-white shadow-sm">
+                        <AvatarImage src={selectedProvider?.avatar_url || ""} />
+                        <AvatarFallback>{selectedProvider?.full_name?.charAt(0) || "P"}</AvatarFallback>
+                      </Avatar>
                       <div>
-                        <h3 className="font-medium mb-2">Specialties & Skills</h3>
-                        {(!selectedProvider.specialties || selectedProvider.specialties.length === 0) ? (
-                          <p className="text-muted-foreground text-sm">No specialties listed.</p>
-                        ) : (
-                          <div className="flex flex-wrap gap-2">
-                            {selectedProvider.specialties.map(s => (
-                              <Badge key={s.id} variant="outline" className="flex flex-col items-start gap-1 py-1 px-3 h-auto">
-                                <span className="font-bold">{s.specialty_name}</span>
-                                <span className="text-xs text-muted-foreground font-normal">
-                                  {s.experience_level} • {s.years_experience}y exp
-                                </span>
+                        <DialogTitle className="text-2xl">{selectedProvider?.full_name}</DialogTitle>
+                        <DialogDescription className="mt-1 flex items-center gap-2">
+                          <span>{selectedProvider?.email}</span>
+                          <span className="text-muted-foreground/30">•</span>
+                          <span>{selectedProvider?.phone}</span>
+                        </DialogDescription>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      {selectedProvider && getStatusBadge(selectedProvider.provider_status)}
+                    </div>
+                  </div>
+                </DialogHeader>
+
+                {selectedProvider && (
+                  <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+                    {/* Critical Alerts */}
+                    {selectedProvider.services?.some(s => s.is_emergency) && (
+                      <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 shadow-sm">
+                        <div className="p-2 bg-red-100 rounded-full">
+                          <ShieldCheck className="h-6 w-6 text-red-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-red-900 text-lg">⚠️ Emergency Services Provider</h4>
+                          <p className="text-red-700 text-sm mt-1">
+                            This provider has declared ability to perform 24h Emergency Services.
+                            Please verify their qualifications and location carefully.
+                          </p>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {selectedProvider.services.filter(s => s.is_emergency).map((s, i) => (
+                              <Badge key={i} variant="destructive" className="bg-red-600 hover:bg-red-700">
+                                {s.services?.name}
                               </Badge>
                             ))}
                           </div>
-                        )}
-                      </div>
-
-                      {selectedProvider.bio && (
-                        <div>
-                          <h3 className="font-medium mb-2">Biography</h3>
-                          <p className="text-sm">{selectedProvider.bio}</p>
                         </div>
-                      )}
-
-                      {/* Portfolio Section */}
-                      <div>
-                        <h3 className="font-medium mb-4">Portfolio ({selectedProvider.portfolio.length})</h3>
-                        {selectedProvider.portfolio.length === 0 ? (
-                          <p className="text-muted-foreground text-sm">No portfolio items.</p>
-                        ) : (
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {selectedProvider.portfolio.map(item => (
-                              <Card key={item.id} className="overflow-hidden">
-                                <div className="aspect-video relative">
-                                  <img src={item.image_url} alt={item.title} className="object-cover w-full h-full" />
-                                </div>
-                                <div className="p-2">
-                                  <p className="font-medium text-sm truncate" title={item.title}>{item.title}</p>
-                                </div>
-                              </Card>
-                            ))}
-                          </div>
-                        )}
                       </div>
+                    )}
 
-                      {/* Documents Section */}
-                      {/* Documents Section */}
-                      <div>
-                        <h3 className="font-medium mb-4">Documents ({selectedProvider.documents.length})</h3>
+                    <Tabs defaultValue="overview" className="w-full">
+                      <TabsList className="grid w-full grid-cols-3 mb-6">
+                        <TabsTrigger value="overview">Overview & Stats</TabsTrigger>
+                        <TabsTrigger value="documents" className="relative">
+                          Documents
+                          {selectedProvider.documents.length > 0 && (
+                            <Badge variant="secondary" className="ml-2 h-5 px-1.5 min-w-[1.25rem]">{selectedProvider.documents.length}</Badge>
+                          )}
+                        </TabsTrigger>
+                        <TabsTrigger value="portfolio">Portfolio & Services</TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="overview" className="space-y-6 animate-in fade-in-50">
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <Card>
+                            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Hourly Rate</p>
+                              <p className="text-2xl font-bold mt-1">{selectedProvider.hourly_rate ? `€${selectedProvider.hourly_rate}` : "-"}</p>
+                              <p className="text-xs text-muted-foreground">per hour</p>
+                            </CardContent>
+                          </Card>
+                          <Card>
+                            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Experience</p>
+                              <p className="text-2xl font-bold mt-1">{selectedProvider.provider_experience_years || 0}</p>
+                              <p className="text-xs text-muted-foreground">years</p>
+                            </CardContent>
+                          </Card>
+                          <Card>
+                            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Radius</p>
+                              <p className="text-2xl font-bold mt-1">{selectedProvider.service_radius_km || 30}</p>
+                              <p className="text-xs text-muted-foreground">km coverage</p>
+                            </CardContent>
+                          </Card>
+                          <Card>
+                            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Postal Code</p>
+                              <p className="text-lg font-bold mt-1 truncate max-w-full px-2">{selectedProvider.postal_code || "-"}</p>
+                              <p className="text-xs text-muted-foreground">Base location</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        {/* Bio */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Biography</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-line">
+                              {selectedProvider.bio || "No biography provided."}
+                            </p>
+                          </CardContent>
+                        </Card>
+
+                        {/* Location */}
+                        <div className="bg-white p-4 rounded-lg border">
+                          <h4 className="font-semibold mb-2 flex items-center">
+                            <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                            Service Area
+                          </h4>
+                          <p className="text-sm">
+                            This provider is based in <strong>{selectedProvider.postal_code}</strong> and serves a <strong>{selectedProvider.service_radius_km}km</strong> radius.
+                          </p>
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="documents" className="space-y-6 animate-in fade-in-50">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-semibold text-lg">Required Documentation</h3>
+                          <p className="text-sm text-muted-foreground">Verify all documents before approving.</p>
+                        </div>
+
                         {selectedProvider.documents.length === 0 ? (
-                          <p className="text-muted-foreground">No documents uploaded.</p>
+                          <div className="text-center py-12 bg-white rounded-lg border border-dashed">
+                            <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3 opacity-20" />
+                            <p className="text-muted-foreground font-medium">No documents uploaded.</p>
+                            <p className="text-xs text-muted-foreground mt-1">This application is incomplete.</p>
+                          </div>
                         ) : (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 gap-4">
                             {selectedProvider.documents.map((doc) => (
-                              <Card key={doc.id}>
-                                <CardContent className="p-4">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <h4 className="font-medium">{doc.document_name}</h4>
-                                    {getStatusBadge(doc.status)}
+                              <Card key={doc.id} className="overflow-hidden border-l-4 border-l-primary">
+                                <div className="p-4 flex items-center gap-4">
+                                  <div className="h-12 w-12 rounded bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                    <FileText className="h-6 w-6 text-blue-600" />
                                   </div>
-                                  <p className="text-sm text-muted-foreground mb-2">
-                                    <span className="font-medium">Type:</span> {doc.document_type}
-                                    {doc.description && <span className="block mt-1 font-medium text-black dark:text-white">"{doc.description}"</span>}
-                                  </p>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between">
+                                      <h4 className="font-semibold truncate pr-4" title={doc.document_name}>{doc.document_name}</h4>
+                                      {getStatusBadge(doc.status)}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground uppercase font-bold mt-1">
+                                      {doc.document_type}
+                                    </p>
+                                    {doc.description && <p className="text-sm mt-1">"{doc.description}"</p>}
+                                  </div>
+                                </div>
+                                <div className="bg-muted/50 p-3 flex items-center justify-between border-t gap-2">
                                   <Button
-                                    variant="outline"
+                                    variant="default"
                                     size="sm"
+                                    className="flex-1"
                                     onClick={async () => {
                                       try {
                                         const { data, error } = await supabase.storage.from("documents").createSignedUrl(doc.document_url, 60)
@@ -432,87 +486,140 @@ export function ProviderApproval() {
                                       }
                                     }}
                                   >
-                                    <FileText className="h-4 w-4 mr-2" />
-                                    View
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View Document
                                   </Button>
+
                                   {doc.status === "pending" && (
-                                    <div className="flex space-x-2">
+                                    <>
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        className="text-green-600 border-green-600 hover:bg-green-50"
+                                        className="flex-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800 hover:border-green-300"
                                         onClick={() => updateDocumentStatus(selectedProvider.id, doc.id, "approved")}
                                       >
-                                        <Check className="h-4 w-4" />
+                                        <Check className="h-4 w-4 mr-2" />
+                                        Approve
                                       </Button>
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        className="text-red-600 border-red-600 hover:bg-red-50"
+                                        className="flex-1 bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800 hover:border-red-300"
                                         onClick={() => {
                                           const reason = window.prompt("Reason for rejection:")
                                           if (reason) updateDocumentStatus(selectedProvider.id, doc.id, "rejected", reason)
                                         }}
                                       >
-                                        <XCircle className="h-4 w-4" />
+                                        <XCircle className="h-4 w-4 mr-2" />
+                                        Reject
                                       </Button>
-                                    </div>
+                                    </>
                                   )}
-                                </CardContent>
+                                </div>
                               </Card>
                             ))}
                           </div>
                         )}
-                      </div>
+                      </TabsContent>
 
-                      {selectedProvider.provider_status === "pending" && (
-                        <div className="flex justify-end space-x-2 pt-4 border-t">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="destructive">
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Reject
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Reject Provider</DialogTitle>
-                                <DialogDescription>State the reason for rejection to notify the provider.</DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <label className="text-sm font-medium">Rejection reason</label>
-                                  <Textarea
-                                    value={rejectionReason}
-                                    onChange={(e) => setRejectionReason(e.target.value)}
-                                    placeholder="Explain the reason for rejection..."
-                                    rows={3}
-                                  />
-                                </div>
-                                <div className="flex justify-end space-x-2">
-                                  <Button variant="outline">Cancel</Button>
-                                  <Button
-                                    variant="destructive"
-                                    onClick={() => updateProviderStatus(selectedProvider.id, "rejected", rejectionReason)}
-                                    disabled={!rejectionReason.trim()}
-                                  >
-                                    Reject
-                                  </Button>
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                          <Button onClick={() => updateProviderStatus(selectedProvider.id, "approved")}>
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Approve
-                          </Button>
+                      <TabsContent value="portfolio" className="space-y-6 animate-in fade-in-50">
+                        <div>
+                          <h3 className="font-semibold mb-3">Selected Services</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedProvider.services?.map((s, idx) => (
+                              <Badge key={idx} variant="secondary" className="px-3 py-1 text-sm flex items-center gap-2">
+                                {s.services?.name}
+                                {s.is_emergency && <ShieldCheck className="w-3 h-3 text-red-600" />}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                      )}
+
+                        <div>
+                          <h3 className="font-semibold mb-3">Specialties & Skills</h3>
+                          <div className="grid grid-cols-2 gap-2">
+                            {selectedProvider.specialties?.map((s) => (
+                              <div key={s.id} className="flex items-center justify-between p-2 border rounded bg-white">
+                                <span className="font-medium">{s.specialty_name}</span>
+                                <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                                  {s.experience_level} • {s.years_experience}y
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="font-semibold mb-3">Portfolio Projects ({selectedProvider.portfolio.length})</h3>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {selectedProvider.portfolio?.map((item) => (
+                              <Card key={item.id} className="overflow-hidden group cursor-pointer hover:border-primary transition-colors">
+                                <div className="aspect-video relative bg-gray-100">
+                                  {item.image_url ? (
+                                    <img src={item.image_url} alt={item.title} className="object-cover w-full h-full" />
+                                  ) : (
+                                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                                      <Briefcase className="h-8 w-8 opacity-20" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="p-3">
+                                  <p className="font-medium text-sm truncate">{item.title}</p>
+                                </div>
+                              </Card>
+                            ))}
+                          </div>
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                )}
+
+                {/* Footer Actions */}
+                <div className="p-6 border-t bg-white flex justify-between items-center z-10">
+                  <div className="text-sm text-muted-foreground">
+                    Status: <span className="font-semibold">{selectedProvider?.provider_status}</span>
+                  </div>
+                  {selectedProvider && selectedProvider.provider_status === "pending" && (
+                    <div className="flex space-x-3">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800">
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Reject Application
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Reject Provider</DialogTitle>
+                            <DialogDescription>State the reason for rejection to notify the provider.</DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-sm font-medium">Rejection reason</label>
+                              <Textarea
+                                value={rejectionReason}
+                                onChange={(e) => setRejectionReason(e.target.value)}
+                                placeholder="Explain the reason for rejection..."
+                                rows={3}
+                              />
+                            </div>
+                            <div className="flex justify-end space-x-2">
+                              <Button variant="destructive" onClick={() => updateProviderStatus(selectedProvider.id, "rejected", rejectionReason)}>Reject</Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
+                      <Button onClick={() => updateProviderStatus(selectedProvider.id, "approved")} className="bg-green-600 hover:bg-green-700 text-white min-w-[150px]">
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Approve Provider
+                      </Button>
                     </div>
                   )}
-                </DialogContent>
-              </Dialog>
-            </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardContent>
       </Card>

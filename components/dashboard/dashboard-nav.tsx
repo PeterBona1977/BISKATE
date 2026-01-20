@@ -66,7 +66,7 @@ export function DashboardNav({ viewMode = "client" }: { viewMode?: "client" | "p
 
   const isAdmin = profile?.role === "admin"
   const isProvider = (profile?.role === "provider" || profile?.is_provider === true) && profile?.provider_status === 'approved'
-  const isPendingProvider = profile?.role === "provider_pending"
+  const isPendingProvider = profile?.role === "provider_pending" || profile?.provider_status === 'pending'
 
   // If Admin, show Admin Navigation
   if (isAdmin) {

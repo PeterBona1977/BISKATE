@@ -76,9 +76,9 @@ export function AddressAutocomplete({
 
         try {
             const options = {
-                types: ["(cities)"], // Restrict to cities/localities
+                types: ["geocode"], // Allow postal codes and addresses
                 fields: ["address_components", "formatted_address", "name"],
-                componentRestrictions: { country: "pt" }, // Optional: restrict to Portugal if desired, remove if international
+                componentRestrictions: { country: "pt" }, // Keep restricted to Portugal
             }
 
             autoCompleteRef.current = new window.google.maps.places.Autocomplete(
@@ -98,32 +98,53 @@ export function AddressAutocomplete({
     }, [scriptLoaded])
 
     const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
-        // Extract municipality (concelho) and district (distrito)
+        // Extract address components
+        let locality = ""
+        let postalTown = ""
         let municipality = ""
         let district = ""
+        let country = ""
 
         if (place.address_components) {
             for (const component of place.address_components) {
+                if (component.types.includes("locality")) {
+                    locality = component.long_name
+                }
+                if (component.types.includes("postal_town")) {
+                    postalTown = component.long_name
+                }
                 if (component.types.includes("administrative_area_level_2")) {
                     municipality = component.long_name
                 }
                 if (component.types.includes("administrative_area_level_1")) {
                     district = component.long_name
                 }
+                if (component.types.includes("country")) {
+                    country = component.long_name
+                }
             }
         }
 
-        // Fallback: use formatted address or name if extraction fails, but prefer "Municipality, District"
+        // Construct formatting location with preference for specificity
+        // 1. Prefer "Locality, Country" or "Postal Town, Country" if available (e.g. "Ramada, Portugal")
+        // 2. Fallback to "Municipality, District" (e.g. "Odivelas, Lisboa")
+        // 3. Last resort: Name or Formatted Address
+
         let formattedLocation = ""
-        if (municipality && district) {
+
+        // For postal codes, the 'name' is often the postal code itself (e.g. "2620-271"), so we don't want to use that as the location text alone.
+        // We want the Place Name associated with it. Usually found in locality.
+
+        const specificLocation = locality || postalTown
+
+        if (specificLocation) {
+            formattedLocation = `${specificLocation}, ${country || "Portugal"}`
+        } else if (municipality && district) {
             formattedLocation = `${municipality}, ${district}`
         } else if (municipality) {
             formattedLocation = `${municipality}, Portugal`
         } else {
-            // Sometimes only level 1 is available (e.g. "Lisbon")
-            formattedLocation = place.formatted_address || place.name || ""
-            // Clean up country if present to keep it short? Optional.
-            // formattedLocation = formattedLocation.replace(", Portugal", "")
+            formattedLocation = place.formatted_address || ""
         }
 
         // Update parent
