@@ -9,7 +9,6 @@ import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { Settings, Database, Bell, Shield, Globe, Save, RefreshCw } from "lucide-react"
 import { FirebaseIntegrationSettings } from "@/components/admin/firebase-integration-settings"
-import { getPlatformSettings, updatePlatformSettings } from "@/app/actions/admin"
 import { useToast } from "@/hooks/use-toast"
 import { logClientActivity } from "@/app/actions/log"
 import { useAuth } from "@/contexts/auth-context"
@@ -34,14 +33,17 @@ export default function AdminSettingsPage() {
   const loadSettings = async () => {
     try {
       setLoading(true)
-      const result = await getPlatformSettings()
-      if (result.success && result.settings) {
-        setSettings({
-          site_name: result.settings.site_name,
-          site_url: result.settings.site_url,
-          site_description: result.settings.site_description,
-          maintenance_mode: result.settings.maintenance_mode,
-        })
+      const response = await fetch('/api/admin/settings')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.settings) {
+          setSettings({
+            site_name: data.settings.site_name || "GigHub",
+            site_url: data.settings.site_url || "",
+            site_description: data.settings.site_description || "",
+            maintenance_mode: data.settings.maintenance_mode || false,
+          })
+        }
       } else {
         toast({
           title: "Erro",
@@ -59,8 +61,15 @@ export default function AdminSettingsPage() {
   const handleSave = async () => {
     try {
       setSaving(true)
-      const result = await updatePlatformSettings(settings)
-      if (result.success) {
+      const response = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(settings)
+      })
+
+      if (response.ok) {
         // Log the settings update
         if (profile) {
           logClientActivity(
@@ -76,9 +85,10 @@ export default function AdminSettingsPage() {
           description: "Configurações atualizadas com sucesso.",
         })
       } else {
+        const data = await response.json()
         toast({
           title: "Erro",
-          description: result.error || "Erro ao salvar configurações.",
+          description: data.error || "Erro ao salvar configurações.",
           variant: "destructive",
         })
       }
