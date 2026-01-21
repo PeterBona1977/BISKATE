@@ -33,6 +33,7 @@ import { EmergencyService, EmergencyRequest, EmergencyResponse } from "@/lib/eme
 import { toast } from "@/hooks/use-toast"
 import { EmergencyMap } from "@/components/dashboard/emergency-map"
 import { cn } from "@/lib/utils"
+import { supabase } from "@/lib/supabase/client"
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
 
