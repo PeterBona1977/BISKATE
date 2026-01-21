@@ -1229,7 +1229,7 @@ export function EnhancedProviderOnboarding() {
                   <CardHeader>
                     <CardTitle className="text-base flex items-center">
                       <User className="mr-2 h-4 w-4" />
-                      Documento de Identificação *
+                      {formData.providerType === 'company' ? "Documento de Identificação do Responsável (Gerente) *" : "Documento de Identificação *"}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
