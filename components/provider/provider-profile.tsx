@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { ServiceSelector } from "./service-selector"
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete"
 import { ReviewsDisplay } from "@/components/reviews/reviews-display"
 import { Activity, CheckCircle } from "lucide-react"
 
@@ -94,11 +95,11 @@ export function ProviderProfile() {
   const [hourlyRate, setHourlyRate] = useState(profile?.provider_hourly_rate || 0)
   const [availability, setAvailability] = useState(profile?.provider_availability || "available")
   const [completedJobs, setCompletedJobs] = useState(0)
-  const [providerType, setProviderType] = useState<string>(profile?.provider_type || "individual")
   const [companyName, setCompanyName] = useState(profile?.company_name || "")
   const [serviceRadius, setServiceRadius] = useState(profile?.provider_service_radius || 20)
   const [lat, setLat] = useState<number | null>(profile?.last_lat || null)
   const [lng, setLng] = useState<number | null>(profile?.last_lng || null)
+  const [postalCode, setPostalCode] = useState(profile?.postal_code || "")
 
   useEffect(() => {
     if (profile) {
@@ -116,106 +117,15 @@ export function ProviderProfile() {
       setServiceRadius(profile.provider_service_radius || 20)
       setLat(profile.last_lat || null)
       setLng(profile.last_lng || null)
+      setPostalCode(profile.postal_code || profile.provider_location || "") // Fallback to location?
       fetchPortfolio()
       fetchDocuments()
       fetchCompletedJobsCount()
     }
   }, [profile])
 
-  // Google Maps Autocomplete
-  useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    if (!apiKey) return
+  // Removed manual Google Maps loading as AddressAutocomplete handles it internally
 
-    // Helper to extract City, District
-    const formatAddress = (components: google.maps.GeocoderAddressComponent[]) => {
-      let locality = "";
-      let district = "";
-
-      for (const component of components) {
-        if (component.types.includes("locality")) {
-          locality = component.long_name;
-        }
-        if (component.types.includes("administrative_area_level_1")) {
-          district = component.long_name;
-        }
-        // Fallback for locality if empty (try sublocality)
-        if (!locality && component.types.includes("sublocality")) {
-          locality = component.long_name;
-        }
-      }
-
-      if (locality && district) return `${locality}, ${district}`;
-      if (locality) return locality;
-      if (district) return district;
-      return "";
-    }
-
-    const loadGoogleMaps = () => {
-      if (window.google) {
-        initAutocomplete()
-        return
-      }
-
-      if (document.getElementById("google-maps-script")) {
-        const checkInterval = setInterval(() => {
-          if (window.google) {
-            initAutocomplete()
-            clearInterval(checkInterval)
-          }
-        }, 100)
-        return
-      }
-
-      const script = document.createElement("script")
-      script.id = "google-maps-script"
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geocoding&loading=async`
-      script.async = true
-      script.defer = true
-      script.onload = () => initAutocomplete()
-      document.head.appendChild(script)
-    }
-
-    const initAutocomplete = () => {
-      const input = document.getElementById("location-input") as HTMLInputElement
-      if (!input || !window.google) return
-
-      const attemptInit = () => {
-        if (window.google?.maps?.places?.Autocomplete) {
-          const autocomplete = new window.google.maps.places.Autocomplete(input, {
-            types: ["(cities)"],
-          })
-
-          autocomplete.addListener("place_changed", () => {
-            const place = autocomplete.getPlace()
-            if (place.geometry) {
-              setLat(place.geometry.location.lat())
-              setLng(place.geometry.location.lng())
-
-              // Use formatted address part
-              if (place.address_components) {
-                const formatted = formatAddress(place.address_components);
-                setLocation(formatted || place.formatted_address || "")
-              } else {
-                setLocation(place.formatted_address || place.name || "")
-              }
-            }
-          })
-          return true
-        }
-        return false
-      }
-
-      if (!attemptInit()) {
-        const interval = setInterval(() => {
-          if (attemptInit()) clearInterval(interval)
-        }, 100)
-        setTimeout(() => clearInterval(interval), 5000)
-      }
-    }
-
-    loadGoogleMaps()
-  }, [])
 
   const fetchPortfolio = async () => {
     if (!profile) return
@@ -318,6 +228,7 @@ export function ProviderProfile() {
         last_lat: finalLat,
         last_lng: finalLng,
         hourly_rate: hourlyRate,
+        postal_code: location, // Use the location string as postal code since they are one and the same in this flow
         updated_at: new Date().toISOString(),
       })
 
@@ -629,24 +540,30 @@ export function ProviderProfile() {
                   </div>
                   <div className="md:col-span-2 space-y-4">
                     <div className="flex flex-col gap-2">
-                      <Label className="text-sm font-medium">Localização</Label>
+                      <Label className="text-sm font-medium">Localização / Código Postal</Label>
                       <div className="flex gap-2">
                         <div className="relative flex-1">
-                          <Input
-                            id="location-input"
+                          <AddressAutocomplete
                             value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            placeholder="Sua cidade, rua ou região"
-                            className="pr-10"
+                            onChange={(val) => {
+                              setLocation(val)
+                              setPostalCode(val) // Sync valid logic
+                            }}
+                            onSelect={(place) => {
+                              if (place.geometry && place.geometry.location) {
+                                setLat(place.geometry.location.lat())
+                                setLng(place.geometry.location.lng())
+                              }
+                            }}
+                            placeholder="Sua cidade ou código postal"
                           />
-                          <MapPin className="absolute right-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <MapPin className="absolute right-3 top-2.5 h-5 w-5 text-muted-foreground pointer-events-none" />
                         </div>
-
                       </div>
                       {(lat && lng) && (
                         <p className="text-[10px] text-muted-foreground italic flex items-center gap-1">
                           <CheckCircle className="h-3 w-3 text-green-500" />
-                          Coordenadas verificadas: {lat.toFixed(4)}, {lng.toFixed(4)}
+                          Coordenadas: {lat.toFixed(4)}, {lng.toFixed(4)}
                         </p>
                       )}
                     </div>
