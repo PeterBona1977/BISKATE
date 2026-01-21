@@ -34,6 +34,11 @@ interface Provider {
   service_radius_km?: number
   postal_code?: string
   performs_emergency_services?: boolean
+  company_name?: string | null
+  vat_number?: string | null
+  commercial_registry_code?: string | null
+  provider_type?: string | null
+  provider_hourly_rate?: number | null
 }
 
 interface Specialty {
@@ -574,7 +579,9 @@ export function ProviderApproval() {
                     <Card>
                       <CardContent className="p-4 flex flex-col items-center justify-center text-center">
                         <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Hourly Rate</p>
-                        <p className="text-2xl font-bold mt-1">{selectedProvider.hourly_rate ? `€${selectedProvider.hourly_rate}` : "-"}</p>
+                        <p className="text-2xl font-bold mt-1 max-w-full truncate px-2">
+                          €{selectedProvider.provider_hourly_rate || selectedProvider.hourly_rate || "-"}
+                        </p>
                         <p className="text-xs text-muted-foreground">per hour</p>
                       </CardContent>
                     </Card>
@@ -613,6 +620,40 @@ export function ProviderApproval() {
                     </CardContent>
                   </Card>
 
+                  {/* Business Details (Company Only) */}
+                  {selectedProvider.provider_type === "company" && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center">
+                          <Briefcase className="h-5 w-5 mr-2" />
+                          Business Information
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-xs text-muted-foreground uppercase font-bold">Company Name</p>
+                            <p className="font-medium">{selectedProvider.company_name || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground uppercase font-bold">VAT / NIF</p>
+                            <p className="font-medium">{selectedProvider.vat_number || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground uppercase font-bold">Registry Code</p>
+                            <p className="font-mono bg-muted px-2 py-1 rounded inline-block text-sm">
+                              {selectedProvider.commercial_registry_code || "-"}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground uppercase font-bold">Responsible Person</p>
+                            <p className="font-medium">{selectedProvider.full_name}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
                   {/* Location */}
                   <div className="bg-white p-4 rounded-lg border">
                     <h4 className="font-semibold mb-2 flex items-center">
@@ -639,6 +680,30 @@ export function ProviderApproval() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 gap-4">
+                      {/* Show Registry Code as a Virtual Document if exists */}
+                      {selectedProvider.commercial_registry_code && (
+                        <Card className="overflow-hidden border-l-4 border-l-purple-600 bg-purple-50/20">
+                          <div className="p-4 flex items-center gap-4">
+                            <div className="h-12 w-12 rounded bg-purple-50 flex items-center justify-center flex-shrink-0">
+                              <Briefcase className="h-6 w-6 text-purple-600" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold">Certidão Permanente (Access Code)</h4>
+                                <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">Provided Code</Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground uppercase font-bold mt-1">
+                                Code Access
+                              </p>
+                              <div className="mt-2 text-sm font-mono bg-white border px-3 py-2 rounded max-w-md">
+                                {selectedProvider.commercial_registry_code}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">Use this code to verify the company status online.</p>
+                            </div>
+                          </div>
+                        </Card>
+                      )}
+
                       {selectedProvider.documents.map((doc) => (
                         <Card key={doc.id} className="overflow-hidden border-l-4 border-l-primary">
                           <div className="p-4 flex items-center gap-4">

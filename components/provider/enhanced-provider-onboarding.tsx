@@ -1269,48 +1269,51 @@ export function EnhancedProviderOnboarding() {
                 </Card>
 
                 {/* Address Document Card */}
-                <Card className={documents.address.length === 0 ? "border-dashed" : "border-primary"}>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center">
-                      <MapPin className="mr-2 h-4 w-4" />
-                      Comprovativo de Morada *
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {documents.address.map((file, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-2 bg-muted rounded">
-                          <div className="flex items-center overflow-hidden">
-                            <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
-                            <span className="text-sm truncate">{file.name}</span>
+                {/* Address Document Card (Individual Only) */}
+                {formData.providerType !== 'company' && (
+                  <Card className={documents.address.length === 0 ? "border-dashed" : "border-primary"}>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Comprovativo de Morada *
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {documents.address.map((file, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-2 bg-muted rounded">
+                            <div className="flex items-center overflow-hidden">
+                              <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
+                              <span className="text-sm truncate">{file.name}</span>
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={() => removeDocument("address", idx)}>
+                              <X className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <Button variant="ghost" size="sm" onClick={() => removeDocument("address", idx)}>
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
+                        ))}
 
-                      <div className="flex items-center justify-center w-full">
-                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
-                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <Upload className="w-8 h-8 mb-4 text-gray-500" />
-                            <p className="text-sm text-gray-500">
-                              <span className="font-semibold">Clique para enviar</span>
-                            </p>
-                            <p className="text-xs text-gray-500">Fatura ou documento oficial</p>
-                          </div>
-                          <input
-                            type="file"
-                            accept="image/*,.pdf"
-                            multiple
-                            className="hidden"
-                            onChange={(e) => handleFileChange(e, "address")}
-                          />
-                        </label>
+                        <div className="flex items-center justify-center w-full">
+                          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <Upload className="w-8 h-8 mb-4 text-gray-500" />
+                              <p className="text-sm text-gray-500">
+                                <span className="font-semibold">Clique para enviar</span>
+                              </p>
+                              <p className="text-xs text-gray-500">Fatura ou documento oficial</p>
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/*,.pdf"
+                              multiple
+                              className="hidden"
+                              onChange={(e) => handleFileChange(e, "address")}
+                            />
+                          </label>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                )}
 
 
                 {/* Company Reg Document Card */}
@@ -1425,7 +1428,7 @@ export function EnhancedProviderOnboarding() {
               </Button>
               <Button onClick={handleNext} disabled={
                 documents.id.length === 0 ||
-                documents.address.length === 0 ||
+                (formData.providerType !== 'company' && documents.address.length === 0) ||
                 (formData.providerType === 'company' && documents.company.length === 0 && (!formData.commercialRegistryCode || formData.commercialRegistryCode.length < 5))
               }>
                 Próximo
