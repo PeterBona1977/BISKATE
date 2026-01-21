@@ -39,6 +39,7 @@ interface FormData {
   providerType: "individual" | "company"
   vatNumber: string
   companyName: string
+  companyResponsible: string
   commercialRegistryCode: string
 }
 
@@ -98,6 +99,7 @@ export function EnhancedProviderOnboarding() {
     providerType: "individual",
     vatNumber: "",
     companyName: "",
+    companyResponsible: "",
     commercialRegistryCode: ""
   })
   const [specialties, setSpecialties] = useState<Specialty[]>([])
@@ -359,10 +361,11 @@ export function EnhancedProviderOnboarding() {
         vat_number: formData.vatNumber,
         provider_type: formData.providerType,
         company_name: formData.providerType === "company" ? formData.companyName : null,
+        company_responsible: formData.providerType === "company" ? formData.companyResponsible : null,
         commercial_registry_code: formData.providerType === "company" ? formData.commercialRegistryCode : null,
         service_radius_km: formData.radiusKm, // Keep for backward compatibility if needed
         performs_emergency_services: formData.performsEmergency,
-        // postal_code: formData.postalCode, // Don't overwrite client address
+        postal_code: formData.postalCode, // Saving postal code as operative base
         phone_country_code: formData.countryCode,
         // phone: ... // Don't overwrite client phone
       }
@@ -716,16 +719,25 @@ export function EnhancedProviderOnboarding() {
               </div>
             </div>
 
-            {formData.providerType === "company" && (
-              <div className="space-y-2">
-                <Label htmlFor="companyName">Nome da Empresa</Label>
-                <Input
-                  id="companyName"
-                  value={formData.companyName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
-                  placeholder="Nome Legal da Empresa"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="companyName">Nome da Empresa</Label>
+              <Input
+                id="companyName"
+                value={formData.companyName}
+                onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
+                placeholder="Nome Legal da Empresa"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="companyResponsible">Nome do Responsável (Gerente)</Label>
+              <Input
+                id="companyResponsible"
+                value={formData.companyResponsible}
+                onChange={(e) => setFormData(prev => ({ ...prev, companyResponsible: e.target.value }))}
+                placeholder="Nome Completo do Responsável"
+              />
+            </div>
             )}
 
             <div className="space-y-2">
@@ -877,7 +889,7 @@ export function EnhancedProviderOnboarding() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-end">
-            <Button onClick={handleNext} disabled={!formData.bio || !formData.phone || !formData.postalCode || !formData.hourlyRate || !formData.vatNumber || (formData.providerType === "company" && !formData.companyName)}>
+            <Button onClick={handleNext} disabled={!formData.bio || !formData.phone || !formData.postalCode || !formData.hourlyRate || !formData.vatNumber || (formData.providerType === "company" && (!formData.companyName || !formData.companyResponsible))}>
               Próximo
             </Button>
           </CardFooter>

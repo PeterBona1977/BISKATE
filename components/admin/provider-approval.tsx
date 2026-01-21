@@ -39,6 +39,7 @@ interface Provider {
   commercial_registry_code?: string | null
   provider_type?: string | null
   provider_hourly_rate?: number | null
+  company_responsible?: string | null
 }
 
 interface Specialty {
@@ -647,7 +648,7 @@ export function ProviderApproval() {
                           </div>
                           <div>
                             <p className="text-xs text-muted-foreground uppercase font-bold">Responsible Person</p>
-                            <p className="font-medium">{selectedProvider.full_name}</p>
+                            <p className="font-medium">{selectedProvider.company_responsible || selectedProvider.full_name}</p>
                           </div>
                         </div>
                       </CardContent>
