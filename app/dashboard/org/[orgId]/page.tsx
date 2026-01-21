@@ -44,18 +44,18 @@ export default function OrganizationDashboard() {
         if (orgId) fetchStats()
     }, [orgId])
 
-    if (!currentOrganization) return <div className="p-8">Loading Organization...</div>
+    if (!currentOrganization) return <div className="p-8">Carregando Organização...</div>
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{currentOrganization.legal_name}</h1>
-                    <p className="text-muted-foreground">Business Dashboard</p>
+                    <p className="text-muted-foreground">Painel Empresarial</p>
                 </div>
                 <div className="flex gap-2">
                     <Button>
-                        <Plus className="mr-2 h-4 w-4" /> New Request
+                        <Plus className="mr-2 h-4 w-4" /> Novo Pedido
                     </Button>
                 </div>
             </div>
@@ -63,34 +63,34 @@ export default function OrganizationDashboard() {
             <div className="grid gap-4 md:grid-cols-3">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+                        <CardTitle className="text-sm font-medium">Membros</CardTitle>
                         <Users className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{stats.members}</div>
-                        <p className="text-xs text-muted-foreground">Active accounts</p>
+                        <p className="text-xs text-muted-foreground">Contas ativas</p>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Departments</CardTitle>
+                        <CardTitle className="text-sm font-medium">Departamentos</CardTitle>
                         <Building2 className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{stats.depts}</div>
-                        <p className="text-xs text-muted-foreground">Organizational units</p>
+                        <p className="text-xs text-muted-foreground">Unidades organizacionais</p>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Active Budget</CardTitle>
+                        <CardTitle className="text-sm font-medium">Orçamento Ativo</CardTitle>
                         <CreditCard className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">€0.00</div>
-                        <p className="text-xs text-muted-foreground">Current month spend</p>
+                        <p className="text-xs text-muted-foreground">Gasto mês atual</p>
                     </CardContent>
                 </Card>
             </div>
@@ -98,11 +98,11 @@ export default function OrganizationDashboard() {
             {/* Placeholder for Recent Activity */}
             <Card className="col-span-3">
                 <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
+                    <CardTitle>Atividade Recente</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="text-sm text-muted-foreground text-center py-8">
-                        No recent activity to show.
+                        Nenhuma atividade recente.
                     </div>
                 </CardContent>
             </Card>

@@ -133,13 +133,13 @@ export default function RegisterPage() {
               className={`flex-1 pb-2 text-sm font-medium transition-colors ${activeTab === "individual" ? "border-b-2 border-primary text-primary" : "text-gray-500 hover:text-gray-700"}`}
               onClick={() => setActiveTab("individual")}
             >
-              Individual
+              Particular
             </button>
             <button
               className={`flex-1 pb-2 text-sm font-medium transition-colors ${activeTab === "company" ? "border-b-2 border-primary text-primary" : "text-gray-500 hover:text-gray-700"}`}
               onClick={() => setActiveTab("company")}
             >
-              Business (Company)
+              Empresa
             </button>
           </div>
 
@@ -153,13 +153,13 @@ export default function RegisterPage() {
           {activeTab === "individual" ? (
             <form onSubmit={handleIndividualSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="fullName">Nome Completo</Label>
                 <Input
                   id="fullName"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
-                  placeholder="Your full name"
+                  placeholder="Seu nome completo"
                 />
               </div>
               <div className="space-y-2">
@@ -170,11 +170,11 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="your@email.com"
+                  placeholder="seu@email.com"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Senha</Label>
                 <Input
                   id="password"
                   type="password"
@@ -186,19 +186,19 @@ export default function RegisterPage() {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Creating account..." : "Create Personal Account"}
+                {loading ? "Criando conta..." : "Criar Conta Pessoal"}
               </Button>
             </form>
           ) : (
             <form onSubmit={handleCompanySubmit} className="space-y-4">
               <div className="p-3 bg-blue-50 text-blue-800 text-sm rounded mb-4">
-                <strong>Business Account:</strong> Requires a valid VAT number and Registry Code.
-                You will be creating the <strong>Organization</strong> and its first <strong>Admin User</strong>.
+                <strong>Conta Empresarial:</strong> Requer NIF e Código da Certidão válidos.
+                Você criará a <strong>Organização</strong> e o primeiro <strong>Utilizador Admin</strong>.
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 col-span-2">
-                  <Label htmlFor="legalName">Company Legal Name</Label>
+                  <Label htmlFor="legalName">Nome Legal da Empresa</Label>
                   <Input
                     id="legalName"
                     value={legalName}
@@ -208,7 +208,7 @@ export default function RegisterPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="vatNumber">VAT / NIF</Label>
+                  <Label htmlFor="vatNumber">NIF / VAT</Label>
                   <Input
                     id="vatNumber"
                     value={vatNumber}
@@ -218,17 +218,17 @@ export default function RegisterPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="registryCode">Registry Code</Label>
+                  <Label htmlFor="registryCode">Cód. Certidão Permanente</Label>
                   <Input
                     id="registryCode"
                     value={registryCode}
                     onChange={(e) => setRegistryCode(e.target.value)}
                     required
-                    placeholder="Code from Certidão"
+                    placeholder="Código da Certidão"
                   />
                 </div>
                 <div className="space-y-2 col-span-2">
-                  <Label htmlFor="address">Headquarters Address</Label>
+                  <Label htmlFor="address">Morada da Sede</Label>
                   <Input
                     id="address"
                     value={address}
@@ -240,19 +240,19 @@ export default function RegisterPage() {
               </div>
 
               <div className="border-t pt-4 mt-2">
-                <h4 className="text-sm font-medium mb-3">Representative (Admin User)</h4>
+                <h4 className="text-sm font-medium mb-3">Representante (Admin)</h4>
                 <div className="space-y-2 mb-2">
-                  <Label htmlFor="repName">Admin Full Name</Label>
+                  <Label htmlFor="repName">Nome do Representante</Label>
                   <Input
                     id="repName"
                     value={repName}
                     onChange={(e) => setRepName(e.target.value)}
                     required
-                    placeholder="Pedro Manager"
+                    placeholder="Pedro Santos"
                   />
                 </div>
                 <div className="space-y-2 mb-2">
-                  <Label htmlFor="companyEmail">Business Email</Label>
+                  <Label htmlFor="companyEmail">Email Corporativo</Label>
                   <Input
                     id="companyEmail"
                     type="email"
@@ -263,7 +263,7 @@ export default function RegisterPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="companyPassword">Password</Label>
+                  <Label htmlFor="companyPassword">Senha</Label>
                   <Input
                     id="companyPassword"
                     type="password"
@@ -277,15 +277,15 @@ export default function RegisterPage() {
               </div>
 
               <Button type="submit" className="w-full bg-slate-800 hover:bg-slate-700" disabled={loading}>
-                {loading ? "Registering Company..." : "Register Company"}
+                {loading ? "Registando Empresa..." : "Registar Empresa"}
               </Button>
             </form>
           )}
 
           <div className="text-center text-sm mt-6">
-            <span className="text-gray-600">Already have an account? </span>
+            <span className="text-gray-600">Já tem conta? </span>
             <Link href="/login" className="text-blue-600 hover:text-blue-500">
-              Login
+              Entrar
             </Link>
           </div>
         </CardContent>

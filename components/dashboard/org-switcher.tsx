@@ -39,8 +39,7 @@ export function OrgSwitcher({ className }: { className?: string }) {
         setOpen(false)
     }
 
-    const activeLabel = currentOrganization ? currentOrganization.legal_name : "Personal Account"
-
+    const activeLabel = currentOrganization ? currentOrganization.legal_name : "Conta Pessoal"
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -48,7 +47,7 @@ export function OrgSwitcher({ className }: { className?: string }) {
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    aria-label="Select a workspace"
+                    aria-label="Selecione um espaço"
                     className={cn("w-full justify-between mb-4", className)}
                 >
                     {currentOrganization ? (
@@ -63,22 +62,22 @@ export function OrgSwitcher({ className }: { className?: string }) {
             <PopoverContent className="w-[200px] p-0">
                 <Command>
                     <CommandList>
-                        <CommandInput placeholder="Search workspace..." />
-                        <CommandEmpty>No workspace found.</CommandEmpty>
-                        <CommandGroup heading="Personal">
+                        <CommandInput placeholder="Procurar..." />
+                        <CommandEmpty>Nenhum espaço encontrado.</CommandEmpty>
+                        <CommandGroup heading="Pessoal">
                             <CommandItem
                                 onSelect={handleSelectPersonal}
                                 className="text-sm"
                             >
                                 <User className="mr-2 h-4 w-4" />
-                                Personal Account
+                                Conta Pessoal
                                 {!currentOrganization && (
                                     <Check className="ml-auto h-4 w-4" />
                                 )}
                             </CommandItem>
                         </CommandGroup>
                         <CommandSeparator />
-                        <CommandGroup heading="Organizations">
+                        <CommandGroup heading="Organizações">
                             {organizations.map((org) => (
                                 <CommandItem
                                     key={org.id}
@@ -102,7 +101,7 @@ export function OrgSwitcher({ className }: { className?: string }) {
                                 }}
                             >
                                 <PlusCircle className="mr-2 h-5 w-5" />
-                                Create Organization
+                                Criar Organização
                             </CommandItem>
                         </CommandGroup>
                     </CommandList>
