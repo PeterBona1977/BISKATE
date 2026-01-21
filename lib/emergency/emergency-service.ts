@@ -61,9 +61,57 @@ export class EmergencyService {
 
             if (error) throw error
 
-            // Find nearby online providers (within 20km approx) that have emergency_calls enabled in their plan
-            // We use a join with plan_limits to filter by features
-            const radius = 0.2
+            // Strict Filtering: Find providers who offer services in this category
+            // 1. Get Category ID if not service provided
+            let targetServiceIds: string[] = []
+
+            if (data.serviceId) {
+                targetServiceIds = [data.serviceId]
+            } else if (data.category) {
+                // Find category ID
+                const { data: catData } = await supabase
+                    .from("categories")
+                    .select("id")
+                    .eq("name", data.category)
+                    .single()
+
+                if (catData) {
+                    // Find all services in this category (via subcategories)
+                    const { data: subData } = await supabase
+                        .from("subcategories")
+                        .select("id")
+                        .eq("category_id", catData.id)
+
+                    if (subData && subData.length > 0) {
+                        const subIds = subData.map(s => s.id)
+                        const { data: servData } = await supabase
+                            .from("services")
+                            .select("id")
+                            .in("subcategory_id", subIds)
+
+                        if (servData) {
+                            targetServiceIds = servData.map(s => s.id)
+                        }
+                    }
+                }
+            }
+
+            // 2. Find providers with these services
+            let targetProviderIds: string[] = []
+            if (targetServiceIds.length > 0) {
+                const { data: provServices } = await supabase
+                    .from("provider_services")
+                    .select("provider_id")
+                    .in("service_id", targetServiceIds)
+
+                if (provServices) {
+                    targetProviderIds = [...new Set(provServices.map(ps => ps.provider_id))]
+                }
+            }
+
+            console.log(`🎯 Targeting ${targetProviderIds.length} providers for category ${data.category}`)
+
+            // 3. Find nearby online providers (within 20km approx) that have emergency_calls enabled
             const { data: nearbyProviders, error: providerError } = await supabase
                 .from("profiles")
                 .select(`
@@ -80,53 +128,43 @@ export class EmergencyService {
                 .eq("role", "provider")
                 .not("last_lat", "is", null)
                 .not("last_lng", "is", null)
-            // .gte("last_lat", data.lat - radius)
-            // .lte("last_lat", data.lat + radius)
-            // .gte("last_lng", data.lng - radius)
-            // .lte("last_lng", data.lng + radius)
+                // If we found specific providers, filter by ID
+                .in("id", targetProviderIds.length > 0 ? targetProviderIds : ['no_matches_found_placeholder'])
 
             if (providerError) {
                 console.error("❌ Error finding providers:", providerError)
             } else if (nearbyProviders) {
-                console.log(`📍 Found ${nearbyProviders.length} potential providers nearby. Filtering...`)
+                console.log(`📍 Found ${nearbyProviders.length} potential providers nearby. Filtering by radius...`)
 
-                // Filter by feature in JS
+                // Filter by feature and radius in JS
                 const eligibleProviders = nearbyProviders.filter((p: any) => {
                     const features = p.plan_limits?.features
                     const hasEmergencyFeature = features && features.emergency_calls === true
-
-                    // If a serviceId is specified, only notify providers who have that skill
-                    const hasMatchingSkill = !data.serviceId || (p.skills && p.skills.includes(data.serviceId))
 
                     // Distance Check
                     const distance = this.calculateDistance(data.lat, data.lng, p.last_lat, p.last_lng)
                     const isWithinRadius = distance <= (p.provider_service_radius || 20)
 
-                    console.log(`👤 Provider ${p.email} (${p.id}):`)
-                    console.log(`   - Emergency Feature: ${hasEmergencyFeature} (${JSON.stringify(features)})`)
-                    console.log(`   - Matching Skill: ${hasMatchingSkill} (Req: ${data.serviceId}, Skills: ${p.skills})`)
-                    console.log(`   - Distance: ${distance.toFixed(2)}km (Max: ${p.provider_service_radius || 20}km)`)
-                    console.log(`   - Is Eligible: ${hasEmergencyFeature && hasMatchingSkill && isWithinRadius}`)
-
-                    return hasEmergencyFeature && hasMatchingSkill && isWithinRadius
+                    return hasEmergencyFeature && isWithinRadius
                 })
 
                 if (eligibleProviders.length === 0) {
-                    console.log("ℹ️ No eligible providers (with emergency feature) found nearby.")
+                    console.log("ℹ️ No eligible providers found nearby.")
                 } else {
                     console.log(`✅ Broadcasting to ${eligibleProviders.length} providers.`)
                 }
 
                 // Broadcast to eligible providers
-                for (const provider of eligibleProviders) {
-                    await notificationService.createNotification({
+                // We use a Promise.all to send notifications in parallel
+                await Promise.all(eligibleProviders.map(provider =>
+                    notificationService.createNotification({
                         user_id: provider.id,
                         title: "🚨 EMERGENCY CALL!",
-                        message: `New emergency request for ${data.category} near you. Immediate response needed.`,
+                        message: `New emergency request for ${data.category}. Immediate response needed.`,
                         type: "error",
                         action_url: `/dashboard/emergency/${request.id}/respond`,
                     })
-                }
+                ))
             }
 
             return { data: request, error: null }
@@ -189,7 +227,23 @@ export class EmergencyService {
      * Client accepts a specific provider (Stage 2 of the new flow)
      */
     static async clientAcceptProvider(requestId: string, providerId: string) {
-        // 1. Update the request with the chosen provider
+        // 1. Get the quote first to know amount
+        const { data: response } = await supabase
+            .from("emergency_responses")
+            .select("quote_details")
+            .eq("emergency_id", requestId)
+            .eq("provider_id", providerId)
+            .single()
+
+        if (!response) throw new Error("Response not found")
+
+        // PLACEHOLDER: Debit Logic
+        // In a real app, this would call Stripe/Payment Provider to capture funds
+        // Amount = response.quote_details.price_per_hour * response.quote_details.min_hours
+        console.log(`💰 DEBITING CLIENT: Quote accepted for ${requestId}. Provider: ${providerId}`)
+        console.log(`💳 Amount: ${response.quote_details.price_per_hour * response.quote_details.min_hours}€`)
+
+        // 2. Update the request with the chosen provider
         const { error: requestError } = await supabase
             .from("emergency_requests")
             .update({
@@ -198,22 +252,34 @@ export class EmergencyService {
                 accepted_at: new Date().toISOString(),
             })
             .eq("id", requestId)
+            // Safety check: ensure it's not already accepted
+            .neq("status", "accepted")
 
         if (requestError) throw requestError
 
-        // 2. Update the chosen response status
+        // 3. Update the chosen response status
         await supabase
             .from("emergency_responses")
             .update({ status: 'accepted' })
             .eq("emergency_id", requestId)
             .eq("provider_id", providerId)
 
-        // 3. Reject other responses
+        // 4. Reject other responses
         await supabase
             .from("emergency_responses")
             .update({ status: 'rejected' })
             .eq("emergency_id", requestId)
             .neq("provider_id", providerId)
+
+        // 5. Create Transaction Record (Placeholder)
+        await supabase.from("transactions").insert({
+            user_id: (await supabase.auth.getUser()).data.user?.id, // Client
+            provider_id: providerId,
+            amount: response.quote_details.price_per_hour * response.quote_details.min_hours,
+            type: "emergency_debit",
+            status: "completed",
+            description: "Emergency Service Hold"
+        }).select().maybeSingle() // Use maybeSingle to avoid throw if table missing/RLS
 
         return { success: true }
     }
@@ -222,6 +288,13 @@ export class EmergencyService {
      * Cancel an emergency request
      */
     static async cancelEmergency(requestId: string) {
+        // Check current status first to prevent cancelling accepted jobs without penalty logic
+        const { data: req } = await supabase.from("emergency_requests").select("status").eq("id", requestId).single()
+
+        if (req?.status === 'accepted' || req?.status === 'in_progress') {
+            throw new Error("Cannot cancel an accepted emergency job without support intervention. Fee applies.")
+        }
+
         return supabase
             .from("emergency_requests")
             .update({ status: 'cancelled' })

@@ -44,7 +44,15 @@ export default function EmergencyRespondPage() {
     const [request, setRequest] = useState<EmergencyRequest | null>(null)
     const [client, setClient] = useState<any>(null)
     const [loading, setLoading] = useState(true)
-    const [isAccepting, setIsAccepting] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    // Form State
+    const [minHours, setMinHours] = useState<number>(1)
+    const [eta, setEta] = useState<string>("15 mins")
+
+    const hourlyRate = profile?.hourly_rate || 20 // Default fallback if not set
+    const premiumRate = hourlyRate * 1.5
+    const totalQuote = premiumRate * minHours
 
     useEffect(() => {
         if (id) {
@@ -78,19 +86,29 @@ export default function EmergencyRespondPage() {
         }
     }
 
-    const handleAccept = async () => {
+    const handleSendQuote = async () => {
         if (!user || !request) return
-        setIsAccepting(true)
+        setIsSubmitting(true)
         try {
-            const { error } = await EmergencyService.acceptEmergency(request.id, user.id)
+            const { error } = await EmergencyService.respondToEmergency({
+                requestId: request.id,
+                providerId: user.id,
+                quote: {
+                    price_per_hour: premiumRate, // Store the premium rate
+                    min_hours: minHours,
+                    eta: eta
+                }
+            })
+
             if (error) throw error
 
-            toast({ title: "Emergency Accepted!", description: "The client has been notified. Please head to the location immediately." })
+            toast({ title: "Quote Sent!", description: "The client has been notified of your offer." })
             router.push(`/dashboard/emergency/${request.id}`)
         } catch (err: any) {
-            toast({ title: "Failed to accept", description: err.message, variant: "destructive" })
+            console.error(err)
+            toast({ title: "Failed to send quote", description: err.message, variant: "destructive" })
         } finally {
-            setIsAccepting(false)
+            setIsSubmitting(false)
         }
     }
 
@@ -106,7 +124,7 @@ export default function EmergencyRespondPage() {
     const isAvailable = request.status === 'pending'
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-2xl mx-auto space-y-6 pb-20">
             <Card className="border-red-200 overflow-hidden shadow-2xl">
                 <div className="bg-red-600 p-6 text-white flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -122,41 +140,29 @@ export default function EmergencyRespondPage() {
                 </div>
 
                 <CardContent className="p-8 space-y-8">
+                    {/* Category & Badge */}
                     <div className="grid grid-cols-2 gap-8 text-center bg-gray-50 rounded-2xl p-6">
                         <div>
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Category</p>
                             <p className="text-xl font-bold text-gray-900">{request.category}</p>
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Earnings</p>
-                            <p className="text-xl font-bold text-green-600 font-mono">1.5x Premium</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Base Rate</p>
+                            <div className="flex items-center justify-center gap-2">
+                                <span className="text-gray-400 line-through text-lg">{hourlyRate}€</span>
+                                <span className="text-xl font-black text-green-600">{premiumRate}€ (1.5x)</span>
+                            </div>
                         </div>
                     </div>
 
+                    {/* Request Details */}
                     <div className="space-y-4">
                         <h3 className="font-bold text-gray-900 flex items-center gap-2">
                             <MapPin className="h-5 w-5 text-red-600" />
                             Location & Details
                         </h3>
-                        <div className="bg-white border rounded-xl p-4 space-y-3">
-                            <p className="text-gray-700 leading-relaxed font-medium italic">"{request.description}"</p>
-                            <div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t text-[11px]">
-                                {request.lat && request.lng && profile?.last_lat && profile?.last_lng && (
-                                    <span className="flex items-center gap-1 font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
-                                        <Navigation className="h-4 w-4" />
-                                        {calculateDistance(
-                                            profile.last_lat,
-                                            profile.last_lng,
-                                            request.lat,
-                                            request.lng
-                                        ).toFixed(1)} km de distância
-                                    </span>
-                                )}
-                                <span className="flex items-center gap-1">
-                                    <Clock className="h-4 w-4" />
-                                    Reportado há {Math.floor((new Date().getTime() - new Date(request.created_at).getTime()) / 60000)} mins
-                                </span>
-                            </div>
+                        <div className="bg-white border rounded-xl p-4 space-y-3 shadow-sm">
+                            <p className="text-gray-700 leading-relaxed font-medium italic text-lg">"{request.description}"</p>
 
                             <div className="aspect-video bg-gray-100 rounded-xl border border-gray-200 overflow-hidden relative mt-4">
                                 <EmergencyMap
@@ -167,50 +173,97 @@ export default function EmergencyRespondPage() {
                                     apiKey={GOOGLE_MAPS_API_KEY}
                                 />
                             </div>
+
+                            <div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t mt-4">
+                                {request.lat && request.lng && profile?.last_lat && profile?.last_lng && (
+                                    <span className="flex items-center gap-1 font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full">
+                                        <Navigation className="h-4 w-4" />
+                                        {calculateDistance(
+                                            profile.last_lat,
+                                            profile.last_lng,
+                                            request.lat,
+                                            request.lng
+                                        ).toFixed(1)} km away
+                                    </span>
+                                )}
+                                <span className="flex items-center gap-1 text-gray-400">
+                                    <Clock className="h-4 w-4" />
+                                    {Math.floor((new Date().getTime() - new Date(request.created_at).getTime()) / 60000)} mins ago
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    {client && (
-                        <div className="space-y-4">
-                            <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                                <User className="h-5 w-5 text-blue-600" />
-                                Client Information
-                            </h3>
-                            <div className="flex items-center justify-between bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
-                                        {client.full_name[0]}
-                                    </div>
-                                    <span className="font-bold text-gray-900">{client.full_name}</span>
+                    {/* RESPONSE FORM */}
+                    {isAvailable ? (
+                        <div className="bg-red-50/50 border-2 border-red-100 rounded-2xl p-6 space-y-6">
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
+                                    <CheckCircle className="h-5 w-5 text-red-600" />
                                 </div>
-                                <Badge variant="outline" className="bg-white">{client.rating?.toFixed(1) || '5.0'} ★ Client</Badge>
+                                <h3 className="font-bold text-gray-900 text-lg">Send Quotation</h3>
                             </div>
-                        </div>
-                    )}
 
-                    <div className="pt-6 flex flex-col gap-3">
-                        {isAvailable ? (
-                            <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase text-gray-500">Min. Hours</label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            step="0.5"
+                                            value={minHours}
+                                            onChange={(e) => setMinHours(Number(e.target.value))}
+                                            className="w-full h-14 pl-4 pr-12 rounded-xl border-gray-200 font-bold text-lg focus:ring-red-500 focus:border-red-500 shadow-sm"
+                                        />
+                                        <span className="absolute right-4 top-4 text-gray-400 font-medium">hrs</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase text-gray-500">ETA (Arrival)</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {['15m', '30m', '45m', '1h'].map(t => (
+                                            <button
+                                                key={t}
+                                                onClick={() => setEta(t)}
+                                                className={`h-14 rounded-xl font-bold text-sm transition-all ${eta === t ? 'bg-red-600 text-white shadow-lg shadow-red-200' : 'bg-white border hover:bg-gray-50'}`}
+                                            >
+                                                {t}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-4 rounded-xl border border-red-100 flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-500">Estimated Total (Before Fees)</span>
+                                <span className="text-2xl font-black text-gray-900">{totalQuote.toFixed(2)}€</span>
+                            </div>
+
+                            <div className="flex flex-col gap-3 pt-2">
                                 <Button
-                                    onClick={handleAccept}
-                                    disabled={isAccepting}
-                                    className="h-16 bg-red-600 hover:bg-red-700 text-lg font-black uppercase tracking-widest shadow-xl shadow-red-100 transform active:scale-95 transition-all"
+                                    onClick={handleSendQuote}
+                                    disabled={isSubmitting}
+                                    className="h-16 bg-red-600 hover:bg-red-700 text-lg font-black uppercase tracking-widest shadow-xl shadow-red-200 transform active:scale-[0.99] transition-all"
                                 >
-                                    {isAccepting ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : <CheckCircle className="h-6 w-6 mr-2" />}
-                                    ACCEPT EMERGENCY
+                                    {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : <Zap className="h-5 w-5 mr-2 fill-current" />}
+                                    SEND QUOTE ({totalQuote.toFixed(0)}€)
                                 </Button>
                                 <Button variant="ghost" className="text-gray-400" onClick={() => router.push('/dashboard')}>
                                     <XCircle className="h-4 w-4 mr-2" />
-                                    Decline
+                                    Ignore Request
                                 </Button>
-                            </>
-                        ) : (
-                            <div className="text-center p-6 bg-gray-100 rounded-xl">
-                                <p className="font-bold text-gray-500">This emergency has already been handled by another provider.</p>
-                                <Button variant="link" onClick={() => router.push('/dashboard')}>Return to Dashboard</Button>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="text-center p-8 bg-gray-100 rounded-3xl border-2 border-dashed border-gray-200">
+                            <p className="font-bold text-gray-500 text-lg">This emergency has already been handled.</p>
+                            <Button variant="link" onClick={() => router.push('/dashboard')} className="mt-2 text-red-600 font-bold">
+                                Return to Dashboard
+                            </Button>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>

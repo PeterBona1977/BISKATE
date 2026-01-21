@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react"
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { useEmergencyHeartbeat } from "@/hooks/use-emergency-heartbeat"
+import { EmergencyProviderListener } from "@/components/emergency/emergency-provider-listener"
 import { useTranslations } from "next-intl"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -52,6 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <EmergencyProviderListener />
       <DashboardHeader />
       <div className="flex h-screen overflow-hidden pt-16">
         {/* Sidebar - hidden on mobile in this standard layout, but let's keep it and adjust */}
