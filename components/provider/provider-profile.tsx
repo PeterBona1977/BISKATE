@@ -100,6 +100,7 @@ export function ProviderProfile() {
   const [lat, setLat] = useState<number | null>(profile?.last_lat || null)
   const [lng, setLng] = useState<number | null>(profile?.last_lng || null)
   const [postalCode, setPostalCode] = useState(profile?.postal_code || "")
+  const [providerType, setProviderType] = useState(profile?.provider_type || "individual")
 
   useEffect(() => {
     if (profile) {

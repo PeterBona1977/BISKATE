@@ -532,7 +532,7 @@ export function EnhancedProviderOnboarding() {
             providerId: user.id,
             providerName: formData.bio ? "Novo Prestador" : "Prestador",
             providerEmail: user.email,
-            action_url: "/dashboard/admin/providers"
+            action_url: "/admin/providers"
           }
         })
       })

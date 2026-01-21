@@ -25,6 +25,17 @@ export type Profile = DBProfile & {
   permissions?: string[] | null
   provider_verified_at?: string | null
   provider_documents?: any | null
+  plan?: any
+  rating?: number | null
+  total_reviews?: number
+  total_earnings?: number
+  profile_completion?: number
+  last_active?: string | null
+  is_online?: boolean
+  skills?: string[] | null
+  portfolio_url?: string | null
+  notification_preferences?: any
+  privacy_settings?: any
 }
 
 interface AuthContextType {

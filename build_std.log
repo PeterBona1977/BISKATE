@@ -1,0 +1,175 @@
+
+> gighub@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Parsing of C:\Users\pedro\Downloads\biskate - Backup before GigHub\node_modules\next-intl\dist\esm\production\extractor\format\index.js for build dependencies failed at 'import(t)'.
+<w> Build dependencies behind this expression are ignored and might cause incorrect cache invalidation.
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Parsing of C:\Users\pedro\Downloads\biskate - Backup before GigHub\node_modules\next-intl\dist\esm\production\extractor\format\index.js for build dependencies failed at 'import(t)'.
+<w> Build dependencies behind this expression are ignored and might cause incorrect cache invalidation.
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (130kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Parsing of C:\Users\pedro\Downloads\biskate - Backup before GigHub\node_modules\next-intl\dist\esm\production\extractor\format\index.js for build dependencies failed at 'import(t)'.
+<w> Build dependencies behind this expression are ignored and might cause incorrect cache invalidation.
+ ⚠ Compiled with warnings
+
+./node_modules/@supabase/realtime-js/dist/module/lib/websocket-factory.js
+A Node.js API is used (process.versions at line: 39) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/module/lib/websocket-factory.js
+./node_modules/@supabase/realtime-js/dist/module/index.js
+./node_modules/@supabase/supabase-js/dist/index.mjs
+./node_modules/@supabase/ssr/dist/index.mjs
+
+./node_modules/@supabase/supabase-js/dist/index.mjs
+A Node.js API is used (process.version at line: 395) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/@supabase/supabase-js/dist/index.mjs
+./node_modules/@supabase/ssr/dist/index.mjs
+
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+ ⚠ Using edge runtime on a page currently disables static generation for that page
+   Generating static pages (0/79) ...
+   Generating static pages (19/79) 
+   Generating static pages (39/79) 
+   Generating static pages (59/79) 
+ ✓ Generating static pages (79/79)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                  Size     First Load JS
+┌ ○ /                                        19.8 kB         232 kB
+├ ○ /_not-found                              880 B          89.2 kB
+├ ƒ /admin                                   4.4 kB          178 kB
+├ ○ /admin/analytics                         8 kB            229 kB
+├ ○ /admin/analytics/advanced                5.73 kB         186 kB
+├ ○ /admin/analytics/executive               10.3 kB         277 kB
+├ ○ /admin/categories                        172 B           189 kB
+├ ○ /admin/categories/debug                  4.25 kB         155 kB
+├ ○ /admin/categories/enhanced               173 B           189 kB
+├ ○ /admin/categories/final                  15.9 kB         196 kB
+├ ○ /admin/categories/fixed                  11.5 kB         186 kB
+├ ○ /admin/categories/simple                 11.9 kB         168 kB
+├ ○ /admin/cms                               2.94 kB         104 kB
+├ ○ /admin/complete-system                   9.84 kB         136 kB
+├ ○ /admin/dashboard                         4.27 kB         176 kB
+├ ○ /admin/dashboard/complete                6.95 kB         164 kB
+├ ○ /admin/emails                            4.81 kB         153 kB
+├ ƒ /admin/emails/[id]                       7.36 kB         184 kB
+├ ƒ /admin/emails/[id]/preview               5.16 kB         158 kB
+├ ○ /admin/feedback                          2.38 kB        90.7 kB
+├ ○ /admin/finance                           13.6 kB         313 kB
+├ ƒ /admin/gigs                              2.38 kB        90.7 kB
+├ ○ /admin/gigs/complete                     5.06 kB         128 kB
+├ ƒ /admin/logs/site                         1.75 kB         195 kB
+├ ƒ /admin/logs/users                        2.28 kB         196 kB
+├ ○ /admin/moderation                        11.6 kB         174 kB
+├ ○ /admin/notifications                     6.73 kB         188 kB
+├ ○ /admin/payments/setup                    6.7 kB          108 kB
+├ ○ /admin/plans                             6.95 kB         190 kB
+├ ○ /admin/profiles/completion               8.85 kB         104 kB
+├ ○ /admin/providers                         13.4 kB         176 kB
+├ ○ /admin/repair                            10.3 kB         162 kB
+├ ○ /admin/responses                         2.38 kB        90.7 kB
+├ ○ /admin/seo                               5.17 kB         110 kB
+├ ○ /admin/seo/bing                          6.59 kB         108 kB
+├ ○ /admin/seo/google-search-console         5.04 kB         100 kB
+├ ○ /admin/seo/pinterest                     5.44 kB         110 kB
+├ ○ /admin/seo/setup                         5.75 kB         101 kB
+├ ○ /admin/seo/status                        1.87 kB         101 kB
+├ ○ /admin/settings                          6.63 kB         168 kB
+├ ○ /admin/settings/integrations             2.96 kB         223 kB
+├ ○ /admin/tables                            4.85 kB         156 kB
+├ ƒ /admin/users                             2.38 kB        90.7 kB
+├ ƒ /admin/users/[id]                        6.51 kB         154 kB
+├ ƒ /admin/users/[id]/edit                   5.84 kB         183 kB
+├ ○ /admin/users/enhanced                    11.6 kB         192 kB
+├ ƒ /api/admin/diag                          0 B                0 B
+├ ƒ /api/admin/finance/payments              0 B                0 B
+├ ƒ /api/admin/finance/plans                 0 B                0 B
+├ ƒ /api/admin/finance/subscriptions         0 B                0 B
+├ ƒ /api/admin/providers/update-status       0 B                0 B
+├ ƒ /api/admin/settings                      0 B                0 B
+├ ƒ /api/ai/analyze-request                  0 B                0 B
+├ ƒ /api/ai/emergency-chat                   0 B                0 B
+├ ƒ /api/ai/suggest-categories               0 B                0 B
+├ ƒ /api/auth/confirm                        0 B                0 B
+├ ƒ /api/cron/verification-retry             0 B                0 B
+├ ƒ /api/debug-auth                          0 B                0 B
+├ ƒ /api/debug/provider-check                0 B                0 B
+├ ƒ /api/emergency/create                    0 B                0 B
+├ ƒ /api/geo                                 0 B                0 B
+├ ƒ /api/init-db                             0 B                0 B
+├ ƒ /api/notifications/trigger               0 B                0 B
+├ ƒ /api/og                                  0 B                0 B
+├ ƒ /api/payments/confirm                    0 B                0 B
+├ ƒ /api/payments/create-intent              0 B                0 B
+├ ƒ /api/payments/release-escrow             0 B                0 B
+├ ○ /api/yandex-verification                 0 B                0 B
+├ ○ /bing-verification                       188 B          88.5 kB
+├ ƒ /categories/[id]                         656 B           104 kB
+├ ○ /dashboard                               7.12 kB         201 kB
+├ ○ /dashboard/analytics                     6.76 kB         166 kB
+├ ○ /dashboard/become-provider               357 B           202 kB
+├ ○ /dashboard/billing                       298 B           197 kB
+├ ○ /dashboard/community                     6.89 kB         108 kB
+├ ○ /dashboard/create-gig                    37 kB           248 kB
+├ ○ /dashboard/emergency                     3.45 kB         180 kB
+├ ƒ /dashboard/emergency/[id]                11.9 kB         192 kB
+├ ƒ /dashboard/emergency/[id]/respond        7.32 kB         158 kB
+├ ○ /dashboard/jobs                          5.09 kB         194 kB
+├ ○ /dashboard/messages                      9.49 kB         179 kB
+├ ○ /dashboard/my-gigs                       5.46 kB         180 kB
+├ ƒ /dashboard/my-gigs/[id]                  13.1 kB         181 kB
+├ ○ /dashboard/notifications                 5.79 kB         177 kB
+├ ○ /dashboard/payments                      288 B           176 kB
+├ ○ /dashboard/profile                       7.23 kB         173 kB
+├ ○ /dashboard/provider                      6.66 kB         172 kB
+├ ○ /dashboard/provider/active-jobs          15.8 kB         184 kB
+├ ○ /dashboard/provider/billing              299 B           197 kB
+├ ○ /dashboard/provider/emergency            2.97 kB         223 kB
+├ ƒ /dashboard/provider/emergency/[id]       7.34 kB         224 kB
+├ ○ /dashboard/provider/gigs                 6.28 kB         186 kB
+├ ƒ /dashboard/provider/gigs/[id]            12.4 kB         218 kB
+├ ƒ /dashboard/provider/gigs/[id]/responses  9.26 kB         169 kB
+├ ○ /dashboard/provider/notifications        5.18 kB         162 kB
+├ ○ /dashboard/provider/onboarding           219 B           202 kB
+├ ○ /dashboard/provider/payments             289 B           176 kB
+├ ○ /dashboard/provider/profile              16.2 kB         221 kB
+├ ○ /dashboard/provider/services             4.36 kB         162 kB
+├ ○ /dashboard/provider/settings             295 B           180 kB
+├ ○ /dashboard/provider/setup                5.79 kB         157 kB
+├ ○ /dashboard/realtime                      10.1 kB         171 kB
+├ ○ /dashboard/responses                     9.48 kB         175 kB
+├ ○ /dashboard/settings                      292 B           180 kB
+├ ○ /dashboard/support                       8.9 kB          189 kB
+├ ○ /feed.xml                                0 B                0 B
+├ ○ /legal/cookies                           188 B          88.5 kB
+├ ○ /legal/privacy                           188 B          88.5 kB
+├ ○ /legal/terms                             188 B          88.5 kB
+├ ƒ /login                                   4.7 kB          164 kB
+├ ○ /providers                               6.24 kB         194 kB
+├ ƒ /register                                4.88 kB         165 kB
+├ ○ /robots.txt                              0 B                0 B
+├ ○ /setup                                   4.33 kB         161 kB
+├ ○ /sitemap.xml                             0 B                0 B
+└ ○ /verify-email                            3.24 kB         107 kB
++ First Load JS shared by all                88.3 kB
+  ├ chunks/5030-5bb2542f9b981553.js          31.9 kB
+  ├ chunks/fd9d1056-d47287ed39162623.js      53.6 kB
+  └ other shared chunks (total)              2.75 kB
+
+
+ƒ Middleware                                 75.2 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

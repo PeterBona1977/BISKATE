@@ -1,0 +1,89 @@
+
+> gighub@0.1.0 pages:build
+> npx -y @cloudflare/next-on-pages && npx -y rimraf .vercel/output/static/_worker.js/nop-build-log.json
+
+npm warn deprecated tar@6.2.1: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
+npm warn deprecated @cloudflare/next-on-pages@1.13.16: Please use the OpenNext adapter instead: https://opennext.js.org/cloudflare
+npm warn cleanup Failed to remove some directories [
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\wrangler\\node_modules\\esbuild',
+npm warn cleanup     [Error: EBUSY: resource busy or locked, rmdir 'C:\Users\pedro\AppData\Local\npm-cache\_npx\39e2fd552b408994\node_modules\wrangler\node_modules\esbuild'] {
+npm warn cleanup       errno: -4082,
+npm warn cleanup       code: 'EBUSY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\wrangler\\node_modules\\esbuild'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\wrangler\\node_modules',
+npm warn cleanup     [Error: EBUSY: resource busy or locked, rmdir 'C:\Users\pedro\AppData\Local\npm-cache\_npx\39e2fd552b408994\node_modules\wrangler\node_modules\esbuild'] {
+npm warn cleanup       errno: -4082,
+npm warn cleanup       code: 'EBUSY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\wrangler\\node_modules\\esbuild'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\vercel\\node_modules',
+npm warn cleanup     [Error: EBUSY: resource busy or locked, rmdir 'C:\Users\pedro\AppData\Local\npm-cache\_npx\39e2fd552b408994\node_modules\vercel\node_modules\esbuild'] {
+npm warn cleanup       errno: -4082,
+npm warn cleanup       code: 'EBUSY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\vercel\\node_modules\\esbuild'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\wrangler',
+npm warn cleanup     [Error: EBUSY: resource busy or locked, rmdir 'C:\Users\pedro\AppData\Local\npm-cache\_npx\39e2fd552b408994\node_modules\wrangler\node_modules\esbuild'] {
+npm warn cleanup       errno: -4082,
+npm warn cleanup       code: 'EBUSY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\wrangler\\node_modules\\esbuild'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\vercel',
+npm warn cleanup     [Error: EBUSY: resource busy or locked, rmdir 'C:\Users\pedro\AppData\Local\npm-cache\_npx\39e2fd552b408994\node_modules\vercel\node_modules\esbuild'] {
+npm warn cleanup       errno: -4082,
+npm warn cleanup       code: 'EBUSY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\vercel\\node_modules\\esbuild'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\vercel',
+npm warn cleanup     [Error: EBUSY: resource busy or locked, rmdir 'C:\Users\pedro\AppData\Local\npm-cache\_npx\39e2fd552b408994\node_modules\vercel\node_modules\esbuild'] {
+npm warn cleanup       errno: -4082,
+npm warn cleanup       code: 'EBUSY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\vercel\\node_modules\\esbuild'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\wrangler',
+npm warn cleanup     [Error: EBUSY: resource busy or locked, rmdir 'C:\Users\pedro\AppData\Local\npm-cache\_npx\39e2fd552b408994\node_modules\wrangler\node_modules\esbuild'] {
+npm warn cleanup       errno: -4082,
+npm warn cleanup       code: 'EBUSY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\wrangler\\node_modules\\esbuild'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\next',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'C:\Users\pedro\AppData\Local\npm-cache\_npx\39e2fd552b408994\node_modules\next\node_modules\@swc\helpers\_'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\next\\node_modules\\@swc\\helpers\\_'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\next',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'C:\Users\pedro\AppData\Local\npm-cache\_npx\39e2fd552b408994\node_modules\next\dist\build'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\pedro\\AppData\\Local\\npm-cache\\_npx\\39e2fd552b408994\\node_modules\\next\\dist\\build'
+npm warn cleanup     }
+npm warn cleanup   ]
+npm warn cleanup ]

@@ -6,6 +6,26 @@ export const dynamic = "force-dynamic"
 import { useState, useEffect } from "react"
 // ... (imports remain)
 import { DateRange } from "react-day-picker"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+import { Calendar as CalendarIcon, RefreshCw, Search, Briefcase, User } from "lucide-react"
+import { format } from "date-fns"
+import { pt } from "date-fns/locale"
+import { supabase } from "@/lib/supabase/client"
+
+type ActivityLog = any
+const getLogs = async (params: any) => {
+    // Temporary mock to unblock build
+    const { data, error } = await supabase.from("activity_logs").select("*").order("created_at", { ascending: false }).limit(20)
+    if (error) throw error
+    return data
+}
 
 export default function UserLogsPage() {
     const [logs, setLogs] = useState<ActivityLog[]>([])

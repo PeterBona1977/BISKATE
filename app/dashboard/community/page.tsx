@@ -229,19 +229,19 @@ export default function CommunityPage() {
         <TabsContent value="gigs" className="space-y-4">
           <div className="grid gap-4">
             {popularGigs.map((gig) => (
-              <Card key={biskate.id}>
+              <Card key={gig.id}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-lg">{biskate.title}</CardTitle>
-                      <CardDescription>por {biskate.author}</CardDescription>
+                      <CardTitle className="text-lg">{gig.title}</CardTitle>
+                      <CardDescription>por {gig.author}</CardDescription>
                     </div>
-                    <Badge variant="secondary">{biskate.category}</Badge>
+                    <Badge variant="secondary">{gig.category}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
-                    <div className="text-lg font-semibold text-green-600">{biskate.price}</div>
+                    <div className="text-lg font-semibold text-green-600">{gig.price}</div>
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                       <div className="flex items-center">
                         <MessageCircle className="h-4 w-4 mr-1" />

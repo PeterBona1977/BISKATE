@@ -7,13 +7,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import type { Session } from "next-auth"
+// import type { Session } from "next-auth"
 import Link from "next/link"
 import { Settings } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 interface HeaderProps {
-  session: Session | null
+  session: any
 }
 
 const Header = ({ session }: HeaderProps) => {
