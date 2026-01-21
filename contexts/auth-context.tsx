@@ -485,9 +485,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           table: "profiles",
           filter: `id=eq.${user.id}`,
         },
-        (payload) => {
+        async (payload) => {
           console.log("👤 Realtime profile update:", payload.new)
-          setProfile(payload.new as Profile)
+          // Fetch full profile to ensure all data (including potential joins or formatted fields) is up to date
+          // and to avoid issues with partial updates or missing fields in the payload
+          await refreshProfile()
         }
       )
       .subscribe()

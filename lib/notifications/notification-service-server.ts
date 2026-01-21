@@ -115,6 +115,14 @@ export class NotificationServiceServer {
                 action_url: data.action_url || "/dashboard/admin/providers"
             }
             await this.notifyAdmins(adminTitle, adminMessage, "admin_provider_application", notificationData)
+        } else if (trigger === "user_registered") {
+            const adminTitle = "Novo Registo de Utilizador 🆕"
+            const adminMessage = `O utilizador ${data.userName} (${data.userEmail}) registou-se na plataforma.`
+            const notificationData = {
+                ...data,
+                action_url: "/dashboard/admin/users"
+            }
+            await this.notifyAdmins(adminTitle, adminMessage, "admin_user_registered", notificationData)
         } else if (trigger === "welcome_email") {
             const adminTitle = "Novo Utilizador Confirmado ✅"
             const adminMessage = `O utilizador ${data.userName} (${data.userEmail}) confirmou o email. Por favor, verifique o número de telefone.`

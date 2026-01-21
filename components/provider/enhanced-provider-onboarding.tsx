@@ -35,6 +35,9 @@ interface FormData {
   postalCode: string
   radiusKm: number
   performsEmergency: boolean
+  providerType: "individual" | "company"
+  vatNumber: string
+  companyName: string
 }
 
 interface Specialty {
@@ -61,6 +64,13 @@ interface PortfolioItem {
   clientName: string
 }
 
+interface DocumentsState {
+  id: (File | { name: string; url?: string })[]
+  address: (File | { name: string; url?: string })[]
+  company: (File | { name: string; url?: string })[]
+  others: (File | { name: string; url?: string })[]
+}
+
 export function EnhancedProviderOnboarding() {
   const { user, profile, updateProfile } = useAuth()
   const router = useRouter()
@@ -82,17 +92,17 @@ export function EnhancedProviderOnboarding() {
     countryCode: "+351",
     postalCode: "",
     radiusKm: 30,
-    performsEmergency: false
+    performsEmergency: false,
+    providerType: "individual",
+    vatNumber: "",
+    companyName: ""
   })
   const [specialties, setSpecialties] = useState<Specialty[]>([])
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([])
-  const [documents, setDocuments] = useState<{
-    id: (File | { name: string; url?: string })[]
-    address: (File | { name: string; url?: string })[]
-    others: (File | { name: string; url?: string })[]
-  }>({
+  const [documents, setDocuments] = useState<DocumentsState>({
     id: [],
     address: [],
+    company: [],
     others: [],
   })
 
@@ -216,6 +226,7 @@ export function EnhancedProviderOnboarding() {
           const newDocs = {
             id: [] as any[],
             address: [] as any[],
+            company: [] as any[],
             others: [] as any[]
           }
 
@@ -223,6 +234,7 @@ export function EnhancedProviderOnboarding() {
             const fileObj = { name: doc.document_name, url: doc.document_url }
             if (doc.document_type === 'id') newDocs.id.push(fileObj)
             else if (doc.document_type === 'address') newDocs.address.push(fileObj)
+            else if (doc.document_type === 'company_reg') newDocs.company.push(fileObj)
             else newDocs.others.push(fileObj)
           })
 
@@ -287,7 +299,7 @@ export function EnhancedProviderOnboarding() {
     setPortfolio(updated)
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "id" | "address" | "others") => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: keyof DocumentsState) => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files)
       setDocuments((prev) => ({
@@ -297,7 +309,7 @@ export function EnhancedProviderOnboarding() {
     }
   }
 
-  const removeDocument = (type: "id" | "address" | "others", index: number) => {
+  const removeDocument = (type: keyof DocumentsState, index: number) => {
     setDocuments((prev) => {
       const newFiles = [...prev[type]]
       newFiles.splice(index, 1)
@@ -497,6 +509,28 @@ export function EnhancedProviderOnboarding() {
           docInserts.push({
             provider_id: user.id,
             document_type: "other",
+            document_name: name,
+            document_url: url,
+            status: "pending"
+          })
+        }
+      }
+
+      // Process Company documents
+      for (const doc of documents.company) {
+        let url = (doc as any).url
+        let name = doc.name
+
+        if (doc instanceof File) {
+          const sanitizedName = doc.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+          const path = `providers/${user.id}/company_${Date.now()}_${sanitizedName}`
+          url = await uploadFile(doc, "documents", path)
+        }
+
+        if (url) {
+          docInserts.push({
+            provider_id: user.id,
+            document_type: "company_reg",
             document_name: name,
             document_url: url,
             status: "pending"
@@ -1224,6 +1258,53 @@ export function EnhancedProviderOnboarding() {
                     </div>
                   </CardContent>
                 </Card>
+
+
+                {/* Company Reg Document Card */}
+                {formData.providerType === 'company' && (
+                  <Card className={documents.company.length === 0 ? "border-dashed col-span-1 md:col-span-2" : "border-primary col-span-1 md:col-span-2"}>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <Briefcase className="mr-2 h-4 w-4" />
+                        Certidão Permanente / Registo Comercial *
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {documents.company.map((file, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-2 bg-muted rounded">
+                            <div className="flex items-center overflow-hidden">
+                              <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
+                              <span className="text-sm truncate">{file.name}</span>
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={() => removeDocument("company", idx)}>
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+
+                        <div className="flex items-center justify-center w-full">
+                          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <Upload className="w-8 h-8 mb-4 text-gray-500" />
+                              <p className="text-sm text-gray-500">
+                                <span className="font-semibold">Carregar Certidão</span>
+                              </p>
+                              <p className="text-xs text-gray-500">PDF ou Imagem</p>
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/*,.pdf"
+                              multiple
+                              className="hidden"
+                              onChange={(e) => handleFileChange(e, "company")}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               <div className="mt-6">
@@ -1266,7 +1347,11 @@ export function EnhancedProviderOnboarding() {
               <Button variant="outline" onClick={handlePrevious}>
                 Anterior
               </Button>
-              <Button onClick={handleNext} disabled={documents.id.length === 0 || documents.address.length === 0}>
+              <Button onClick={handleNext} disabled={
+                documents.id.length === 0 ||
+                documents.address.length === 0 ||
+                (formData.providerType === 'company' && documents.company.length === 0)
+              }>
                 Próximo
               </Button>
             </CardFooter>

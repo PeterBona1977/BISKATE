@@ -790,11 +790,32 @@ export function ProviderProfile() {
           </TabsContent>
 
           <TabsContent value="services" className="space-y-6">
-            <ServiceSelector
-              userId={profile.id}
-              initialSelectedServices={profile.skills || []}
-              onSave={() => refreshProfile()}
-            />
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("tabs.services")}</CardTitle>
+                <CardDescription>Selecione os serviços que você oferece para receber gigs relevantes.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <ServiceSelector
+                  userId={profile.id}
+                  selectedServices={profile.skills || []}
+                  onServicesChange={async (newServices) => {
+                    // Direct save for better UX or create local state? 
+                    // Direct save might be slow. Let's optimize if needed, but for now direct save ensures data consistency.
+                    // Actually, let's use the updateProfile context method.
+                    setLoading(true)
+                    try {
+                      const { error } = await updateProfile({ skills: newServices })
+                      if (error) throw error
+                    } catch (err) {
+                      toast({ title: "Erro", description: "Falha ao salvar serviços", variant: "destructive" })
+                    } finally {
+                      setLoading(false)
+                    }
+                  }}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="reviews" className="space-y-6">
