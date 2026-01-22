@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { createClient } from "@/lib/supabase/server";
 import { InviteMemberDialog } from "@/components/dashboard/team/invite-member-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

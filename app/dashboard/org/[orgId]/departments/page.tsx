@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { createClient } from "@/lib/supabase/server";
 import { CreateDepartmentDialog } from "@/components/dashboard/departments/create-department-dialog";
 import { Button } from "@/components/ui/button";
