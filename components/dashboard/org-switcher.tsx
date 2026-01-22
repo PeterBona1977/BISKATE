@@ -64,18 +64,20 @@ export function OrgSwitcher({ className }: { className?: string }) {
                     <CommandList>
                         <CommandInput placeholder="Procurar..." />
                         <CommandEmpty>Nenhum espaço encontrado.</CommandEmpty>
-                        <CommandGroup heading="Pessoal">
-                            <CommandItem
-                                onSelect={handleSelectPersonal}
-                                className="text-sm"
-                            >
-                                <User className="mr-2 h-4 w-4" />
-                                Conta Pessoal
-                                {!currentOrganization && (
+                        <CommandEmpty>Nenhum espaço encontrado.</CommandEmpty>
+                        {/* Hide Personal Account if in Organization Context to enforce Company Area */}
+                        {!currentOrganization ? (
+                            <CommandGroup heading="Pessoal">
+                                <CommandItem
+                                    onSelect={handleSelectPersonal}
+                                    className="text-sm"
+                                >
+                                    <User className="mr-2 h-4 w-4" />
+                                    Conta Pessoal
                                     <Check className="ml-auto h-4 w-4" />
-                                )}
-                            </CommandItem>
-                        </CommandGroup>
+                                </CommandItem>
+                            </CommandGroup>
+                        ) : null}
                         <CommandSeparator />
                         <CommandGroup heading="Organizações">
                             {organizations.map((org) => (

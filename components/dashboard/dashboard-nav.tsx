@@ -215,9 +215,21 @@ export function DashboardNav({ viewMode = "client" }: { viewMode?: "client" | "p
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             )}
           >
-            <Building className={cn("mr-3 h-5 w-5 flex-shrink-0", pathname === `/dashboard/org/${currentOrganization.id}` ? "text-purple-500" : "text-gray-400")} />
-            Dashboard
+            <Building2 className={cn("mr-3 h-5 w-5 flex-shrink-0", pathname === `/dashboard/org/${currentOrganization.id}` ? "text-purple-500" : "text-gray-400")} />
+            Detalhes da Empresa
           </Link>
+
+          <Link
+            href={`/dashboard/org/${currentOrganization.id}/messages`}
+            className={cn(
+              "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+              pathname?.includes("/messages") ? "bg-purple-100 text-purple-700" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            )}
+          >
+            <MessageSquare className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
+            {t("messages")}
+          </Link>
+
           <Link
             href={`/dashboard/org/${currentOrganization.id}/team`}
             className={cn(
@@ -228,6 +240,7 @@ export function DashboardNav({ viewMode = "client" }: { viewMode?: "client" | "p
             <Users className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
             Equipa
           </Link>
+
           <Link
             href={`/dashboard/org/${currentOrganization.id}/departments`}
             className={cn(
@@ -238,6 +251,29 @@ export function DashboardNav({ viewMode = "client" }: { viewMode?: "client" | "p
             <Building className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
             Departamentos
           </Link>
+
+          <Link
+            href={`/dashboard/org/${currentOrganization.id}/payments`}
+            className={cn(
+              "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+              pathname?.includes("/payments") ? "bg-purple-100 text-purple-700" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            )}
+          >
+            <CreditCard className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
+            {t("payments")}
+          </Link>
+
+          <Link
+            href={`/dashboard/org/${currentOrganization.id}/notifications`}
+            className={cn(
+              "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+              pathname?.includes("/notifications") ? "bg-purple-100 text-purple-700" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            )}
+          >
+            <Bell className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
+            {t("notifications")}
+          </Link>
+
           <Link
             href={`/dashboard/org/${currentOrganization.id}/settings`}
             className={cn(
@@ -247,6 +283,39 @@ export function DashboardNav({ viewMode = "client" }: { viewMode?: "client" | "p
           >
             <Settings className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
             Configurações
+          </Link>
+
+          <Link
+            href={`/dashboard/org/${currentOrganization.id}/my-gigs`}
+            className={cn(
+              "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+              pathname?.includes("/my-gigs") ? "bg-purple-100 text-purple-700" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            )}
+          >
+            <Briefcase className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
+            {t("myGigs")}
+          </Link>
+
+          <Link
+            href={`/dashboard/org/${currentOrganization.id}/emergency`}
+            className={cn(
+              "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+              pathname?.includes("/emergency") ? "bg-purple-100 text-purple-700" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            )}
+          >
+            <AlertTriangle className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
+            {t("emergencies")}
+          </Link>
+
+          <Link
+            href={`/dashboard/org/${currentOrganization.id}/support`}
+            className={cn(
+              "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+              pathname?.includes("/support") ? "bg-purple-100 text-purple-700" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            )}
+          >
+            <LifeBuoy className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
+            {t("support")}
           </Link>
 
 
