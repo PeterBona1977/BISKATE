@@ -37,8 +37,9 @@ export function DashboardSidebar() {
     const router = useRouter()
     const { user, profile, signOut, refreshProfile } = useAuth()
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
-    const [viewMode, setViewMode] = useState<"client" | "provider">(
-        pathname?.includes("/dashboard/provider") ? "provider" : "client"
+    const [viewMode, setViewMode] = useState<"client" | "provider" | "organization">(
+        pathname?.includes("/dashboard/provider") ? "provider" :
+            pathname?.includes("/dashboard/org/") ? "organization" : "client"
     )
 
     const isProvider = (profile?.role === "provider" || profile?.is_provider === true) && profile?.provider_status === 'approved'
@@ -47,6 +48,8 @@ export function DashboardSidebar() {
     useEffect(() => {
         if (pathname?.includes("/dashboard/provider")) {
             setViewMode("provider")
+        } else if (pathname?.includes("/dashboard/org/")) {
+            setViewMode("organization")
         } else {
             setViewMode("client")
         }

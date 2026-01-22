@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { logClientActivity } from "@/app/actions/log"
-import { LoginForm } from "@/components/auth/login-form"
+// import { LoginForm } from "@/components/auth/login-form"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
@@ -23,28 +23,29 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const { signIn, isAuthenticated, profile } = useAuth()
+  const { signIn, isAuthenticated, profile, organizations } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
     if (isAuthenticated && profile) {
       // Log successful login/session presence
-      // Checks sessionStorage to avoid spamming logs on page refresh/navigation if desired, 
-      // but for now we log every time the login page redirects an active user.
       if (!sessionStorage.getItem("logged_in_session")) {
-        logClientActivity(profile.id, profile.role, "LOGIN", { email: profile.email })
+        logClientActivity(profile.id, profile.role || "user", "LOGIN", { email: profile.email || "unknown" })
         sessionStorage.setItem("logged_in_session", "true")
       }
 
       if (profile.role === "admin") {
         router.push("/admin")
+      } else if (organizations && organizations.length > 0) {
+        // Redirect to the first organization dashboard
+        router.push(`/dashboard/org/${organizations[0].id}`)
       } else if (profile.role === "provider" || profile.is_provider) {
         router.push("/dashboard/provider")
       } else {
         router.push("/dashboard")
       }
     }
-  }, [isAuthenticated, profile, router])
+  }, [isAuthenticated, profile, organizations, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

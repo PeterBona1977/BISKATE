@@ -33,12 +33,19 @@ export async function GET(request: NextRequest) {
         }
 
         // 2. Marcar como verificado no perfil
-        await supabase
+        await (supabase as any)
             .from("profiles")
             .update({ email_verified: true })
             .eq("id", userId)
 
-        // 3. Disparar a notificação de Bem-vindo (e alerta para o admin)
+        // 3. Verificar se pertence a uma organização (Owner/Member)
+        const { data: orgMember } = await supabase
+            .from("organization_members")
+            .select("organization_id")
+            .eq("user_id", userId)
+            .single()
+
+        // 4. Disparar a notificação de Bem-vindo (e alerta para o admin)
         // Buscamos o nome do perfil
         const { data: profile } = await supabase
             .from("profiles")
@@ -48,13 +55,17 @@ export async function GET(request: NextRequest) {
 
         await NotificationServiceServer.triggerNotification("email_verified", {
             userId: userId,
-            userName: profile?.full_name || user.user_metadata?.full_name || "Utilizador",
+            userName: (profile as any)?.full_name || user.user_metadata?.full_name || "Utilizador",
             userEmail: user.email,
         })
 
         console.log("✅ Welcome email and admin alert triggered for:", user.email)
 
-        // 3. Redirecionar para o dashboard
+        // 5. Redirecionar para o dashboard apropriado
+        if (orgMember && (orgMember as any).organization_id) {
+            return NextResponse.redirect(new URL(`/dashboard/org/${(orgMember as any).organization_id}?welcome=true`, request.url))
+        }
+
         return NextResponse.redirect(new URL("/dashboard?welcome=true", request.url))
 
     } catch (err) {

@@ -208,8 +208,8 @@ export async function sendEmail({ to, templateName, variables }: SendEmailParams
             throw new Error(`Template '${templateName}' not found`);
         }
 
-        let subject = template.subject;
-        let html = template.body;
+        let subject = (template as any).subject;
+        let html = (template as any).body;
 
         // 2. Replace variables
         // Simple string replacement: {{variable}}
@@ -330,12 +330,13 @@ export async function sendEmailByTrigger({
             if (trigger.includes('application')) fallbackSubject = 'Nova Candidatura / Application Update';
             if (trigger.includes('feedback')) fallbackSubject = 'Novo Feedback Recebido';
             if (trigger.includes('response')) fallbackSubject = 'Atualização de Proposta / New Response';
+            if (trigger === 'company_registered') fallbackSubject = 'Confirmação de Registo Empresarial - GigHub';
 
             return sendEmailWithContent({ to, subject: fallbackSubject, html: fallbackBody });
         }
 
-        console.log(`✅ Found template: ${template.slug} for trigger: ${trigger}`);
-        return sendEmail({ to, templateName: template.slug, variables });
+        console.log(`✅ Found template: ${(template as any).slug} for trigger: ${trigger}`);
+        return sendEmail({ to, templateName: (template as any).slug, variables });
     } catch (error) {
         console.error(`❌ Error sending email by trigger '${trigger}':`, error);
         return { success: false, error };

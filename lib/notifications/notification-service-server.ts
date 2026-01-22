@@ -22,6 +22,10 @@ export class NotificationServiceServer {
                 title = "Verificação de Email"
                 message = `Olá ${data.userName}, por favor confirme o seu email usando o link enviado.`
                 break
+            case "company_registered":
+                title = "Bem-vindo ao GigHub - Empresa"
+                message = `Olá ${data.userName}, bem-vindo ao GigHub! Confirme o email da sua empresa para começar.`
+                break
             case "welcome_email":
                 title = "Bem-vindo ao GigHub! 🎉"
                 message = `A sua conta foi confirmada com sucesso. Já pode explorar a plataforma.`
@@ -123,6 +127,14 @@ export class NotificationServiceServer {
                 action_url: "/dashboard/admin/users"
             }
             await this.notifyAdmins(adminTitle, adminMessage, "admin_user_registered", notificationData)
+        } else if (trigger === "company_registered") {
+            const adminTitle = "Novo Registo de Empresa 🏢"
+            const adminMessage = `A empresa ${data.company_name} (${data.userEmail}) registou-se na plataforma.`
+            const notificationData = {
+                ...data,
+                action_url: "/dashboard/admin/users" // TODO: Point to companies list when available
+            }
+            await this.notifyAdmins(adminTitle, adminMessage, "admin_company_registered", notificationData)
         } else if (trigger === "welcome_email") {
             const adminTitle = "Novo Utilizador Confirmado ✅"
             const adminMessage = `O utilizador ${data.userName} (${data.userEmail}) confirmou o email. Por favor, verifique o número de telefone.`

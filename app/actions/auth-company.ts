@@ -64,7 +64,7 @@ export async function registerCompany(data: CompanyRegistrationData) {
     verificationLink = verificationLink.replace('USER_ID_PLACEHOLDER', userId)
 
     // 3. Create Organization (Using Admin Client - RLS Bypass)
-    const { data: orgData, error: orgError } = await supabaseAdmin
+    const { data: orgData, error: orgError } = await (supabaseAdmin as any)
         .from("organizations")
         .insert({
             legal_name: data.legalName,
@@ -77,13 +77,11 @@ export async function registerCompany(data: CompanyRegistrationData) {
 
     if (orgError) {
         console.error("CRITICAL: Failed to create organization for new user", userId, orgError)
-        // Note: User is created but Org failed. Technically we should ideally rollback/delete user 
-        // but for now we report error.
         return { error: `Failed to create organization: ${orgError.message}` }
     }
 
     // 4. Create Organization Member (Owner)
-    const { error: memberError } = await supabaseAdmin
+    const { error: memberError } = await (supabaseAdmin as any)
         .from("organization_members")
         .insert({
             organization_id: orgData.id,
@@ -99,7 +97,7 @@ export async function registerCompany(data: CompanyRegistrationData) {
     // 5. Initialize verification tracking in profile (Consistency with individual flow)
     // Small delay to ensure triggers have run (if any)
     await new Promise(resolve => setTimeout(resolve, 1000))
-    await supabaseAdmin
+    await (supabaseAdmin as any)
         .from("profiles")
         .update({
             verification_attempts: 1,
@@ -110,7 +108,7 @@ export async function registerCompany(data: CompanyRegistrationData) {
 
     // 6. Send Custom Notification/Email
     try {
-        await NotificationServiceServer.triggerNotification("user_registered", {
+        await NotificationServiceServer.triggerNotification("company_registered", {
             userId: userId,
             userName: data.fullName || data.email.split("@")[0],
             userEmail: data.email,

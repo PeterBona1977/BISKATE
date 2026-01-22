@@ -75,7 +75,7 @@ interface DocumentsState {
 }
 
 export function EnhancedProviderOnboarding() {
-  const { user, profile, updateProfile } = useAuth()
+  const { user, profile, updateProfile, currentOrganization } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
 
@@ -158,6 +158,29 @@ export function EnhancedProviderOnboarding() {
         setCategories(categoriesData || [])
       }
 
+      // Check if user belongs to an organization (Company Registration flow)
+      if (currentOrganization && !profile?.is_provider) {
+        // Fetch full organization details
+        const { data: orgDetails } = await supabase
+          .from("organizations")
+          .select("*")
+          .eq("id", currentOrganization.id)
+          .single()
+
+        if (orgDetails) {
+          setFormData(prev => ({
+            ...prev,
+            providerType: "company",
+            companyName: (orgDetails as any).legal_name,
+            vatNumber: (orgDetails as any).vat_number,
+            address: (orgDetails as any).address || "",
+            commercialRegistryCode: (orgDetails as any).registry_code || "",
+            postalCode: (orgDetails as any).postal_code || "",
+            companyResponsible: (profile as any)?.full_name || ""
+          }))
+        }
+      }
+
       // Carregar dados existentes se já for prestador ou tiver alterações solicitadas
       if (profile?.is_provider || profile?.provider_status === 'changes_requested' || profile?.provider_status === 'pending') {
         const p = profile as any;
@@ -176,6 +199,7 @@ export function EnhancedProviderOnboarding() {
           providerType: p.provider_type || "individual",
           vatNumber: p.vat_number || "",
           companyName: p.company_name || "",
+          companyResponsible: p.company_responsible || "",
           commercialRegistryCode: p.commercial_registry_code || ""
         })
 
@@ -702,12 +726,18 @@ export function EnhancedProviderOnboarding() {
             <div className="space-y-2">
               <Label>Tipo de Prestador</Label>
               <div className="flex gap-4">
-                <div onClick={() => setFormData(prev => ({ ...prev, providerType: "individual" }))}
-                  className={`flex-1 p-4 border rounded-lg cursor-pointer transition-colors ${formData.providerType === "individual" ? "border-primary bg-primary/5" : "hover:bg-gray-50"}`}>
+                <div onClick={() => !currentOrganization && setFormData(prev => ({ ...prev, providerType: "individual" }))}
+                  className={`flex-1 p-4 border rounded-lg transition-colors ${formData.providerType === "individual"
+                    ? "border-primary bg-primary/5"
+                    : currentOrganization
+                      ? "opacity-50 cursor-not-allowed bg-gray-100"
+                      : "hover:bg-gray-50 cursor-pointer"
+                    }`}>
                   <div className="flex items-center gap-2 font-medium">
                     <User className="h-4 w-4" /> Individual
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">Trabalhador independente / Freelancer</p>
+                  {currentOrganization && <p className="text-[10px] text-red-500 mt-1">Registado como Empresa</p>}
                 </div>
                 <div onClick={() => setFormData(prev => ({ ...prev, providerType: "company" }))}
                   className={`flex-1 p-4 border rounded-lg cursor-pointer transition-colors ${formData.providerType === "company" ? "border-primary bg-primary/5" : "hover:bg-gray-50"}`}>
@@ -805,7 +835,7 @@ export function EnhancedProviderOnboarding() {
                     id="postalCode"
                     placeholder="Digite seu Código Postal ou Localidade"
                     value={formData.postalCode}
-                    onChange={(value) => setFormData(prev => ({ ...prev, postalCode: value, location: value }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value, location: e.target.value }))}
                     required
                   />
                   <p className="text-xs text-muted-foreground mt-1">

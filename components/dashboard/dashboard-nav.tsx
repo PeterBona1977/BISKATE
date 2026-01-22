@@ -59,10 +59,10 @@ const adminNavigation = [
   { nameKey: "adminSettings", href: "/admin/settings", icon: Settings },
 ]
 
-export function DashboardNav({ viewMode = "client" }: { viewMode?: "client" | "provider" }) {
+export function DashboardNav({ viewMode = "client" }: { viewMode?: "client" | "provider" | "organization" }) {
   const t = useTranslations("Navigation")
   const pathname = usePathname()
-  const { user, profile } = useAuth()
+  const { user, profile, currentOrganization } = useAuth()
 
   const isAdmin = profile?.role === "admin"
   const isProvider = (profile?.role === "provider" || profile?.is_provider === true) && profile?.provider_status === 'approved'
@@ -200,6 +200,71 @@ export function DashboardNav({ viewMode = "client" }: { viewMode?: "client" | "p
               </Link>
             )
           })}
+        </div>
+      )}
+
+      {/* Organization Mode */}
+      {viewMode === "organization" && currentOrganization && (
+        <div className="space-y-1">
+          <Link
+            href={`/dashboard/org/${currentOrganization.id}`}
+            className={cn(
+              "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+              pathname === `/dashboard/org/${currentOrganization.id}`
+                ? "bg-purple-100 text-purple-700"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            )}
+          >
+            <Building className={cn("mr-3 h-5 w-5 flex-shrink-0", pathname === `/dashboard/org/${currentOrganization.id}` ? "text-purple-500" : "text-gray-400")} />
+            Dashboard
+          </Link>
+          <Link
+            href={`/dashboard/org/${currentOrganization.id}/team`}
+            className={cn(
+              "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+              pathname?.includes("/team") ? "bg-purple-100 text-purple-700" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            )}
+          >
+            <Users className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
+            Equipa
+          </Link>
+          <Link
+            href={`/dashboard/org/${currentOrganization.id}/departments`}
+            className={cn(
+              "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+              pathname?.includes("/departments") ? "bg-purple-100 text-purple-700" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            )}
+          >
+            <Building className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
+            Departamentos
+          </Link>
+          <Link
+            href={`/dashboard/org/${currentOrganization.id}/settings`}
+            className={cn(
+              "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+              pathname?.includes("/settings") ? "bg-purple-100 text-purple-700" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            )}
+          >
+            <Settings className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
+            Configurações
+          </Link>
+
+
+          {/* Become Provider Link inside Organization if NOT YET Provider */}
+          {!isProvider && (
+            <Link
+              href="/dashboard/become-provider"
+              className={cn(
+                "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors mt-4",
+                pathname === "/dashboard/become-provider"
+                  ? "bg-indigo-100 text-indigo-700"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              )}
+            >
+              <Briefcase className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400" />
+              {t("becomeProvider") || "Tornar-se Prestador"}
+            </Link>
+          )}
         </div>
       )}
 
