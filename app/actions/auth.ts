@@ -87,3 +87,61 @@ export async function signUpUser(formData: FormData) {
 
     return { success: true }
 }
+
+export async function resendVerificationEmail(formData: FormData) {
+    const email = formData.get("email") as string
+
+    if (!email) {
+        return { error: "Email is required" }
+    }
+
+    const supabase = getSupabaseAdmin()
+
+    // 1. Generate new link (Magic Link acts as verification)
+    const isProduction = process.env.NODE_ENV === 'production';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    let redirectBase = 'http://localhost:3000';
+    if (isProduction) {
+        redirectBase = 'https://gighub.pages.dev';
+    } else if (appUrl && !appUrl.includes('localhost')) {
+        redirectBase = appUrl;
+    }
+
+    // We need to resolve the user ID to pass it correctly in the redirect URL if we want consistency
+    // But generateLink with magiclink returns the user object.
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+        type: "magiclink",
+        email,
+        options: {
+            redirectTo: redirectBase // We can handle the final destination in the dashboard or just let them in
+        }
+    })
+
+    if (linkError) {
+        // Don't reveal if user exists or not for security, but for now helpful error
+        console.error("Resend link error:", linkError)
+        return { error: "Erro ao gerar link. Verifique se o email está correto." }
+    }
+
+    const { user, properties } = linkData
+    const verificationLink = properties?.action_link
+
+    if (!user || !verificationLink) {
+        return { error: "Não foi possível gerar o link." }
+    }
+
+    // 2. Send Email
+    try {
+        await NotificationServiceServer.triggerNotification("verification_reminder", {
+            userId: user.id,
+            userName: user.user_metadata?.full_name || email.split("@")[0],
+            userEmail: email,
+            verification_link: verificationLink,
+        })
+    } catch (err) {
+        console.error("Failed to trigger resend notification:", err)
+        return { error: "Falha ao enviar email." }
+    }
+
+    return { success: true }
+}

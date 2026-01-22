@@ -70,7 +70,7 @@ export default function RegisterPage() {
         setSuccess(true)
         setLoading(false)
         setTimeout(() => {
-          router.push("/verify-email")
+          router.push(`/verify-email?email=${encodeURIComponent(email)}`)
         }, 2000)
       }
     } catch (err) {
@@ -112,7 +112,7 @@ export default function RegisterPage() {
         setSuccess(true)
         // Redirect to verification instead of resetting form
         setTimeout(() => {
-          router.push("/verify-email")
+          router.push(`/verify-email?email=${encodeURIComponent(companyEmail)}`)
         }, 1500)
       }
     } catch (err: any) {
