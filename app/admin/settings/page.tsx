@@ -20,7 +20,7 @@ export default function AdminSettingsPage() {
   const { profile } = useAuth()
 
   const [settings, setSettings] = useState({
-    site_name: "GigHub",
+    site_name: "Biskate",
     site_url: "https://gighub.com",
     site_description: "Plataforma de serviços freelance",
     maintenance_mode: false,
@@ -38,7 +38,7 @@ export default function AdminSettingsPage() {
         const data = await response.json()
         if (data.settings) {
           setSettings({
-            site_name: data.settings.site_name || "GigHub",
+            site_name: data.settings.site_name || "Biskate",
             site_url: data.settings.site_url || "",
             site_description: data.settings.site_description || "",
             maintenance_mode: data.settings.maintenance_mode || false,
@@ -118,7 +118,7 @@ export default function AdminSettingsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Configurações do Sistema</h1>
-          <p className="text-gray-500 mt-2">Configure as definições globais da plataforma GigHub.</p>
+          <p className="text-gray-500 mt-2">Configure as definições globais da plataforma Biskate.</p>
         </div>
         <Button onClick={handleSave} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
           {saving ? (

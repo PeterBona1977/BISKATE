@@ -112,7 +112,7 @@ export function AIConversation({ isOpen, onClose, onComplete }: AIConversationPr
         id: Date.now().toString(),
         role: "assistant",
         content:
-          "Olá! Sou o assistente do GigHub. Diga-me o que precisa e eu ajudo a preencher os dados. Por exemplo: 'Preciso de um eletricista em Lisboa para trocar uma tomada'",
+          "Olá! Sou o assistente do Biskate. Diga-me o que precisa e eu ajudo a preencher os dados. Por exemplo: 'Preciso de um eletricista em Lisboa para trocar uma tomada'",
         timestamp: new Date(),
       }
       setMessages([welcomeMessage])
@@ -364,7 +364,7 @@ export function AIConversation({ isOpen, onClose, onComplete }: AIConversationPr
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
-            GigHub Voice Assistant
+            Biskate Voice Assistant
           </DialogTitle>
           <DialogDescription>
             Use your voice to describe the gig you need. Our AI will help you fill out the details.

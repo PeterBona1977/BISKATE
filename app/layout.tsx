@@ -14,13 +14,13 @@ const inter = Inter({ subsets: ["latin"] })
 
 
 export const metadata: Metadata = {
-  title: "GigHub - Freelance Platform",
+  title: "Biskate - Freelance Platform",
   description: "Connect with skilled professionals for your projects",
   manifest: "/manifest.json",
   icons: {
-    icon: "/gighub-logo.png",
-    shortcut: "/gighub-logo.png",
-    apple: "/gighub-logo.png",
+    icon: "/biskate-logo.png",
+    shortcut: "/biskate-logo.png",
+    apple: "/biskate-logo.png",
   },
 }
 

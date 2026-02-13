@@ -36,7 +36,7 @@ export default function LegalLayout({
                         <Link href="/legal/terms" className="hover:text-white transition-colors">Terms of Service</Link>
                         <Link href="/legal/cookies" className="hover:text-white transition-colors">Cookie Policy</Link>
                     </div>
-                    <p className="text-xs">&copy; {new Date().getFullYear()} GigHub. All rights reserved.</p>
+                    <p className="text-xs">&copy; {new Date().getFullYear()} Biskate. All rights reserved.</p>
                 </div>
             </footer>
         </div>

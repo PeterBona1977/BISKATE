@@ -64,7 +64,7 @@ export function FeedbackForm() {
 
             toast({
                 title: "Feedback Submitted! 🎉",
-                description: "Thank you for helping us improve GigHub. Our team will review it shortly.",
+                description: "Thank you for helping us improve Biskate. Our team will review it shortly.",
             })
 
             // Trigger Admin Notification

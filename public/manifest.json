@@ -1,6 +1,6 @@
 {
-  "name": "GigHub - Services Platform",
-  "short_name": "GigHub",
+  "name": "Biskate - Services Platform",
+  "short_name": "Biskate",
   "description": "Connect with local service providers intelligently",
   "start_url": "/",
   "display": "standalone",
@@ -16,13 +16,13 @@
   "dir": "ltr",
   "icons": [
     {
-      "src": "/gighub-logo.png",
+      "src": "/biskate-logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/gighub-logo.png",
+      "src": "/biskate-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
@@ -52,7 +52,7 @@
       "url": "/dashboard/create-gig",
       "icons": [
         {
-          "src": "/gighub-logo.png",
+          "src": "/biskate-logo.png",
           "sizes": "96x96"
         }
       ]
@@ -64,7 +64,7 @@
       "url": "/dashboard/messages",
       "icons": [
         {
-          "src": "/gighub-logo.png",
+          "src": "/biskate-logo.png",
           "sizes": "96x96"
         }
       ]
@@ -76,7 +76,7 @@
       "url": "/dashboard/notifications",
       "icons": [
         {
-          "src": "/gighub-logo.png",
+          "src": "/biskate-logo.png",
           "sizes": "96x96"
         }
       ]

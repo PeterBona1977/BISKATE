@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
 
-    const title = searchParams.get("title") || "GigHub - Serviços Locais"
+    const title = searchParams.get("title") || "Biskate - Serviços Locais"
     const description = searchParams.get("description") || "Conecte-se com prestadores de serviços locais"
     const category = searchParams.get("category")
     const price = searchParams.get("price")
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
               color: "#0ea5e9",
             }}
           >
-            🚀 GigHub
+            🚀 Biskate
           </div>
           {category && (
             <div
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
             color: "#64748b",
           }}
         >
-          Serviços locais em Portugal • gighub.pt
+          Serviços locais em Portugal • biskate.pt
         </div>
       </div>,
       {

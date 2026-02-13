@@ -121,7 +121,7 @@ function wrapEmail(body: string, subject: string): string {
         <table class="main">
             <tr>
                 <td class="header">
-                    <h1>GigHub</h1>
+                    <h1>Biskate</h1>
                 </td>
             </tr>
             <tr>
@@ -136,8 +136,8 @@ function wrapEmail(body: string, subject: string): string {
                         <span>Twitter</span>
                         <span>Instagram</span>
                     </div>
-                    <p>&copy; ${new Date().getFullYear()} GigHub. Todos os direitos reservados.</p>
-                    <p>Enviado com ❤️ pela equipa GigHub</p>
+                    <p>&copy; ${new Date().getFullYear()} Biskate. Todos os direitos reservados.</p>
+                    <p>Enviado com ❤️ pela equipa Biskate</p>
                     <p>
                         <a href="mailto:support@biskate.eu">support@biskate.eu</a> | 
                         <a href="https://biskate.eu">biskate.eu</a>
@@ -240,23 +240,25 @@ export async function sendEmail({ to, templateName, variables }: SendEmailParams
 
         // 4. Send email
         const { data, error } = await resend.emails.send({
-            from: "GigHub <noreply@biskate.eu>",
-            to: [to],
+            from: "Biskate <noreply@biskate.eu>",
+            ...
+            if(trigger === 'company_registered') fallbackSubject = 'Confirmação de Registo Empresarial - Biskate';
+        to: [to],
             subject: subject,
-            html: finalHtml,
+                html: finalHtml,
         });
 
-        if (error) {
-            console.error("❌ Resend API Error:", error);
-            return { success: false, error };
-        }
-
-        console.log("✅ Resend API Success:", data);
-        return { success: true, data };
-    } catch (error) {
-        console.error("Failed to send email:", error);
+    if (error) {
+        console.error("❌ Resend API Error:", error);
         return { success: false, error };
     }
+
+    console.log("✅ Resend API Success:", data);
+    return { success: true, data };
+} catch (error) {
+    console.error("Failed to send email:", error);
+    return { success: false, error };
+}
 }
 
 /**
@@ -270,7 +272,7 @@ async function sendEmailWithContent({ to, subject, html }: { to: string, subject
         const finalHtml = wrapEmail(html, subject);
 
         const { data, error } = await resend.emails.send({
-            from: "GigHub <noreply@biskate.eu>",
+            from: "Biskate <noreply@biskate.eu>",
             to: [to],
             subject: subject,
             html: finalHtml,
@@ -319,7 +321,7 @@ export async function sendEmailByTrigger({
 
             // Fallback content logic
             let fallbackSubject = `Notification: ${trigger.replace(/_/g, ' ')}`;
-            let fallbackBody = `<h1>GigHub Notification</h1><p>Action: ${trigger}</p><p>Data:</p><ul>`;
+            let fallbackBody = `<h1>Biskate Notification</h1><p>Action: ${trigger}</p><p>Data:</p><ul>`;
 
             Object.entries(variables).forEach(([key, value]) => {
                 fallbackBody += `<li><strong>${key}:</strong> ${value}</li>`;
@@ -330,7 +332,7 @@ export async function sendEmailByTrigger({
             if (trigger.includes('application')) fallbackSubject = 'Nova Candidatura / Application Update';
             if (trigger.includes('feedback')) fallbackSubject = 'Novo Feedback Recebido';
             if (trigger.includes('response')) fallbackSubject = 'Atualização de Proposta / New Response';
-            if (trigger === 'company_registered') fallbackSubject = 'Confirmação de Registo Empresarial - GigHub';
+            if (trigger === 'company_registered') fallbackSubject = 'Confirmação de Registo Empresarial - Biskate';
 
             return sendEmailWithContent({ to, subject: fallbackSubject, html: fallbackBody });
         }

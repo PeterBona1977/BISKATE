@@ -135,7 +135,7 @@ export default function ProviderDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Torne-se um Prestador</CardTitle>
-            <CardDescription>Comece a oferecer os seus serviços na plataforma GigHub</CardDescription>
+            <CardDescription>Comece a oferecer os seus serviços na plataforma Biskate</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="mb-4">

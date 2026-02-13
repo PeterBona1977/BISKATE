@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
             if (error.code === 'PGRST116') {
                 return NextResponse.json({
                     settings: {
-                        site_name: "GigHub",
+                        site_name: "Biskate",
                         site_url: "https://gighub.com",
                         site_description: "Plataforma de serviços freelance",
                         maintenance_mode: false,

@@ -5,8 +5,8 @@ export default function PrivacyPage() {
             <p className="text-gray-500 text-sm">Last updated: {new Date().toLocaleDateString()}</p>
 
             <p>
-                At GigHub, accessible from our website, one of our main priorities is the privacy of our visitors.
-                This Privacy Policy document contains types of information that is collected and recorded by GigHub and how we use it.
+                At Biskate, accessible from our website, one of our main priorities is the privacy of our visitors.
+                This Privacy Policy document contains types of information that is collected and recorded by Biskate and how we use it.
             </p>
 
             <h2>1. Information We Collect</h2>
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
             </ul>
 
             <h2>4. Contact Us</h2>
-            <p>If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at support@gighub.com.</p>
+            <p>If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at support@biskate.pt.</p>
         </div>
     )
 }

@@ -13,7 +13,7 @@ export function CookieConsentBanner() {
 
     useEffect(() => {
         // Check if user has already accepted/declined
-        const consent = localStorage.getItem("gighub-cookie-consent")
+        const consent = localStorage.getItem("biskate-cookie-consent")
         if (!consent) {
             // Small delay for better UX on load
             const timer = setTimeout(() => setShowBanner(true), 1000)
@@ -22,12 +22,12 @@ export function CookieConsentBanner() {
     }, [])
 
     const handleAccept = () => {
-        localStorage.setItem("gighub-cookie-consent", "accepted")
+        localStorage.setItem("biskate-cookie-consent", "accepted")
         setShowBanner(false)
     }
 
     const handleDecline = () => {
-        localStorage.setItem("gighub-cookie-consent", "declined")
+        localStorage.setItem("biskate-cookie-consent", "declined")
         setShowBanner(false)
     }
 

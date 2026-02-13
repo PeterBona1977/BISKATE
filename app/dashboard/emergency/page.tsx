@@ -3,7 +3,7 @@ import { ClientEmergencyListView } from "@/components/dashboard/client-emergency
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-    title: "As Minhas Emergências | GigHub",
+    title: "As Minhas Emergências | Biskate",
     description: "Gerencie os seus pedidos de emergência e acompanhe em tempo real.",
 }
 

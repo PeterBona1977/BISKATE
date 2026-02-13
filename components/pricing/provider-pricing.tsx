@@ -150,7 +150,7 @@ export function ProviderPricing() {
       <div className="text-center">
         <h2 className="text-3xl font-bold">Provider Plans</h2>
         <p className="text-gray-600 mt-2">
-          Choose the ideal plan to grow your business on the GigHub platform
+          Choose the ideal plan to grow your business on the Biskate platform
         </p>
       </div>
 
@@ -164,12 +164,12 @@ export function ProviderPricing() {
             <CardHeader className="text-center pb-4">
               <div
                 className={`mx-auto mb-4 p-3 rounded-full ${plan.id === "biscateiro-free"
-                    ? "bg-gray-100"
-                    : plan.id === "biscateiro-pro"
-                      ? "bg-blue-100"
-                      : plan.id === "biscateiro-business"
-                        ? "bg-purple-100"
-                        : "bg-yellow-100"
+                  ? "bg-gray-100"
+                  : plan.id === "biscateiro-pro"
+                    ? "bg-blue-100"
+                    : plan.id === "biscateiro-business"
+                      ? "bg-purple-100"
+                      : "bg-yellow-100"
                   }`}
               >
                 {plan.icon}

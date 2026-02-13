@@ -68,7 +68,7 @@ export default function VerifyEmailPage() {
                     <div className="text-gray-600">
                         <p className="mb-2">
                             Por favor clique no link no email para verificar a sua conta.
-                            Uma vez verificada, poderá entrar e começar a usar o GigHub.
+                            Uma vez verificada, poderá entrar e começar a usar o Biskate.
                         </p>
                         {email && <p className="font-medium text-gray-900 mt-2">{email}</p>}
                     </div>

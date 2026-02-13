@@ -680,7 +680,7 @@ export function EnhancedProviderOnboarding() {
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold">Torne-se um Prestador GigHub</h1>
+        <h1 className="text-3xl font-bold">Torne-se um Prestador Biskate</h1>
         {providerStatus === 'rejected' && (
           <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200 max-w-2xl mx-auto flex items-start text-left">
             <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />

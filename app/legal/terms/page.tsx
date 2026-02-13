@@ -6,31 +6,31 @@ export default function TermsPage() {
 
             <h2>1. Introduction</h2>
             <p>
-                Welcome to GigHub! These terms of service outline the rules and regulations for the use of GigHub's Website.
-                By accessing this website we assume you accept these terms and conditions. Do not continue to use GigHub if you do not agree to take all of the terms and conditions stated on this page.
+                Welcome to Biskate! These terms of service outline the rules and regulations for the use of Biskate's Website.
+                By accessing this website we assume you accept these terms and conditions. Do not continue to use Biskate if you do not agree to take all of the terms and conditions stated on this page.
             </p>
 
             <h2>2. Cookies</h2>
             <p>
-                We employ the use of cookies. By accessing GigHub, you agreed to use cookies in agreement with the GigHub's Privacy Policy.
+                We employ the use of cookies. By accessing Biskate, you agreed to use cookies in agreement with the Biskate's Privacy Policy.
             </p>
 
             <h2>3. License</h2>
             <p>
-                Unless otherwise stated, GigHub and/or its licensors own the intellectual property rights for all material on GigHub.
-                All intellectual property rights are reserved. You may access this from GigHub for your own personal use subjected to restrictions set in these terms and conditions.
+                Unless otherwise stated, Biskate and/or its licensors own the intellectual property rights for all material on Biskate.
+                All intellectual property rights are reserved. You may access this from Biskate for your own personal use subjected to restrictions set in these terms and conditions.
             </p>
 
             <h2>4. User Content</h2>
             <p>
                 In these Website Standard Terms and Conditions, "Your Content" shall mean any audio, video text, images or other material you choose to display on this Website.
-                By displaying Your Content, you grant GigHub a non-exclusive, worldwide irrevocable, sub licensable license to use, reproduce, adapt, publish, translate and distribute it in any and all media.
+                By displaying Your Content, you grant Biskate a non-exclusive, worldwide irrevocable, sub licensable license to use, reproduce, adapt, publish, translate and distribute it in any and all media.
             </p>
 
             <h2>5. Limitation of Liability</h2>
             <p>
-                In no event shall GigHub, nor any of its officers, directors and employees, be held liable for anything arising out of or in any way connected with your use of this Website whether such liability is under contract.
-                GigHub, including its officers, directors and employees shall not be held liable for any indirect, consequential or special liability arising out of or in any way related to your use of this Website.
+                In no event shall Biskate, nor any of its officers, directors and employees, be held liable for anything arising out of or in any way connected with your use of this Website whether such liability is under contract.
+                Biskate, including its officers, directors and employees shall not be held liable for any indirect, consequential or special liability arising out of or in any way related to your use of this Website.
             </p>
 
             <h2>6. Contact Us</h2>

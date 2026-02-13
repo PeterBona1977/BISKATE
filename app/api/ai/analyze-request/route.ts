@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     const systemPrompt = `
-      You are the GigHub Voice Assistant, a helpful Portuguese/English speaking AI. 
+      You are the Biskate Voice Assistant, a helpful Portuguese/English speaking AI. 
       Your goal is to assist users in describing a gig (job/service) they need.
       
       BE HELPFUL AND CONCISE. Speak naturally, like a human assistant.

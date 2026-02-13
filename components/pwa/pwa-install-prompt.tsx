@@ -117,7 +117,7 @@ export function PWAInstallPrompt() {
                 <Download className="h-5 w-5 text-indigo-600" />
               </div>
               <div>
-                <CardTitle className="text-lg">Install GigHub</CardTitle>
+                <CardTitle className="text-lg">Install Biskate</CardTitle>
                 <Badge variant="secondary" className="text-xs">
                   PWA
                 </Badge>
@@ -131,7 +131,7 @@ export function PWAInstallPrompt() {
 
         <CardContent className="space-y-4">
           <CardDescription className="text-sm">
-            Install GigHub on your device for a faster and more convenient experience!
+            Install Biskate on your device for a faster and more convenient experience!
           </CardDescription>
 
           <div className="grid grid-cols-2 gap-3 text-xs">

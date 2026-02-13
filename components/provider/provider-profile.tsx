@@ -500,7 +500,7 @@ export function ProviderProfile() {
                         <Input
                           value={companyName}
                           onChange={(e) => setCompanyName(e.target.value)}
-                          placeholder="Ex: GigHub Solutions Lda"
+                          placeholder="Ex: Biskate Solutions Lda"
                         />
                       </div>
                       <div>

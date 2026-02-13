@@ -25,9 +25,9 @@ export function Logo({ className, size = "medium", href, ...props }: LogoProps) 
           sizeClasses[size],
         )}
       >
-        <img src="/gighub-logo.png" alt="GigHub" className="w-full h-full object-contain" />
+        <img src="/biskate-logo.png" alt="Biskate" className="w-full h-full object-contain" />
       </div>
-      <span className="font-bold text-gray-900 dark:text-white">GigHub</span>
+      <span className="font-bold text-gray-900 dark:text-white">Biskate</span>
     </div>
   )
 

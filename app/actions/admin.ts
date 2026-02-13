@@ -19,7 +19,7 @@ export async function createAdminUser(formData: {
         const supabase: any = getSupabaseAdmin()
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
             email: formData.email,
-            password: "GigHubTemporary123!", // Senha temporária padrão
+            password: "BiskateTemporary123!", // Senha temporária padrão
             email_confirm: true,
             user_metadata: {
                 full_name: formData.full_name,
@@ -296,7 +296,7 @@ export async function getPlatformSettings() {
                 return {
                     success: true,
                     settings: {
-                        site_name: "GigHub",
+                        site_name: "Biskate",
                         site_url: "https://gighub.com",
                         site_description: "Plataforma de serviços freelance",
                         maintenance_mode: false,

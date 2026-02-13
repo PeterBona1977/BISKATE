@@ -5,7 +5,7 @@ export default function CookiePolicyPage() {
             <p className="text-gray-500 text-sm">Last updated: {new Date().toLocaleDateString()}</p>
 
             <p>
-                This is the Cookie Policy for GigHub, accessible from our website.
+                This is the Cookie Policy for Biskate, accessible from our website.
             </p>
 
             <h2>What Are Cookies</h2>

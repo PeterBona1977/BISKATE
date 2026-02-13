@@ -81,7 +81,7 @@ export default async function JoinTeamPage({ searchParams }: { searchParams: { t
 
                     {isValid && !user && (
                         <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 text-sm text-yellow-800">
-                            Precisa de ter uma conta GigHub para aceitar este convite.
+                            Precisa de ter uma conta Biskate para aceitar este convite.
                         </div>
                     )}
                 </CardContent>

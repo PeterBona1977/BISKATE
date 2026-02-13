@@ -23,11 +23,11 @@ export class NotificationServiceServer {
                 message = `Olá ${data.userName}, por favor confirme o seu email usando o link enviado.`
                 break
             case "company_registered":
-                title = "Bem-vindo ao GigHub - Empresa"
-                message = `Olá ${data.userName}, bem-vindo ao GigHub! Confirme o email da sua empresa para começar.`
+                title = "Bem-vindo ao Biskate - Empresa"
+                message = `Olá ${data.userName}, bem-vindo ao Biskate! Confirme o email da sua empresa para começar.`
                 break
             case "welcome_email":
-                title = "Bem-vindo ao GigHub! 🎉"
+                title = "Bem-vindo ao Biskate! 🎉"
                 message = `A sua conta foi confirmada com sucesso. Já pode explorar a plataforma.`
                 break
             case "verification_reminder":
@@ -273,7 +273,7 @@ export class NotificationServiceServer {
                         gig_title: data.gigTitle || data.gig_title || "",
                         plan_name: data.planName || data.plan_name || "",
                         amount: data.amount || "0",
-                        platform_name: "GigHub",
+                        platform_name: "Biskate",
                         dashboard_link: `${process.env.NEXT_PUBLIC_APP_URL?.includes('localhost') ? process.env.NEXT_PUBLIC_APP_URL : (process.env.NEXT_PUBLIC_APP_URL || 'https://gighub.pages.dev')}/dashboard/provider`,
                         ...data
                     }
@@ -358,7 +358,7 @@ export class NotificationServiceServer {
                             user_email: data.userEmail || data.user_email || "",
                             plan_name: data.planName || data.plan_name || "",
                             amount: data.amount || "0",
-                            platform_name: "GigHub",
+                            platform_name: "Biskate",
                             ...data
                         }
                     }).catch(err =>

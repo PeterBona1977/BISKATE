@@ -22,7 +22,7 @@ export default function SupportPage() {
                             <BookOpen className="h-6 w-6 text-indigo-600" />
                         </div>
                         <h3 className="font-semibold text-lg">Documentation</h3>
-                        <p className="text-sm text-gray-500 mt-2">Learn how to use GigHub effectively</p>
+                        <p className="text-sm text-gray-500 mt-2">Learn how to use Biskate effectively</p>
                     </CardContent>
                 </Card>
 

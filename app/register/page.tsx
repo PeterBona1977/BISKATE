@@ -144,7 +144,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Criar Conta</CardTitle>
-          <CardDescription className="text-center">Junte-se à plataforma GigHub</CardDescription>
+          <CardDescription className="text-center">Junte-se à plataforma Biskate</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex border-b mb-6">
