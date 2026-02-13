@@ -18,9 +18,9 @@ export const metadata: Metadata = {
   description: "Connect with skilled professionals for your projects",
   manifest: "/manifest.json",
   icons: {
-    icon: "/biskate-logo.png",
-    shortcut: "/biskate-logo.png",
-    apple: "/biskate-logo.png",
+    icon: "/biskate-icon.png",
+    shortcut: "/biskate-icon.png",
+    apple: "/biskate-icon.png",
   },
 }
 
