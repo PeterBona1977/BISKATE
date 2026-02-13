@@ -18,7 +18,7 @@ export function Logo({ className, size = "medium", href, ...props }: LogoProps) 
   }
 
   const logoContent = (
-    <div className={cn("flex items-center space-x-2", className)} {...props}>
+    <div className={cn("flex items-center", className)} {...props}>
       <div
         className={cn(
           "bg-white rounded-lg flex items-center justify-center overflow-hidden",
@@ -27,7 +27,6 @@ export function Logo({ className, size = "medium", href, ...props }: LogoProps) 
       >
         <img src="/biskate-logo.png" alt="Biskate" className="w-full h-full object-contain" />
       </div>
-      <span className="font-bold text-gray-900 dark:text-white">Biskate</span>
     </div>
   )
 
