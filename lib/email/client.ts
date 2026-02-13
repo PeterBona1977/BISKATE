@@ -239,26 +239,25 @@ export async function sendEmail({ to, templateName, variables }: SendEmailParams
         const finalHtml = wrapEmail(html, subject);
 
         // 4. Send email
+        // 4. Send email
         const { data, error } = await resend.emails.send({
             from: "Biskate <noreply@biskate.eu>",
-            ...
-            if(trigger === 'company_registered') fallbackSubject = 'Confirmação de Registo Empresarial - Biskate';
-        to: [to],
+            to: [to],
             subject: subject,
-                html: finalHtml,
+            html: finalHtml,
         });
 
-    if (error) {
-        console.error("❌ Resend API Error:", error);
+        if (error) {
+            console.error("❌ Resend API Error:", error);
+            return { success: false, error };
+        }
+
+        console.log("✅ Resend API Success:", data);
+        return { success: true, data };
+    } catch (error) {
+        console.error("Failed to send email:", error);
         return { success: false, error };
     }
-
-    console.log("✅ Resend API Success:", data);
-    return { success: true, data };
-} catch (error) {
-    console.error("Failed to send email:", error);
-    return { success: false, error };
-}
 }
 
 /**
