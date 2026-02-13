@@ -72,7 +72,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Logo />
+              <Logo className="-my-8 relative z-10" />
             </div>
 
             <div className="flex items-center gap-4">
