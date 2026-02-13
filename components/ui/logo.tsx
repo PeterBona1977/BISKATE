@@ -12,9 +12,9 @@ interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Logo({ className, size = "medium", href, ...props }: LogoProps) {
   const sizeClasses = {
-    small: "w-10 h-10 text-sm",
-    medium: "w-14 h-14 text-base",
-    large: "w-20 h-20 text-lg",
+    small: "w-20 h-20 text-sm",
+    medium: "w-28 h-28 text-base",
+    large: "w-40 h-40 text-lg",
   }
 
   const logoContent = (
