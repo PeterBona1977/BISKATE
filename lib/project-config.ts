@@ -2,7 +2,7 @@
 export const PROJECT_CONFIG = {
   name: "Biskate",
   version: "1.0.0",
-  description: "Plataforma de gigs e serviços",
+  description: "Plataforma de serviços e biscates",
 
   // Configurações de autenticação
   auth: {

@@ -19,7 +19,7 @@
     "Navigation": {
         "overview": "Visão Geral",
         "emergencies": "Emergências",
-        "myGigs": "Meus Gigs",
+        "myGigs": "Meus Serviços",
         "messages": "Mensagens",
         "notifications": "Notificações",
         "clientProfile": "Perfil de Cliente",
@@ -28,13 +28,13 @@
         "settings": "Definições",
         "support": "Suporte",
         "providerDashboard": "Painel de Prestador",
-        "gigOpportunities": "Oportunidades de Gigs",
+        "gigOpportunities": "Oportunidades de Serviços",
         "providerProfile": "Perfil de Prestador",
         "billingAndPlans": "Faturação e Planos",
         "becomeProvider": "Tornar-se Prestador",
         "adminDashboard": "Painel de Admin",
         "users": "Utilizadores",
-        "gigs": "Gigs",
+        "gigs": "Serviços",
         "analytics": "Análise",
         "adminSettings": "Definições de Admin",
         "opportunities": "Oportunidades",
@@ -44,7 +44,7 @@
     "UserMenu": {
         "adminPanel": "Painel de Administração",
         "manageUsers": "Gerir Utilizadores",
-        "myWorks": "Meus Gigs",
+        "myWorks": "Meus Serviços",
         "myProfile": "Meu Perfil",
         "settings": "Definições",
         "logout": "Sair",
@@ -58,8 +58,8 @@
             "evening": "Boa noite"
         },
         "roleDesc": {
-            "admin": "Painel de administração da plataforma GigHub",
-            "provider": "Gira os seus gigs e trabalhos",
+            "admin": "Painel de administração da plataforma Biskate",
+            "provider": "Gira os seus serviços e trabalhos",
             "client": "Bem-vindo à sua área pessoal"
         },
         "emergency": "EMERGÊNCIA",
@@ -69,9 +69,9 @@
         },
         "quickActions": {
             "title": "Ações Rápidas",
-            "createGig": "Criar Gig",
+            "createGig": "Criar Serviço",
             "manageUsers": "Gerir Utilizadores",
-            "manageGigs": "Gerir Gigs",
+            "manageGigs": "Gerir Serviços",
             "analytics": "Análise",
             "myJobs": "Meus Trabalhos",
             "payments": "Pagamentos",
@@ -81,8 +81,8 @@
             "completeProfile": "Completar Perfil"
         },
         "stats": {
-            "totalGigs": "Total de Gigs",
-            "activeGigs": "Gigs Ativos",
+            "totalGigs": "Total de Serviços",
+            "activeGigs": "Serviços Ativos",
             "views": "Visualizações",
             "responseRate": "Taxa de Resposta"
         },
@@ -91,10 +91,10 @@
             "viewAll": "Ver Toda a Atividade"
         },
         "featured": {
-            "title": "Gigs em Destaque",
-            "noFound": "Nenhum gig encontrado",
-            "createFirst": "Criar Primeiro Gig",
-            "viewAll": "Ver Todos os Gigs"
+            "title": "Serviços em Destaque",
+            "noFound": "Nenhum serviço encontrado",
+            "createFirst": "Criar Primeiro Serviço",
+            "viewAll": "Ver Todos os Serviços"
         },
         "loading": "A carregar painel...",
         "roles": {
@@ -103,15 +103,15 @@
             "client": "Cliente"
         },
         "CreateGig": {
-            "pageTitle": "Criar Novo Gig",
-            "pageDescription": "Publique um gig para oferecer os seus serviços à comunidade.",
+            "pageTitle": "Criar Novo Serviço",
+            "pageDescription": "Publique um serviço para oferecer os seus serviços à comunidade.",
             "tabs": {
                 "manual": "Formulário Manual",
                 "ai": "Criar com IA"
             },
             "ai": {
-                "title": "Criar Gig com Assistente de IA",
-                "description": "Converse com o nosso assistente de IA para criar o seu gig de forma rápida e simples. O assistente irá fazer-lhe perguntas para recolher todas as informações necessárias.",
+                "title": "Criar Serviço com Assistente de IA",
+                "description": "Converse com o nosso assistente de IA para criar o seu serviço de forma rápida e simples. O assistente irá fazer-lhe perguntas para recolher todas as informações necessárias.",
                 "startBtn": "Iniciar Conversa com IA",
                 "helpText": "A IA irá ajudá-lo a definir título, descrição, categoria, preço, localização e tempo estimado.",
                 "analyzing": "Analisando...",
@@ -127,7 +127,7 @@
                 "categorySetTo": "Categoria definida para: {path}",
                 "success": "Serviço publicado!",
                 "successDesc": "Seu serviço foi criado e os prestadores correspondentes foram notificados.",
-                "errorCreating": "Erro ao criar gig"
+                "errorCreating": "Erro ao criar serviço"
             },
             "form": {
                 "formTitle": "Criar Novo Serviço",
@@ -182,12 +182,12 @@
             }
         },
         "MyGigs": {
-            "title": "Meus Gigs",
+            "title": "Meus Serviços",
             "subtitle": "Gerir os seus serviços",
-            "newGig": "Novo Gig",
-            "noGigs": "Ainda não criou nenhum gig",
+            "newGig": "Novo Serviço",
+            "noGigs": "Ainda não criou nenhum serviço",
             "createFirstDesc": "Crie o seu primeiro serviço",
-            "createFirstBtn": "Criar Primeiro Gig",
+            "createFirstBtn": "Criar Primeiro Serviço",
             "status": {
                 "active": "Ativo",
                 "completed": "Concluído",
@@ -209,8 +209,8 @@
                 "responses": "respostas"
             },
             "errors": {
-                "loadingTitle": "Erro ao carregar gigs",
-                "loadingDesc": "Não foi possível carregar os seus gigs."
+                "loadingTitle": "Erro ao carregar serviços",
+                "loadingDesc": "Não foi possível carregar os seus serviços."
             }
         },
         "Messages": {
@@ -268,7 +268,7 @@
         "Profile": {
             "Client": {
                 "title": "Perfil de Cliente",
-                "subtitle": "Gerencie as suas informações pessoais usadas ao publicar gigs.",
+                "subtitle": "Gerencie as suas informações pessoais usadas ao publicar serviços.",
                 "sections": {
                     "personalInfo": "Informações Pessoais",
                     "notifications": "Notificações"
@@ -397,9 +397,9 @@
             "updates": "Atualizações",
             "marketing": "Marketing & Novidades",
             "types": {
-                "gigApproved": "Gig aprovado",
+                "gigApproved": "Serviço aprovado",
                 "responseReceived": "Nova resposta recebida",
-                "newMatchingGigs": "Novos gigs compatíveis",
+                "newMatchingGigs": "Novos serviços compatíveis",
                 "responseAccepted": "Resposta aceite",
                 "profileViews": "Visualizações de perfil"
             }
@@ -458,28 +458,28 @@
     "Landing": {
         "welcomeBack": {
             "title": "Bem-vindo de volta!",
-            "subtitle": "Pronto para encontrar ou oferecer gigs?",
+            "subtitle": "Pronto para encontrar ou oferecer serviços?",
             "goAdmin": "Ir para Painel de Admin",
             "goDashboard": "Ir para Painel",
             "continue": "Continuar a navegar"
         },
         "hero": {
-            "badge": "🚀 A plataforma de gigs mais confiável do mundo",
+            "badge": "🚀 A plataforma de serviços mais confiável do mundo",
             "hero_title_main": "Encontre o <highlight>serviço perfeito</highlight> para cada necessidade",
             "subtitle": "Ligamos você a prestadores qualificados globalmente. Rápido, seguro e confiável.",
             "emergency": "Serviço de Emergência",
             "getStarted": "Começar Agora",
             "hasAccount": "Já tenho uma conta",
-            "createGig": "Criar Gig",
-            "browseGigs": "Explorar Gigs"
+            "createGig": "Criar Serviço",
+            "browseGigs": "Explorar Serviços"
         },
         "stats": {
-            "completed": "Gigs concluídos",
+            "completed": "Serviços concluídos",
             "activeProviders": "Prestadores ativos",
             "avgRating": "Avaliação média"
         },
         "features": {
-            "title": "Porquê escolher o GigHub?",
+            "title": "Porquê escolher o Biskate?",
             "subtitle": "Oferecemos a melhor experiência para ligar clientes e prestadores de serviços",
             "items": {
                 "instant": {
@@ -502,7 +502,7 @@
             "steps": {
                 "step1": {
                     "title": "Descreva o que precisa",
-                    "description": "Diga-nos que tipo de gig procura"
+                    "description": "Diga-nos que tipo de serviço procura"
                 },
                 "step2": {
                     "title": "Receba propostas",
@@ -516,7 +516,7 @@
         },
         "categories": {
             "title": "Categorias populares",
-            "subtitle": "Encontre o gig que precisa",
+            "subtitle": "Encontre o serviço que precisa",
             "items": {
                 "home": "Casa & Jardim",
                 "repairs": "Reparações",
@@ -528,17 +528,17 @@
         },
         "cta": {
             "title": "Pronto para começar?",
-            "userSubtitle": "Crie o seu primeiro gig ou encontre o que precisa",
-            "guestSubtitle": "Junte-se a milhares de pessoas que já confiam no GigHub",
+            "userSubtitle": "Crie o seu primeiro serviço ou encontre o que precisa",
+            "guestSubtitle": "Junte-se a milhares de pessoas que já confiam no Biskate",
             "createFreeAccount": "Criar Conta Grátis"
         }
     },
     "Footer": {
-        "description": "A plataforma que liga pessoas e gigs em todo o mundo.",
+        "description": "A plataforma que liga pessoas e serviços em todo o mundo.",
         "forClients": {
             "title": "Para Clientes",
             "howItWorks": "Como funciona",
-            "findGigs": "Encontrar gigs",
+            "findGigs": "Encontrar serviços",
             "security": "Segurança"
         },
         "forProviders": {
@@ -554,19 +554,19 @@
             "contact": "Contacto"
         },
         "legal": {
-            "copyright": "© 2024 GigHub. Todos os direitos reservados.",
+            "copyright": "© 2024 Biskate. Todos os direitos reservados.",
             "privacy": "Política de Privacidade",
             "terms": "Termos de Serviço",
             "cookies": "Política de Cookies"
         },
-        "copyright": "© 2024 GigHub. Todos os direitos reservados."
+        "copyright": "© 2024 Biskate. Todos os direitos reservados."
     },
     "Admin": {
         "Sidebar": {
             "menu": "Menu de Admin",
             "overview": "Visão Geral",
             "users": "Utilizadores",
-            "gigs": "Gigs",
+            "gigs": "Serviços",
             "providers": "Prestadores",
             "categories": "Categorias",
             "responses": "Respostas",
@@ -600,7 +600,7 @@
             },
             "stats": {
                 "totalUsers": "Total de Utilizadores",
-                "activeGigs": "Gigs Ativos",
+                "activeGigs": "Serviços Ativos",
                 "responses": "Respostas",
                 "premiumUsers": "Utilizadores Premium",
                 "activeUsers": "Utilizadores Ativos",
@@ -608,15 +608,15 @@
             },
             "cards": {
                 "registeredUsers": "Utilizadores registados",
-                "publishedGigs": "Gigs publicados",
-                "gigResponses": "Respostas a gigs",
+                "publishedGigs": "Serviços publicados",
+                "gigResponses": "Respostas a serviços",
                 "usersWithPaidPlans": "Utilizadores com planos pagos",
                 "regularUsers": "Utilizadores regulares",
                 "pendingReview": "Revisão pendente",
                 "usersDesc": "Gerir contas e permissões de utilizadores",
                 "manageUsers": "Gerir Utilizadores",
-                "gigsDesc": "Moderar e gerir todos os gigs na plataforma",
-                "manageGigs": "Gerir Gigs",
+                "gigsDesc": "Moderar e gerir todos os serviços na plataforma",
+                "manageGigs": "Gerir Serviços",
                 "categoriesDesc": "Gerir hierarquia de categorias e serviços",
                 "manageCategories": "Gerir Categorias",
                 "analyticsDesc": "Relatórios e análise de dados da plataforma",
@@ -716,7 +716,7 @@
             "editDescription": "Atualize o nome e descrição do produto no Stripe. Para alterar o preço, arquive este e crie um novo.",
             "form": {
                 "name": "Nome do Plano",
-                "namePlaceholder": "Ex: GigHub Pro",
+                "namePlaceholder": "Ex: Biskate Pro",
                 "price": "Preço (€)",
                 "interval": "Intervalo",
                 "description": "Descrição",
