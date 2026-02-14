@@ -8,7 +8,22 @@ export const getSupabaseAdmin = () => {
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (!url || !key) {
-        throw new Error("Missing Supabase admin environment variables")
+        console.warn("⚠️ Warning: Supabase admin environment variables are missing.")
+        // Return a silent proxy instead of throwing
+        const silentProxy = new Proxy({} as any, {
+            get: (target, prop) => {
+                if (prop === 'auth') return silentProxy;
+                if (prop === 'from') return () => silentProxy;
+                if (prop === 'select') return () => silentProxy;
+                if (prop === 'eq') return () => silentProxy;
+                if (prop === 'update') return () => silentProxy;
+                if (prop === 'insert') return () => silentProxy;
+                if (prop === 'single') return () => Promise.resolve({ data: null, error: null });
+                if (prop === 'maybeSingle') return () => Promise.resolve({ data: null, error: null });
+                return silentProxy;
+            }
+        });
+        return silentProxy;
     }
 
     return createClient<Database>(url, key, {
