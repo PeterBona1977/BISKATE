@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Users, Briefcase, AlertTriangle, FileText, Settings, Database, Activity } from "lucide-react"
-import { UsersManagementComplete } from "@/components/admin/users-management-complete"
+import { UsersManagement } from "@/components/admin/users-management"
 import { GigsManagementComplete } from "@/components/admin/gigs-management-complete"
 import { CMSManagement } from "@/components/admin/cms-management"
 import { SystemOverview } from "@/components/admin/system-overview"
@@ -56,7 +56,7 @@ export default function CompleteSystemPage() {
           </TabsContent>
 
           <TabsContent value="users">
-            <UsersManagementComplete />
+            <UsersManagement />
           </TabsContent>
 
           <TabsContent value="gigs">

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ModerationAlertsFixed } from "@/components/admin/moderation-alerts-fixed"
+import { ModerationAlerts } from "@/components/admin/moderation-alerts"
 import { PageLoading } from "@/components/ui/page-loading"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
@@ -82,7 +82,7 @@ export default function AdminModerationPage() {
         <p className="text-gray-500 mt-2">Revise e modere conteúdo sinalizado na plataforma.</p>
       </div>
 
-      {isAdmin && <ModerationAlertsFixed />}
+      {isAdmin && <ModerationAlerts />}
     </div>
   )
 }
