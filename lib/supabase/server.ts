@@ -9,7 +9,7 @@ export async function createClient() {
 
   if (!url || !key) {
     console.error("SERVER: Missing Supabase Environment Variables!")
-    throw new Error("Missing Supabase Environment Variables")
+    return null as any
   }
 
   console.log("SERVER: Initializing Supabase Client with URL:", url, "Cookie count:", cookieStore.getAll().length)

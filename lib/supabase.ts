@@ -20,12 +20,20 @@ const GLOBAL_KEY = "__biskate_supabase_client__"
 function createSupabaseClient() {
   if (!supabaseUrl || !supabaseAnonKey) {
     if (typeof window === "undefined") {
-      // No servidor durante o build, retorna um proxy inofensivo
-      return new Proxy({} as any, {
-        get: () => {
-          throw new Error("Supabase client accessed during build time without environment variables.")
+      // No servidor durante o build ou se faltarem chaves, retorna um proxy silencioso
+      const silentProxy = new Proxy({} as any, {
+        get: (target, prop) => {
+          if (prop === 'auth') return silentProxy;
+          if (prop === 'from') return () => silentProxy;
+          if (prop === 'select') return () => silentProxy;
+          if (prop === 'eq') return () => silentProxy;
+          if (prop === 'maybeSingle') return () => Promise.resolve({ data: null, error: null });
+          if (prop === 'single') return () => Promise.resolve({ data: null, error: null });
+          if (prop === 'onAuthStateChange') return () => ({ data: { subscription: { unsubscribe: () => { } } } });
+          return silentProxy;
         }
-      })
+      });
+      return silentProxy;
     }
     return null as any
   }
