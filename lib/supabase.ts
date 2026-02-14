@@ -18,6 +18,18 @@ const GLOBAL_KEY = "__biskate_supabase_client__"
 
 // Função para criar o cliente apenas uma vez
 function createSupabaseClient() {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    if (typeof window === "undefined") {
+      // No servidor durante o build, retorna um proxy inofensivo
+      return new Proxy({} as any, {
+        get: () => {
+          throw new Error("Supabase client accessed during build time without environment variables.")
+        }
+      })
+    }
+    return null as any
+  }
+
   return createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: true,
@@ -41,17 +53,22 @@ function createSupabaseClient() {
 // Garantir uma única instância global usando uma chave específica
 const getSupabaseClient = () => {
   if (typeof window === "undefined") {
-    // No servidor, sempre criar uma nova instância
+    // No servidor, sempre criar uma nova instância (ou o proxy de build)
     return createSupabaseClient()
   }
 
   // No cliente, usar a instância global com chave específica
   if (!(globalThis as any)[GLOBAL_KEY]) {
-    ;(globalThis as any)[GLOBAL_KEY] = createSupabaseClient()
+    const client = createSupabaseClient()
+    if (client) {
+      ; (globalThis as any)[GLOBAL_KEY] = client
 
-    // Debug apenas em desenvolvimento
-    if (typeof window !== "undefined" && window.location.hostname === "localhost") {
-      console.log("🔧 Supabase client created:", GLOBAL_KEY)
+      // Debug apenas em desenvolvimento
+      if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+        console.log("🔧 Supabase client created:", GLOBAL_KEY)
+      }
+    } else {
+      return null as any
     }
   }
 
