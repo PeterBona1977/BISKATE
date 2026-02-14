@@ -52,14 +52,17 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
     const fetchData = async () => {
         setLoading(true)
         try {
-            // Fetch all hierarchy data
-            const { data: catData } = await supabase.from("categories").select("id, name").order("name")
-            const { data: subData } = await supabase.from("subcategories").select("*").order("name")
-            const { data: servData } = await supabase.from("services").select("*").order("name")
+            // Fetch ALL categories as they now contain the 3 levels (recursive parent_id)
+            const { data: allData, error } = await supabase
+                .from("categories")
+                .select("id, name, parent_id, description")
+                .eq("is_active", true)
 
-            if (catData && subData) {
-                // Filter categories: Only show those that have at least one subcategory
-                // AND are in our explicit allowlist of Main Categories to avoid legacy clutter
+            if (error) throw error
+
+            if (allData) {
+                // Filter Categories (Level 1): Only show those with parent_id null
+                // AND are in our explicit allowlist
                 const ALLOWED_CATEGORIES = [
                     "AULAS",
                     "CASA",
@@ -69,18 +72,27 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                     "OUTROS"
                 ]
 
-                const parentIds = new Set(subData.map(s => s.category_id))
+                const level1 = allData.filter(c =>
+                    c.parent_id === null &&
+                    ALLOWED_CATEGORIES.some(allowed =>
+                        c.name.toUpperCase() === allowed || c.name.toUpperCase().includes(allowed)
+                    )
+                ).sort((a, b) => a.name.localeCompare(b.name))
 
-                const validCategories = catData.filter(c =>
-                    // Case insensitive check
-                    parentIds.has(c.id) && ALLOWED_CATEGORIES.some(allowed => c.name.toUpperCase() === allowed || c.name.toUpperCase().includes(allowed))
-                )
+                // Level 2: Subcategories (categories whose parent is a Level 1)
+                const level1Ids = new Set(level1.map(c => c.id))
+                const level2 = allData.filter(c => c.parent_id && level1Ids.has(c.parent_id))
+                    .sort((a, b) => a.name.localeCompare(b.name))
 
-                setCategories(validCategories)
+                // Level 3: Services (categories whose parent is a Level 2)
+                const level2Ids = new Set(level2.map(c => c.id))
+                const level3 = allData.filter(c => c.parent_id && level2Ids.has(c.parent_id))
+                    .sort((a, b) => a.name.localeCompare(b.name))
+
+                setCategories(level1)
+                setSubcategories(level2 as any) // Keep name 'subcategories' for minimal UI impact
+                setServices(level3 as any)      // Keep name 'services' for minimal UI impact
             }
-            // if (catData) setCategories(catData) // Removed simple set
-            if (subData) setSubcategories(subData)
-            if (servData) setServices(servData)
         } catch (error) {
             console.error("Error fetching service data:", error)
         } finally {
@@ -89,12 +101,13 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
     }
 
     // Filter based on hierarchy and search
+    // We map parent_id to identify children
     const filteredSubcategories = activeCategory
-        ? subcategories.filter((s) => s.category_id === activeCategory)
+        ? subcategories.filter((s: any) => s.parent_id === activeCategory)
         : []
 
     const filteredServices = activeSubcategory
-        ? services.filter((s) => s.subcategory_id === activeSubcategory)
+        ? services.filter((s: any) => s.parent_id === activeSubcategory)
         : []
 
     // Global search (if query exists, override hierarchy view for results)

@@ -121,7 +121,7 @@ export function EnhancedProviderOnboarding() {
     if (selectedServices.length > 0) {
       const fetchServiceDetails = async () => {
         const { data } = await supabase
-          .from("services")
+          .from("categories")
           .select("id, name")
           .in("id", selectedServices)
 
