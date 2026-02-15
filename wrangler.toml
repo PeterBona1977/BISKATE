@@ -8,7 +8,7 @@ pages_build_output_dir = ".vercel/output/static"
 NEXT_PUBLIC_SUPABASE_URL = "https://dhwsocpykhexdvdfyfwd.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRod3NvY3B5a2hleGR2ZGZ5ZndkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5NDI1NTksImV4cCI6MjA4MjUxODU1OX0.ijkdk5di_maqJGzAoVIDwae7w3SbRBgNulOW0z_bI6A"
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY = "AIzaSyDqEI4PK4Hp1mnaex46aKl6-n3d-7EiRKQ"
-NEXT_PUBLIC_APP_URL = "https://gighub.pages.dev"
+NEXT_PUBLIC_APP_URL = "https://biskate.eu"
 SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRod3NvY3B5a2hleGR2ZGZ5ZndkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Njk0MjU1OSwiZXhwIjoyMDgyNTE4NTU5fQ.ukjctcvfVfKM8i_-OkWo8KXVj5q3c8sC6JhVaHNXJEk"
 RESEND_API_KEY = "re_VkrMrsbh_8TYSoKyf3ABKT9UmhhPJ2jJd"
 # Primary Gemini Key
