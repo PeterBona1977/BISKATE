@@ -33,44 +33,48 @@ export async function POST(request: NextRequest) {
                 .join("\n")
         }
 
-        // 2. Initialize Gemini
-        const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+        // 2. Initialize Gemini - The Nuclear Option (Dual Key + Multi Model)
+        const keys = [
+            process.env.GEMINI_API_KEY,
+            process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+            process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+        ].filter(Boolean) as string[]
 
-        if (!apiKey) {
-            console.error("CRITICAL: Missing GEMINI API KEY in environment variables")
-            return NextResponse.json({ error: "Configuration Error: Missing AI API Key on Server" }, { status: 500 })
+        if (keys.length === 0) {
+            console.error("CRITICAL: No AI API keys found in environment")
+            return NextResponse.json({ error: "Configuration Error: No AI API keys found" }, { status: 500 })
         }
 
-        // Safe logging for debugging environment issues
-        console.log(`[AI_DEBUG] Using API Key starting with: ${apiKey.substring(0, 6)}...`)
-
-        const genAI = new GoogleGenerativeAI(apiKey)
-
-        // Try multiple model IDs as aliases vary across accounts/regions
-        const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.0-pro", "gemini-1.5-flash-latest"]
         let model = null
         let lastError = null
 
-        for (const name of modelNames) {
-            try {
-                console.log(`[AI_DEBUG] Attempting to use model: ${name}`)
-                // Use default version first, then try explicitly
-                const tempModel = genAI.getGenerativeModel({ model: name })
-                // Test the model with a minimal prompt to ensure it actually exists and works
-                await tempModel.generateContent({ contents: [{ role: 'user', parts: [{ text: 'ping' }] }] })
-                model = tempModel
-                console.log(`[AI_DEBUG] Successfully initialized model: ${name}`)
-                break
-            } catch (err: any) {
-                console.warn(`[AI_DEBUG] Model ${name} failed: ${err.message}`)
-                lastError = err
+        const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-flash-latest", "gemini-1.0-pro"]
+
+        for (const apiKey of keys) {
+            const genAI = new GoogleGenerativeAI(apiKey)
+
+            for (const name of modelNames) {
+                try {
+                    console.log(`[AI_DEBUG] Testing Key ${apiKey.substring(0, 6)}... with model ${name}`)
+                    // Explicitly try v1 first
+                    const tempModel = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' })
+                    // Test connection
+                    await tempModel.generateContent("ping")
+                    model = tempModel
+                    console.log(`[AI_DEBUG] Success! Using Key ${apiKey.substring(0, 6)}... and model ${name}`)
+                    break
+                } catch (err: any) {
+                    console.warn(`[AI_DEBUG] Failed (${apiKey.substring(0, 6)} / ${name}): ${err.message}`)
+                    lastError = err
+                }
             }
+            if (model) break
         }
 
         if (!model) {
-            console.error("CRITICAL: No supported Gemini models found for this API key.")
+            console.error("CRITICAL: All AI connection attempts failed.")
             return NextResponse.json({
-                error: `Internal Server Error: No supported AI models found. Last error: ${lastError?.message || "Unknown"}`
+                error: `Internal Server Error: No AI connection successful. Last error: ${lastError?.message || "Unknown"}`
             }, { status: 500 })
         }
 

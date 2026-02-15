@@ -17,37 +17,37 @@ export class CategorySuggestionService {
     private static genAI: GoogleGenerativeAI | null = null
 
     /**
-     * Initialize the Gemini AI client
-     */
-    private static getAI(): GoogleGenerativeAI {
-        if (!this.genAI) {
-            const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-            if (!apiKey) {
-                throw new Error("GEMINI_API_KEY is not configured")
-            }
-            this.genAI = new GoogleGenerativeAI(apiKey)
-        }
-        return this.genAI
-    }
-
-    /**
-     * Get a working model instance
+     * Get a working model instance - The Nuclear Option
      */
     private static async getModelInstance(): Promise<any> {
-        const genAI = this.getAI()
-        const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.0-pro", "gemini-1.5-flash-latest"]
+        const keys = [
+            process.env.GEMINI_API_KEY,
+            process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+            process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+        ].filter(Boolean) as string[]
 
-        for (const name of modelNames) {
-            try {
-                const model = genAI.getGenerativeModel({ model: name })
-                // Test the model
-                await model.generateContent({ contents: [{ role: 'user', parts: [{ text: 'hi' }] }] })
-                return model
-            } catch (e) {
-                console.warn(`[AI_DEBUG] Model ${name} failed in category-service:`, e)
+        if (keys.length === 0) throw new Error("No AI API keys configured")
+
+        const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-flash-latest", "gemini-1.0-pro"]
+        let lastError = null
+
+        for (const apiKey of keys) {
+            const genAI = new GoogleGenerativeAI(apiKey)
+            for (const name of modelNames) {
+                try {
+                    console.log(`[AI_DEBUG] category-service: Testing Key ${apiKey.substring(0, 6)}... with model ${name}`)
+                    const model = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' })
+                    // Test connection
+                    await model.generateContent("ping")
+                    console.log(`[AI_DEBUG] category-service: Success with model ${name}`)
+                    return model
+                } catch (e) {
+                    console.warn(`[AI_DEBUG] category-service: Failed (${apiKey.substring(0, 6)} / ${name}):`, e)
+                    lastError = e
+                }
             }
         }
-        throw new Error("No supported Gemini models found")
+        throw lastError || new Error("No supported Gemini models found")
     }
 
     /**

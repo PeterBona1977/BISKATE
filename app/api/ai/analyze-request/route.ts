@@ -4,25 +4,36 @@ export const runtime = "edge"
 export const dynamic = "force-dynamic"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
-// Setup Gemini
+// Setup Gemini - The Nuclear Option
 const getModel = async () => {
-  const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  if (!apiKey) throw new Error("Missing Google AI API Key")
+  const keys = [
+    process.env.GEMINI_API_KEY,
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  ].filter(Boolean) as string[]
 
-  const genAI = new GoogleGenerativeAI(apiKey)
-  const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.0-pro", "gemini-1.5-flash-latest"]
+  if (keys.length === 0) throw new Error("No AI API keys found")
 
-  for (const name of modelNames) {
-    try {
-      const model = genAI.getGenerativeModel({ model: name })
-      // Test the model with a minimal prompt
-      await model.generateContent({ contents: [{ role: 'user', parts: [{ text: 'hi' }] }] })
-      return model
-    } catch (e) {
-      console.warn(`[AI_DEBUG] Model ${name} failed in analyze-request:`, e)
+  const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-flash-latest", "gemini-1.0-pro"]
+  let lastError = null
+
+  for (const apiKey of keys) {
+    const genAI = new GoogleGenerativeAI(apiKey)
+    for (const name of modelNames) {
+      try {
+        console.log(`[AI_DEBUG] analyze-request: Testing key ${apiKey.substring(0, 6)}... with model ${name}`)
+        const model = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' })
+        // Test the model with a minimal prompt
+        await model.generateContent("ping")
+        console.log(`[AI_DEBUG] analyze-request: Success with model ${name}`)
+        return model
+      } catch (e) {
+        console.warn(`[AI_DEBUG] analyze-request: Failed (${apiKey.substring(0, 6)} / ${name}):`, e)
+        lastError = e
+      }
     }
   }
-  throw new Error("No supported Gemini models found")
+  throw lastError || new Error("No supported Gemini models found")
 }
 
 interface AnalysisResult {
