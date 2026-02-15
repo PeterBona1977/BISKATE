@@ -1,0 +1,119 @@
+Found 3 keys to test.
+
+Testing Key: AIzaSyDtxL...
+❌ ListModels Failed: 403 Forbidden
+   Response: {
+  "error": {
+    "code": 403,
+    "message": "Your API key was reported as leaked. Please use another API key.",
+    "status": "PERMISSION_DENIED"
+  }
+}
+...
+❌ FAILED: [gemini-1.5-flash] [v1] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available models an...
+❌ FAILED: [gemini-1.5-flash] [v1beta] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available model...
+❌ FAILED: [gemini-pro] [v1] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-pro is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available models and thei...
+❌ FAILED: [gemini-pro] [v1beta] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and ...
+❌ FAILED: [gemini-1.5-flash-latest] [v1] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash-latest is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available mo...
+❌ FAILED: [gemini-1.5-flash-latest] [v1beta] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of availabl...
+
+Testing Key: AIzaSyDtxL...
+❌ ListModels Failed: 403 Forbidden
+   Response: {
+  "error": {
+    "code": 403,
+    "message": "Your API key was reported as leaked. Please use another API key.",
+    "status": "PERMISSION_DENIED"
+  }
+}
+...
+❌ FAILED: [gemini-1.5-flash] [v1] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available models an...
+❌ FAILED: [gemini-1.5-flash] [v1beta] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available model...
+❌ FAILED: [gemini-pro] [v1] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-pro is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available models and thei...
+❌ FAILED: [gemini-pro] [v1beta] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and ...
+❌ FAILED: [gemini-1.5-flash-latest] [v1] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash-latest is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available mo...
+❌ FAILED: [gemini-1.5-flash-latest] [v1beta] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of availabl...
+
+Testing Key: AIzaSyDqEI...
+✅ ListModels Success. Found 44 models.
+   Available: models/gemini-2.5-flash, models/gemini-2.5-pro, models/gemini-2.0-flash, models/gemini-2.0-flash-001, models/gemini-2.0-flash-lite-001, models/gemini-2.0-flash-lite, models/gemini-exp-1206, models/gem...
+❌ FAILED: [gemini-1.5-flash] [v1] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available models an...
+❌ FAILED: [gemini-1.5-flash] [v1beta] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available model...
+❌ FAILED: [gemini-pro] [v1] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-pro is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available models and thei...
+❌ FAILED: [gemini-pro] [v1beta] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and ...
+❌ FAILED: [gemini-1.5-flash-latest] [v1] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash-latest is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available mo...
+❌ FAILED: [gemini-1.5-flash-latest] [v1beta] Status: 404 Not Found
+   Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of availabl...
+
+All attempts finished.

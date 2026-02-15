@@ -21,7 +21,13 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
         process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     ].filter(Boolean) as string[]
 
-    const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-flash-latest"]
+    const modelNames = [
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-001",
+        "gemini-flash-latest",
+        "gemini-pro-latest",
+        "gemini-1.5-flash" // Fallback
+    ]
     const apiVersions = ["v1", "v1beta"]
 
     let lastError = null
@@ -43,9 +49,14 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
                             cachedConfig = { apiKey, model: name, apiVersion: ver }
                             return cachedConfig
                         }
+                    } else {
+                        const errorText = await res.text()
+                        lastError = new Error(`Gemini API Error [${name}/${ver}]: ${res.status} ${res.statusText} - ${errorText}`)
+                        console.warn(`Attempt failed: ${lastError.message}`)
                     }
                 } catch (err: any) {
                     lastError = err
+                    console.warn(`Connection error [${name}/${ver}]:`, err)
                 }
             }
         }
