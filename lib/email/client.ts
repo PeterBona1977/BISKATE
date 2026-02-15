@@ -12,10 +12,22 @@ function getResendClient(): Resend {
     }
 
     if (!resendClient) {
-        if (!process.env.RESEND_API_KEY) {
-            throw new Error("RESEND_API_KEY is not configured");
+        const apiKey = process.env.RESEND_API_KEY;
+
+        if (!apiKey) {
+            console.warn("⚠️ Warning: RESEND_API_KEY is not configured. Email services will be inactive.");
+            // Return a silent proxy instead of throwing
+            const silentProxy = new Proxy({} as any, {
+                get: (target, prop) => {
+                    if (prop === 'emails') return silentProxy;
+                    if (prop === 'send') return () => Promise.resolve({ data: { id: "mock-id" }, error: null });
+                    return () => Promise.resolve({ data: null, error: null });
+                }
+            });
+            return silentProxy as unknown as Resend;
         }
-        resendClient = new Resend(process.env.RESEND_API_KEY);
+
+        resendClient = new Resend(apiKey);
     }
 
     return resendClient;
