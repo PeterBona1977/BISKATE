@@ -13,14 +13,18 @@ function getResendClient(): Resend {
 
     if (!resendClient) {
         const apiKey = process.env.RESEND_API_KEY;
+        console.log(`[EMAIL_DEBUG] 🚀 Initializing Resend client. Key present: ${!!apiKey}`);
 
         if (!apiKey) {
-            console.warn("⚠️ Warning: RESEND_API_KEY is not configured. Email services will be inactive.");
+            console.warn("⚠️ [EMAIL_DEBUG] Warning: RESEND_API_KEY is not configured. Email services will be inactive.");
             // Return a silent proxy instead of throwing
             const silentProxy = new Proxy({} as any, {
                 get: (target, prop) => {
                     if (prop === 'emails') return silentProxy;
-                    if (prop === 'send') return () => Promise.resolve({ data: { id: "mock-id" }, error: null });
+                    if (prop === 'send') return () => {
+                        console.log("[EMAIL_DEBUG] 🔇 Silent proxy 'send' called");
+                        return Promise.resolve({ data: { id: "mock-id" }, error: null });
+                    };
                     return () => Promise.resolve({ data: null, error: null });
                 }
             });
@@ -28,6 +32,7 @@ function getResendClient(): Resend {
         }
 
         resendClient = new Resend(apiKey);
+        console.log("[EMAIL_DEBUG] ✅ Resend client initialized successfully");
     }
 
     return resendClient;

@@ -17,8 +17,10 @@ export async function signUpUser(formData: FormData) {
 
     const isProduction = process.env.NODE_ENV === 'production';
     const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    console.log(`[SIGNUP_DEBUG] 🚀 Nucleus registration start: ${email}`);
     console.log(`[SIGNUP_DEBUG] NODE_ENV: ${process.env.NODE_ENV}`);
     console.log(`[SIGNUP_DEBUG] NEXT_PUBLIC_APP_URL: ${appUrl}`);
+    console.log(`[SIGNUP_DEBUG] SERVICE_ROLE_KEY present: ${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`);
 
     // Force specific logic for debugging
     let redirectBase = 'http://localhost:3000';
@@ -58,6 +60,7 @@ export async function signUpUser(formData: FormData) {
 
     // Replace the placeholder with the actual userId
     verificationLink = verificationLink.replace('USER_ID_PLACEHOLDER', user.id)
+    console.log(`[SIGNUP_DEBUG] Generated Action Link for ${user.id}: ${verificationLink.substring(0, 50)}...`);
 
     // 2. Initialize verification tracking in the profile
     // Small delay to allow trigger to create the profile
@@ -132,12 +135,14 @@ export async function resendVerificationEmail(formData: FormData) {
 
     // 2. Send Email
     try {
+        console.log(`[RESEND_ACTION_DEBUG] 🚀 Triggering notification for ${user.id}`);
         await NotificationServiceServer.triggerNotification("verification_reminder", {
             userId: user.id,
             userName: user.user_metadata?.full_name || email.split("@")[0],
             userEmail: email,
             verification_link: verificationLink,
         })
+        console.log(`[RESEND_ACTION_DEBUG] ✅ Notification triggered successfully`);
     } catch (err) {
         console.error("Failed to trigger resend notification:", err)
         return { error: "Falha ao enviar email." }

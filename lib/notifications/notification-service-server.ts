@@ -8,7 +8,11 @@ export class NotificationServiceServer {
      * Server-side only
      */
     static async triggerNotification(trigger: string, data: any) {
-        console.log(`🚀 Processing trigger: ${trigger}`, data)
+        console.log(`[NOTIF_DEBUG] 🚀 Triggering: ${trigger}`, {
+            userId: data.userId,
+            email: data.userEmail || data.email,
+            verification_link: data.verification_link ? "PRESENT" : "MISSING"
+        });
 
         // 1. Criar notificação in-app
         // Mapear dados do trigger para notificação in-app
