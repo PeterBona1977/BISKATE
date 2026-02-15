@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         }
         const genAI = new GoogleGenerativeAI(apiKey)
         // Use gemini-2.5-flash as validated by diagnostic script
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }, { apiVersion: 'v1beta' })
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1beta' })
 
         // 3. Construct System Prompt
         const systemPrompt = `
