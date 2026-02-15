@@ -15,6 +15,8 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/_next") ||
     request.nextUrl.pathname.includes("/static/") ||
     request.nextUrl.pathname.endsWith(".ico") ||
+    request.nextUrl.pathname.endsWith(".json") ||
+    request.nextUrl.pathname.endsWith(".xml") ||
     request.nextUrl.pathname.match(/\.(js|css|png|jpg|jpeg|gif|webp|svg)$/)
   ) {
     return NextResponse.next()
