@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
+import { generateGeminiContent } from "./gemini-rest-client"
 
 export interface CategorySuggestion {
     id: string
@@ -14,41 +14,7 @@ export interface CategoryNode {
 }
 
 export class CategorySuggestionService {
-    private static genAI: GoogleGenerativeAI | null = null
-
-    /**
-     * Get a working model instance - The Nuclear Option
-     */
-    private static async getModelInstance(): Promise<any> {
-        const keys = [
-            process.env.GEMINI_API_KEY,
-            process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-            process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-        ].filter(Boolean) as string[]
-
-        if (keys.length === 0) throw new Error("No AI API keys configured")
-
-        const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-flash-latest", "gemini-1.0-pro"]
-        let lastError = null
-
-        for (const apiKey of keys) {
-            const genAI = new GoogleGenerativeAI(apiKey)
-            for (const name of modelNames) {
-                try {
-                    console.log(`[AI_DEBUG] category-service: Testing Key ${apiKey.substring(0, 6)}... with model ${name}`)
-                    const model = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' })
-                    // Test connection
-                    await model.generateContent("ping")
-                    console.log(`[AI_DEBUG] category-service: Success with model ${name}`)
-                    return model
-                } catch (e) {
-                    console.warn(`[AI_DEBUG] category-service: Failed (${apiKey.substring(0, 6)} / ${name}):`, e)
-                    lastError = e
-                }
-            }
-        }
-        throw lastError || new Error("No supported Gemini models found")
-    }
+    // (Initialization and model selection handled by gemini-rest-client utility)
 
     /**
      * Build category paths from flat list
@@ -172,11 +138,7 @@ Rules:
 - If a service fits into a sub-sub-category, prioritize that UUID.
 - Return ONLY the JSON array, no other text`
 
-            const model = await this.getModelInstance()
-
-            const result = await model.generateContent(prompt)
-            const response = await result.response
-            const text = response.text()
+            const text = await generateGeminiContent(prompt)
 
             // Parse AI response
             let suggestions: { id: string; confidence: number }[] = []

@@ -1,40 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { generateGeminiContent } from "@/lib/ai/gemini-rest-client"
 
 export const runtime = "edge"
 export const dynamic = "force-dynamic"
-import { GoogleGenerativeAI } from "@google/generative-ai"
 
-// Setup Gemini - The Nuclear Option
-const getModel = async () => {
-  const keys = [
-    process.env.GEMINI_API_KEY,
-    process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  ].filter(Boolean) as string[]
-
-  if (keys.length === 0) throw new Error("No AI API keys found")
-
-  const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-flash-latest", "gemini-1.0-pro"]
-  let lastError = null
-
-  for (const apiKey of keys) {
-    const genAI = new GoogleGenerativeAI(apiKey)
-    for (const name of modelNames) {
-      try {
-        console.log(`[AI_DEBUG] analyze-request: Testing key ${apiKey.substring(0, 6)}... with model ${name}`)
-        const model = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' })
-        // Test the model with a minimal prompt
-        await model.generateContent("ping")
-        console.log(`[AI_DEBUG] analyze-request: Success with model ${name}`)
-        return model
-      } catch (e) {
-        console.warn(`[AI_DEBUG] analyze-request: Failed (${apiKey.substring(0, 6)} / ${name}):`, e)
-        lastError = e
-      }
-    }
-  }
-  throw lastError || new Error("No supported Gemini models found")
-}
+// (Initialization handled by gemini-rest-client utility)
 
 interface AnalysisResult {
   category: string
@@ -110,9 +80,7 @@ export async function POST(request: NextRequest) {
       Context: User is using voice to interact. Keep it conversational.
     `
 
-    const model = await getModel()
-    const result = await model.generateContent(prompt)
-    const responseText = result.response.text()
+    const responseText = await generateGeminiContent(prompt)
 
     // Clean up JSON if Gemini wraps it in markdown blocks
     const jsonMatch = responseText.match(/\{[\s\S]*\}/)

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { GoogleGenerativeAI } from "@google/generative-ai"
 import { createClient } from "@/lib/supabase/server"
 import { CategorySuggestionService } from "@/lib/ai/category-suggestion-service"
+import { generateGeminiContent } from "@/lib/ai/gemini-rest-client"
 
 export const runtime = "edge"
 export const dynamic = "force-dynamic"
@@ -33,50 +33,7 @@ export async function POST(request: NextRequest) {
                 .join("\n")
         }
 
-        // 2. Initialize Gemini - The Nuclear Option (Dual Key + Multi Model)
-        const keys = [
-            process.env.GEMINI_API_KEY,
-            process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-            process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-        ].filter(Boolean) as string[]
-
-        if (keys.length === 0) {
-            console.error("CRITICAL: No AI API keys found in environment")
-            return NextResponse.json({ error: "Configuration Error: No AI API keys found" }, { status: 500 })
-        }
-
-        let model = null
-        let lastError = null
-
-        const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-flash-latest", "gemini-1.0-pro"]
-
-        for (const apiKey of keys) {
-            const genAI = new GoogleGenerativeAI(apiKey)
-
-            for (const name of modelNames) {
-                try {
-                    console.log(`[AI_DEBUG] Testing Key ${apiKey.substring(0, 6)}... with model ${name}`)
-                    // Explicitly try v1 first
-                    const tempModel = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' })
-                    // Test connection
-                    await tempModel.generateContent("ping")
-                    model = tempModel
-                    console.log(`[AI_DEBUG] Success! Using Key ${apiKey.substring(0, 6)}... and model ${name}`)
-                    break
-                } catch (err: any) {
-                    console.warn(`[AI_DEBUG] Failed (${apiKey.substring(0, 6)} / ${name}): ${err.message}`)
-                    lastError = err
-                }
-            }
-            if (model) break
-        }
-
-        if (!model) {
-            console.error("CRITICAL: All AI connection attempts failed.")
-            return NextResponse.json({
-                error: `Internal Server Error: No AI connection successful. Last error: ${lastError?.message || "Unknown"}`
-            }, { status: 500 })
-        }
+        // (Initialization handled by gemini-rest-client utility)
 
         // 3. Construct System Prompt
         const systemPrompt = `
@@ -111,29 +68,7 @@ RULES:
 - If it is a life-threatening emergency (medical, major fire, crime), advise them to call 112/911 immediately.
 `
 
-        // 4. Generate Content
-        // We act as if the messages are part of the chat history
-        const chat = model.startChat({
-            history: [
-                { role: "user", parts: [{ text: systemPrompt }] },
-                { role: "model", parts: [{ text: "Understood. I am ready to act as the Gighub Emergency Dispatcher." }] }
-            ]
-        })
-
-        // Convert frontend messages to Gemini format
-        // (Skipping the system prompt we just injected)
-        // message format: { role: 'user' | 'assistant', content: string }
-        const lastMessage = messages[messages.length - 1]
-        const historyParts = messages.slice(0, -1).map((m: any) => ({
-            role: m.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: m.content }]
-        }))
-
-        // We can't easily inject history into startChat *after* the system prompt hack without proper order.
-        // Better approach for single-turn API: send the whole transcript in the user prompt + system prompt.
-        // Or properly use the systemInstruction (if available in this SDK version) or the history array.
-
-        // Let's use a simpler prompt structure for reliability in a stateless request:
+        // 4. Generate Content via Central REST Utility
         const finalPrompt = `
 ${systemPrompt}
 
@@ -142,8 +77,7 @@ ${messages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join("\n")}
 
 Respond in JSON:
 `
-        const result = await model.generateContent(finalPrompt)
-        const responseText = result.response.text()
+        const responseText = await generateGeminiContent(finalPrompt)
 
         // 5. Parse JSON
         let parsedResponse

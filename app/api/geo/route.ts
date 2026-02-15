@@ -31,7 +31,12 @@ export async function POST(req: NextRequest) {
                 lng: result.geometry.location.lng,
             })
         } else {
-            return NextResponse.json({ error: data.status, message: data.error_message }, { status: 400 })
+            console.error("❌ Google Geocoding API Error Response:", JSON.stringify(data))
+            return NextResponse.json({
+                error: data.status,
+                message: data.error_message || "Geocoding failed",
+                raw: data
+            }, { status: 400 })
         }
     } catch (error) {
         console.error("❌ Geocoding API Error:", error)
