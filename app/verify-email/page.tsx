@@ -10,6 +10,9 @@ import { resendVerificationEmail } from "@/app/actions/auth"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
+export const dynamic = "force-dynamic"
+export const runtime = "edge"
+
 export default function VerifyEmailPage() {
     const searchParams = useSearchParams()
     // Prefer URL param, but allow user to edit/enter if missing

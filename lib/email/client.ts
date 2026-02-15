@@ -265,11 +265,11 @@ export async function sendEmail({ to, templateName, variables }: SendEmailParams
         });
 
         if (error) {
-            console.error("❌ Resend API Error:", error);
+            console.error("❌ [EMAIL_DEBUG] Resend API Error:", JSON.stringify(error, null, 2));
             return { success: false, error };
         }
 
-        console.log("✅ Resend API Success:", data);
+        console.log("✅ [EMAIL_DEBUG] Resend API Success:", data?.id);
         return { success: true, data };
     } catch (error) {
         console.error("Failed to send email:", error);
