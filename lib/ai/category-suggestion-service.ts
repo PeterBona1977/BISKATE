@@ -21,13 +21,33 @@ export class CategorySuggestionService {
      */
     private static getAI(): GoogleGenerativeAI {
         if (!this.genAI) {
-            const apiKey = process.env.GEMINI_API_KEY
+            const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
             if (!apiKey) {
                 throw new Error("GEMINI_API_KEY is not configured")
             }
             this.genAI = new GoogleGenerativeAI(apiKey)
         }
         return this.genAI
+    }
+
+    /**
+     * Get a working model instance
+     */
+    private static async getModelInstance(): Promise<any> {
+        const genAI = this.getAI()
+        const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.0-pro", "gemini-1.5-flash-latest"]
+
+        for (const name of modelNames) {
+            try {
+                const model = genAI.getGenerativeModel({ model: name })
+                // Test the model
+                await model.generateContent({ contents: [{ role: 'user', parts: [{ text: 'hi' }] }] })
+                return model
+            } catch (e) {
+                console.warn(`[AI_DEBUG] Model ${name} failed in category-service:`, e)
+            }
+        }
+        throw new Error("No supported Gemini models found")
     }
 
     /**
@@ -152,8 +172,7 @@ Rules:
 - If a service fits into a sub-sub-category, prioritize that UUID.
 - Return ONLY the JSON array, no other text`
 
-            const genAI = this.getAI()
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' })
+            const model = await this.getModelInstance()
 
             const result = await model.generateContent(prompt)
             const response = await result.response

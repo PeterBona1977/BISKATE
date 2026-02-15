@@ -34,15 +34,45 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Initialize Gemini
-        const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY
+        const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
         if (!apiKey) {
             console.error("CRITICAL: Missing GEMINI API KEY in environment variables")
             return NextResponse.json({ error: "Configuration Error: Missing AI API Key on Server" }, { status: 500 })
         }
+
+        // Safe logging for debugging environment issues
+        console.log(`[AI_DEBUG] Using API Key starting with: ${apiKey.substring(0, 6)}...`)
+
         const genAI = new GoogleGenerativeAI(apiKey)
-        // Use gemini-2.5-flash as validated by diagnostic script
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' })
+
+        // Try multiple model IDs as aliases vary across accounts/regions
+        const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.0-pro", "gemini-1.5-flash-latest"]
+        let model = null
+        let lastError = null
+
+        for (const name of modelNames) {
+            try {
+                console.log(`[AI_DEBUG] Attempting to use model: ${name}`)
+                // Use default version first, then try explicitly
+                const tempModel = genAI.getGenerativeModel({ model: name })
+                // Test the model with a minimal prompt to ensure it actually exists and works
+                await tempModel.generateContent({ contents: [{ role: 'user', parts: [{ text: 'ping' }] }] })
+                model = tempModel
+                console.log(`[AI_DEBUG] Successfully initialized model: ${name}`)
+                break
+            } catch (err: any) {
+                console.warn(`[AI_DEBUG] Model ${name} failed: ${err.message}`)
+                lastError = err
+            }
+        }
+
+        if (!model) {
+            console.error("CRITICAL: No supported Gemini models found for this API key.")
+            return NextResponse.json({
+                error: `Internal Server Error: No supported AI models found. Last error: ${lastError?.message || "Unknown"}`
+            }, { status: 500 })
+        }
 
         // 3. Construct System Prompt
         const systemPrompt = `

@@ -5,8 +5,25 @@ export const dynamic = "force-dynamic"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
 // Setup Gemini
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY || "")
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' })
+const getModel = async () => {
+  const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  if (!apiKey) throw new Error("Missing Google AI API Key")
+
+  const genAI = new GoogleGenerativeAI(apiKey)
+  const modelNames = ["gemini-1.5-flash", "gemini-pro", "gemini-1.0-pro", "gemini-1.5-flash-latest"]
+
+  for (const name of modelNames) {
+    try {
+      const model = genAI.getGenerativeModel({ model: name })
+      // Test the model with a minimal prompt
+      await model.generateContent({ contents: [{ role: 'user', parts: [{ text: 'hi' }] }] })
+      return model
+    } catch (e) {
+      console.warn(`[AI_DEBUG] Model ${name} failed in analyze-request:`, e)
+    }
+  }
+  throw new Error("No supported Gemini models found")
+}
 
 interface AnalysisResult {
   category: string
@@ -82,6 +99,7 @@ export async function POST(request: NextRequest) {
       Context: User is using voice to interact. Keep it conversational.
     `
 
+    const model = await getModel()
     const result = await model.generateContent(prompt)
     const responseText = result.response.text()
 
