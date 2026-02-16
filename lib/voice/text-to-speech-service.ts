@@ -1,7 +1,5 @@
 "use client"
 
-import { generateSpeech } from "@/app/actions/voice"
-
 export interface TTSOptions {
   lang?: string
   rate?: number
@@ -102,18 +100,26 @@ export class TextToSpeechService {
     // 1. Try Google Cloud Neural TTS first (unless forced otherwise)
     if (!options.forceBrowser) {
       try {
-        const result = await generateSpeech(text)
+        // Call API route directly from client (more reliable than server actions in Cloudflare)
+        const response = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        })
 
-        if (!result) throw new Error("Server action returned no data")
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || `TTS API failed with status ${response.status}`)
+        }
 
-        const { audioContent, error } = result
+        const data = await response.json()
 
-        if (audioContent) {
-          await this.playCloudAudio(audioContent)
+        if (data.audioContent) {
+          await this.playCloudAudio(data.audioContent)
           return // Success, exit
         }
 
-        console.warn("⚠️ Google Cloud TTS failed, falling back to browser:", error)
+        console.warn("⚠️ Google Cloud TTS returned no audio, falling back to browser")
       } catch (err) {
         console.warn("⚠️ Google Cloud TTS error, falling back to browser:", err)
       }
