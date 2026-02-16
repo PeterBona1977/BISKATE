@@ -99,7 +99,7 @@ export function OrgSwitcher({ className }: { className?: string }) {
                             <CommandItem
                                 onSelect={() => {
                                     setOpen(false)
-                                    router.push("/register?tab=company") // Assuming simple redirect for now or create a modal later
+                                    router.push("/dashboard/org/create")
                                 }}
                             >
                                 <PlusCircle className="mr-2 h-5 w-5" />
