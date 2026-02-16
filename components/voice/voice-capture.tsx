@@ -39,6 +39,11 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [permissionStatus, setPermissionStatus] = useState<PermissionState | null>(null)
+  const [debugLogs, setDebugLogs] = useState<string[]>([])
+
+  const addDebugLog = (msg: string) => {
+    setDebugLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 10))
+  }
 
   // Referências para o reconhecimento de voz
   const recognitionRef = useRef<any>(null)
