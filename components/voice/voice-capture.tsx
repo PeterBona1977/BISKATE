@@ -252,6 +252,10 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
           isFinal = event.results[i].isFinal
         }
 
+        if (transcript) {
+          addDebugLog(`Resultado parcial: "${transcript.substring(0, 20)}..." (Final: ${isFinal})`)
+        }
+
         setVoiceText((prev) => {
           // Se for resultado final, adicionar ao texto existente
           if (isFinal) {
@@ -268,6 +272,7 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
       // Manipular início
       recognition.onstart = () => {
         console.log("Reconhecimento de voz iniciado")
+        addDebugLog("Evento: onstart (Voz iniciada)")
         setIsRecording(true)
         setError(null)
       }
