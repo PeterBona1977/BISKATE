@@ -8,6 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Bell, BellRing, CheckCheck, Eye, MessageSquare, FileText, User, AlertTriangle, Clock } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { notificationService } from "@/lib/notifications/notification-service"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { ExternalLink, Calendar as CalendarIcon } from "lucide-react"
 
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
@@ -18,6 +27,7 @@ export default function NotificationsPage() {
   const router = useRouter()
   const [notifications, setNotifications] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedNotification, setSelectedNotification] = useState<any | null>(null)
 
   useEffect(() => {
     if (profile?.role === "provider" || profile?.is_provider === true) {
@@ -46,6 +56,13 @@ export default function NotificationsPage() {
         prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       )
     }
+  }
+
+  const handleNotificationClick = (notification: any) => {
+    if (!notification.read) {
+      markAsRead(notification.id)
+    }
+    setSelectedNotification(notification)
   }
 
   const markAllAsRead = async () => {
@@ -218,7 +235,8 @@ export default function NotificationsPage() {
             {notifications.map((notification) => (
               <Card
                 key={notification.id}
-                className={`transition-colors hover:bg-muted/50 ${!notification.read ? "border-l-4 border-l-primary bg-primary/5" : ""}`}
+                className={`transition-all hover:bg-muted/50 cursor-pointer ${!notification.read ? "border-l-4 border-l-primary bg-primary/5" : ""}`}
+                onClick={() => handleNotificationClick(notification)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-4">
@@ -247,7 +265,14 @@ export default function NotificationsPage() {
                         <span className="text-xs text-muted-foreground">{formatTimeAgo(notification.created_at)}</span>
 
                         {!notification.read && (
-                          <Button variant="ghost" size="sm" onClick={() => markAsRead(notification.id)}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsRead(notification.id);
+                            }}
+                          >
                             {t("actions.markRead")}
                           </Button>
                         )}
@@ -263,7 +288,11 @@ export default function NotificationsPage() {
             {unreadNotifications.length === 0 ? (
               <p className="text-center py-10 text-muted-foreground">{t("emptyTabs.unread")}</p>
             ) : unreadNotifications.map((notification) => (
-              <Card key={notification.id} className="border-l-4 border-l-primary bg-primary/5">
+              <Card
+                key={notification.id}
+                className="border-l-4 border-l-primary bg-primary/5 cursor-pointer hover:bg-muted/50 transition-all"
+                onClick={() => handleNotificationClick(notification)}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-4">
                     <div className={`mt-1 ${getNotificationColor(notification.type)}`}>
@@ -288,7 +317,14 @@ export default function NotificationsPage() {
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">{formatTimeAgo(notification.created_at)}</span>
 
-                        <Button variant="ghost" size="sm" onClick={() => markAsRead(notification.id)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markAsRead(notification.id);
+                          }}
+                        >
                           {t("actions.markRead")}
                         </Button>
                       </div>
@@ -303,7 +339,11 @@ export default function NotificationsPage() {
             {readNotifications.length === 0 ? (
               <p className="text-center py-10 text-muted-foreground">{t("emptyTabs.read")}</p>
             ) : readNotifications.map((notification) => (
-              <Card key={notification.id} className="opacity-75">
+              <Card
+                key={notification.id}
+                className="opacity-75 cursor-pointer hover:opacity-100 hover:bg-muted/50 transition-all"
+                onClick={() => handleNotificationClick(notification)}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-4">
                     <div className={`mt-1 ${getNotificationColor(notification.type)}`}>
@@ -331,6 +371,61 @@ export default function NotificationsPage() {
           </TabsContent>
         </Tabs>
       )}
+
+      <Dialog open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
+        <DialogContent className="sm:max-w-[425px] overflow-hidden p-0 border-none shadow-2xl space-y-0">
+          {selectedNotification && (
+            <>
+              <div className="h-2 bg-gradient-to-r from-blue-600 to-indigo-600" />
+              <DialogHeader className="p-6 pb-0 text-left">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shadow-inner">
+                    {getNotificationIcon(selectedNotification.type)}
+                  </div>
+                  <div className="text-left">
+                    <DialogTitle className="text-2xl font-black tracking-tight leading-none text-left">
+                      {selectedNotification.title}
+                    </DialogTitle>
+                    <p className="text-xs font-bold text-muted-foreground mt-2 uppercase tracking-widest flex items-center gap-1">
+                      <CalendarIcon className="h-3 w-3" />
+                      {new Date(selectedNotification.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="px-6 py-4">
+                <DialogDescription className="text-base text-foreground leading-relaxed font-medium bg-muted/30 p-4 rounded-xl border border-muted/50">
+                  {selectedNotification.message}
+                </DialogDescription>
+              </div>
+
+              <DialogFooter className="p-6 pt-2 gap-2 sm:gap-0">
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedNotification(null)}
+                  className="font-bold uppercase tracking-widest text-xs h-11"
+                >
+                  {t("Common.cancel") || "Fechar"}
+                </Button>
+                {selectedNotification.data?.action_url && (
+                  <Button
+                    variant="default"
+                    className="font-black uppercase tracking-widest text-xs h-11 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 ml-2"
+                    onClick={() => {
+                      router.push(selectedNotification.data!.action_url!)
+                      setSelectedNotification(null)
+                    }}
+                  >
+                    Abrir Detalhes
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </Button>
+                )}
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
