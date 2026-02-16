@@ -108,7 +108,7 @@ export class TextToSpeechService {
         })
 
         if (!response.ok) {
-          const errorData = await response.json()
+          const errorData = await response.json().catch(() => ({ error: "Unknown TTS error" }))
           throw new Error(errorData.error || `TTS API failed with status ${response.status}`)
         }
 
@@ -132,7 +132,13 @@ export class TextToSpeechService {
     }
 
     await this.ensureInitialized()
-    this.synthesis.cancel()
+
+    // Edge-specific fix: Cancel any pending speech with a delay before starting new one
+    if (this.synthesis.speaking || this.synthesis.pending) {
+      this.synthesis.cancel()
+      // Wait a bit for Edge to fully cancel (Edge is slower than Chrome)
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
 
     return new Promise((resolve, reject) => {
       const utterance = new SpeechSynthesisUtterance(text)
@@ -147,10 +153,34 @@ export class TextToSpeechService {
         utterance.voice = voice
       }
 
-      utterance.onend = () => resolve()
-      utterance.onerror = (event) => reject(new Error(`Browser TTS Error: ${event.error}`))
+      let resolved = false
 
-      this.synthesis!.speak(utterance)
+      utterance.onend = () => {
+        if (!resolved) {
+          resolved = true
+          resolve()
+        }
+      }
+
+      utterance.onerror = (event) => {
+        if (!resolved) {
+          resolved = true
+          // Don't reject on "interrupted" or "canceled" - these are normal in Edge
+          if (event.error === 'interrupted' || event.error === 'canceled') {
+            console.warn('Browser TTS interrupted/canceled (normal in Edge)')
+            resolve()
+          } else {
+            reject(new Error(`Browser TTS Error: ${event.error}`))
+          }
+        }
+      }
+
+      // Edge-specific: Small delay before speaking to avoid race conditions
+      setTimeout(() => {
+        if (this.synthesis) {
+          this.synthesis.speak(utterance)
+        }
+      }, 50)
     })
   }
 
