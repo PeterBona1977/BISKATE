@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, MapPin, Euro, Clock, Star, Filter } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
+import { supabase } from "@/lib/supabase/client"
 
 interface Job {
   id: string
@@ -22,6 +23,7 @@ interface Job {
   responses: number
   timeAgo: string
   isPremium: boolean
+  created_at?: string
 }
 
 export default function JobsPage() {
@@ -45,85 +47,63 @@ export default function JobsPage() {
     try {
       setLoading(true)
 
-      // Dados mock para demonstração
-      const mockJobs: Job[] = [
-        {
-          id: "1",
-          title: "Design de Logo para Startup",
-          description:
-            "Preciso de um logo moderno e profissional para minha startup de tecnologia. Deve ser minimalista e transmitir inovação.",
-          location: "Lisboa",
-          price: 150,
-          category: "Design",
-          author: "João Silva",
-          rating: 4.8,
-          responses: 12,
-          timeAgo: "2h",
-          isPremium: true,
-        },
-        {
-          id: "2",
-          title: "Desenvolvimento de Website E-commerce",
-          description:
-            "Desenvolvimento completo de loja online com sistema de pagamentos, gestão de produtos e painel administrativo.",
-          location: "Porto",
-          price: 800,
-          category: "Desenvolvimento",
-          author: "Maria Santos",
-          rating: 4.9,
-          responses: 8,
-          timeAgo: "4h",
-          isPremium: false,
-        },
-        {
-          id: "3",
-          title: "Consultoria em Marketing Digital",
-          description: "Preciso de ajuda para criar uma estratégia de marketing digital completa para minha empresa.",
-          location: "Braga",
-          price: 300,
-          category: "Marketing",
-          author: "Pedro Costa",
-          rating: 4.7,
-          responses: 15,
-          timeAgo: "6h",
-          isPremium: false,
-        },
-        {
-          id: "4",
-          title: "Tradução de Documentos Técnicos",
-          description:
-            "Tradução de manuais técnicos do inglês para português. Experiência em terminologia técnica necessária.",
-          location: "Coimbra",
-          price: 200,
-          category: "Tradução",
-          author: "Ana Rodrigues",
-          rating: 4.6,
-          responses: 6,
-          timeAgo: "8h",
-          isPremium: false,
-        },
-        {
-          id: "5",
-          title: "Fotografia para Evento Corporativo",
-          description:
-            "Cobertura fotográfica completa de evento corporativo. Inclui edição e entrega das fotos em alta resolução.",
-          location: "Lisboa",
-          price: 400,
-          category: "Fotografia",
-          author: "Carlos Mendes",
-          rating: 4.9,
-          responses: 10,
-          timeAgo: "1d",
-          isPremium: true,
-        },
-      ]
+      const { data, error } = await supabase
+        .from("gigs")
+        .select(`
+          *,
+          author:profiles(full_name, avatar_url, rating)
+        `)
+        .eq('status', 'open') // Assuming 'open' is the status for available jobs
+        .order('created_at', { ascending: false })
 
-      setJobs(mockJobs)
+      if (error) throw error
+
+      const formattedJobs: Job[] = data.map((gig: any) => ({
+        id: gig.id,
+        title: gig.title,
+        description: gig.description,
+        location: gig.location || "Remoto",
+        price: gig.price || 0,
+        category: gig.category,
+        author: gig.author?.full_name || "Utilizador",
+        rating: gig.author?.rating || 5.0,
+        responses: 0, // Pending implementation of separate count
+        timeAgo: formatTimeAgo(gig.created_at),
+        isPremium: false,
+        created_at: gig.created_at
+      }))
+
+      setJobs(formattedJobs)
+      setFilteredJobs(formattedJobs)
     } catch (error) {
       console.error("Erro ao carregar trabalhos:", error)
     } finally {
       setLoading(false)
     }
+  }
+
+  useEffect(() => {
+    // Realtime subscription for new Gigs
+    const channel = supabase
+      .channel('public:gigs')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gigs', filter: 'status=eq.open' }, (payload) => {
+        loadJobs()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInHours = Math.abs(now.getTime() - date.getTime()) / 36e5
+
+    if (diffInHours < 1) return "Recentemente"
+    if (diffInHours < 24) return `${Math.floor(diffInHours)}h`
+    return `${Math.floor(diffInHours / 24)}d`
   }
 
   const filterJobs = () => {

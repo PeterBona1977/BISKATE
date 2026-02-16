@@ -125,8 +125,45 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error("Error loading dashboard data:", error)
+    } finally {
+      // setLoading(false) // This is handled in the caller loop or initial load
     }
   }
+
+  useEffect(() => {
+    if (!user) return
+
+    // Realtime subscription for statistics (gigs status changes)
+    const gigsChannel = supabase
+      .channel('dashboard_gigs_stats')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'gigs',
+        filter: `author_id=eq.${user.id}`
+      }, () => {
+        loadDashboardData()
+      })
+      .subscribe()
+
+    // Realtime subscription for activity (new notifications)
+    const notificationsChannel = supabase
+      .channel('dashboard_notifications')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`
+      }, () => {
+        loadDashboardData()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(gigsChannel)
+      supabase.removeChannel(notificationsChannel)
+    }
+  }, [user])
 
   const getGreeting = () => {
     const hour = new Date().getHours()
