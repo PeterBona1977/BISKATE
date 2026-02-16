@@ -74,8 +74,18 @@ export function ClientEmergencyListView() {
         }
     }
 
-    const activeRequests = requests.filter(r => ['pending', 'accepted', 'in_progress'].includes(r.status))
-    const pastRequests = requests.filter(r => ['completed', 'cancelled'].includes(r.status))
+    // NEW FILTER LOGIC:
+    // 1- "Pendentes" - pending requests waiting for provider responses
+    const pendingRequests = requests.filter(r => r.status === 'pending')
+
+    // 2- "Ativas" - accepted and in-progress emergencies
+    const activeRequests = requests.filter(r => ['accepted', 'in_progress'].includes(r.status))
+
+    // 3- "Recusadas" - cancelled requests
+    const rejectedRequests = requests.filter(r => r.status === 'cancelled')
+
+    // 4- "Concluídas" - completed services
+    const completedRequests = requests.filter(r => r.status === 'completed')
 
     const RequestCard = ({ req }: { req: EmergencyRequest }) => (
         <Card
@@ -141,7 +151,7 @@ export function ClientEmergencyListView() {
                     <h2 className="text-3xl font-bold text-gray-900">As Minhas Emergências</h2>
                     <p className="text-muted-foreground font-medium">Faça a gestão dos seus pedidos de serviço urgentes e acompanhe em tempo real.</p>
                 </div>
-                {activeRequests.length === 0 && (
+                {(pendingRequests.length === 0 && activeRequests.length === 0) && (
                     <Button
                         onClick={() => setIsEmergencyOpen(true)}
                         className="bg-red-600 hover:bg-red-700 font-bold shadow-lg shadow-red-100"
@@ -152,21 +162,40 @@ export function ClientEmergencyListView() {
                 )}
             </div>
 
-            <Tabs defaultValue="active" className="w-full">
+            <Tabs defaultValue="pending" className="w-full">
                 <TabsList className="bg-gray-100 p-1 rounded-xl h-auto flex-wrap mb-6">
+                    <TabsTrigger value="pending" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
+                        Pendentes ({pendingRequests.length})
+                    </TabsTrigger>
                     <TabsTrigger value="active" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
                         Ativas ({activeRequests.length})
                     </TabsTrigger>
-                    <TabsTrigger value="history" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
-                        Histórico ({pastRequests.length})
+                    <TabsTrigger value="rejected" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
+                        Recusadas ({rejectedRequests.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="completed" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
+                        Concluídas ({completedRequests.length})
                     </TabsTrigger>
                 </TabsList>
+
+                <TabsContent value="pending" className="mt-0">
+                    {pendingRequests.length === 0 ? (
+                        <EmptyState
+                            message="Sem pedidos pendentes."
+                            description="Todos os seus pedidos que aguardam resposta de profissionais aparecerão aqui."
+                        />
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {pendingRequests.map(req => <RequestCard key={req.id} req={req} />)}
+                        </div>
+                    )}
+                </TabsContent>
 
                 <TabsContent value="active" className="mt-0">
                     {activeRequests.length === 0 ? (
                         <EmptyState
                             message="Não tem nenhuma emergência ativa de momento."
-                            description="Se precisar de ajuda urgente, utilize o botão de Emergência no dashboard."
+                            description="Emergências aceites e em curso aparecerão aqui."
                         />
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -175,15 +204,28 @@ export function ClientEmergencyListView() {
                     )}
                 </TabsContent>
 
-                <TabsContent value="history" className="mt-0">
-                    {pastRequests.length === 0 ? (
+                <TabsContent value="rejected" className="mt-0">
+                    {rejectedRequests.length === 0 ? (
                         <EmptyState
-                            message="Ainda não tem histórico de emergências."
-                            description="Todos os seus pedidos concluídos aparecerão aqui para consulta futura."
+                            message="Sem pedidos recusados."
+                            description="Pedidos cancelados aparecerão aqui para referência."
                         />
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {pastRequests.map(req => <RequestCard key={req.id} req={req} />)}
+                            {rejectedRequests.map(req => <RequestCard key={req.id} req={req} />)}
+                        </div>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="completed" className="mt-0">
+                    {completedRequests.length === 0 ? (
+                        <EmptyState
+                            message="Ainda não tem emergências concluídas."
+                            description="Todos os seus pedidos finalizados aparecerão aqui para consulta futura."
+                        />
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {completedRequests.map(req => <RequestCard key={req.id} req={req} />)}
                         </div>
                     )}
                 </TabsContent>
