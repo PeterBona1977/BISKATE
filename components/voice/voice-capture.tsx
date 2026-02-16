@@ -198,6 +198,10 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
       // Verificar se o navegador suporta a API
       const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition
       if (!SpeechRecognition) {
+        // Detecção específica para Firefox para mensagem mais útil
+        if (navigator.userAgent.indexOf("Firefox") !== -1) {
+          throw new Error("O Firefox não suporta reconhecimento de voz nativo. Por favor, use Chrome ou Edge.")
+        }
         throw new Error("Reconhecimento de voz não suportado neste navegador.")
       }
 
