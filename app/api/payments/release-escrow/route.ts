@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { stripe } from "@/lib/stripe"
 
 export const dynamic = 'force-dynamic'
-// export const runtime = 'edge'
+export const runtime = 'edge'
 
 export async function POST(request: NextRequest) {
   try {
