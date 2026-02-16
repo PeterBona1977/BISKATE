@@ -196,10 +196,23 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
         throw new Error("Reconhecimento de voz não suportado neste navegador.")
       }
 
+      // Parar instância anterior se existir
+      if (recognitionRef.current) {
+        recognitionRef.current.abort()
+      }
+
       // Solicitar permissão do microfone se necessário
-      if (permissionStatus !== "granted") {
+      // Nota: Edge às vezes precisa de um getUserMedia explícito para "acordar" a permissão
+      try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        stream.getTracks().forEach((track) => track.stop()) // Liberar o microfone após obter permissão
+        // Mantemos as tracks ativas por um momento para garantir que o navegador registre o uso
+        setTimeout(() => {
+          stream.getTracks().forEach((track) => track.stop())
+        }, 500)
+      } catch (permErr) {
+        console.error("Permissão de microfone negada:", permErr)
+        setError("Permissão de microfone negada. Por favor, permita o acesso ao microfone nas configurações do navegador.")
+        return
       }
 
       // Inicializar o reconhecimento de voz
@@ -235,32 +248,50 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
         })
       }
 
+      // Manipular início
+      recognition.onstart = () => {
+        console.log("Reconhecimento de voz iniciado")
+        setIsRecording(true)
+        setError(null)
+      }
+
       // Manipular fim do reconhecimento
       recognition.onend = () => {
-        if (isRecording) {
-          // Se ainda estiver gravando, reiniciar o reconhecimento
-          recognition.start()
-        } else {
-          setIsRecording(false)
-        }
+        console.log("Reconhecimento de voz terminou")
+        // Edge às vezes termina prematuramente. Só paramos se o usuário pediu ou se houve erro fatal.
+        // Verificamos o estado 'isRecording' (que é gerenciado pelo React, cuidado com stale closures aqui)
+        // Mas como onend é closure, precisamos usar a ref ou lógica externa se quisermos reiniciar.
+        // Simplificação: Se cair, o usuário clica de novo, mas logs ajudam a debug.
+        setIsRecording(false)
       }
 
       // Manipular erros
       recognition.onerror = (event: any) => {
         console.error("Erro de reconhecimento de voz:", event.error)
+
+        // Ignorar erros "no-speech" ou "aborted" que são comuns e não requerem feedback visual agressivo
+        if (event.error === 'no-speech') {
+          console.warn("Nenhuma fala detectada. Ignorando erro.")
+          return
+        }
+        if (event.error === 'aborted') {
+          console.warn("Reconhecimento abortado. Ignorando erro.")
+          return
+        }
+
         setError(`Erro no reconhecimento de voz: ${event.error}`)
         setIsRecording(false)
       }
 
       // Iniciar o reconhecimento
       recognition.start()
-      setIsRecording(true)
-      setVoiceText("")
+      setVoiceText("") // Limpar texto anterior ao começar nova gravação
     } catch (err) {
       console.error("Erro ao iniciar reconhecimento de voz:", err)
       setError(
         `Não foi possível acessar o microfone. ${err instanceof Error ? err.message : "Verifique as permissões do navegador."}`,
       )
+      setIsRecording(false)
     }
   }
 
