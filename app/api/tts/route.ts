@@ -31,14 +31,14 @@ export async function POST(request: NextRequest) {
         // Endpoint for Google Cloud Text-to-Speech
         const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`
 
-        // Configuration for Standard voice (free tier, no billing required)
+        // Configuration for Neural2 voice (premium quality, requires billing)
         const requestBody = {
             input: {
                 text: text
             },
             voice: {
                 languageCode: "pt-PT",
-                name: "pt-PT-Standard-A", // Standard voice (free tier)
+                name: "pt-PT-Wavenet-A", // Wavenet is more widely available than Neural2
                 ssmlGender: "FEMALE"
             },
             audioConfig: {
