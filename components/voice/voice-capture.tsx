@@ -456,6 +456,18 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
               </>
             )}
           </div>
+
+          {/* Área de Debug (Visível apenas se houver logs) */}
+          {debugLogs.length > 0 && (
+            <div className="mt-4 p-2 bg-gray-100 rounded text-xs font-mono max-h-32 overflow-y-auto border border-gray-200">
+              <p className="font-bold text-gray-700 mb-1">Debug Logs:</p>
+              {debugLogs.map((log, i) => (
+                <div key={i} className="text-gray-600 border-b border-gray-200 last:border-0 py-0.5">
+                  {log}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
