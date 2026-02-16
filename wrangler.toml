@@ -4,18 +4,3 @@ compatibility_flags = ["nodejs_compat"]
 
 pages_build_output_dir = ".vercel/output/static"
 
-[vars]
-STRIPE_SECRET_KEY = "STRIPE_SECRET_KEY_PLACEHOLDER"
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_PLACEHOLDER"
-
-# Resend
-RESEND_API_KEY = "RESEND_API_KEY_PLACEHOLDER"
-
-# Gemini
-GEMINI_API_KEY = "GEMINI_API_KEY_PLACEHOLDER"
-GOOGLE_GENERATIVE_AI_API_KEY = "GOOGLE_GENERATIVE_AI_API_KEY_PLACEHOLDER"
-
-# Supabase
-# NEXT_PUBLIC_SUPABASE_URL = "https://your-project.supabase.co"
-# NEXT_PUBLIC_SUPABASE_ANON_KEY = "your-anon-key"
-# SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key"
