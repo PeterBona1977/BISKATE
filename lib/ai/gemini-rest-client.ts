@@ -22,13 +22,12 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
     ].filter(Boolean) as string[]
 
     const modelNames = [
-        "gemini-2.0-flash",
-        "gemini-2.0-flash-001",
-        "gemini-flash-latest",
-        "gemini-pro-latest",
-        "gemini-1.5-flash" // Fallback
+        "gemini-1.5-flash-latest",
+        "gemini-1.5-flash",
+        "gemini-1.5-pro-latest",
+        "gemini-pro"
     ]
-    const apiVersions = ["v1", "v1beta"]
+    const apiVersions = ["v1beta"]
 
     let lastError = null
 
