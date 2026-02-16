@@ -313,13 +313,19 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
       // Solicitar permissão do microfone se necessário
       // Nota: Edge às vezes precisa de um getUserMedia explícito para "acordar" a permissão
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        // Mantemos as tracks ativas por um momento para garantir que o navegador registre o uso
-        setTimeout(() => {
-          stream.getTracks().forEach((track) => track.stop())
-        }, 500)
+        addDebugLog("Solicitando permissão getUserMedia...")
+        const constraints = {
+          audio: selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : true
+        }
+        await navigator.mediaDevices.getUserMedia(constraints) // Apenas para permissão
+        addDebugLog("Permissão concedida via getUserMedia")
+
+        // Iniciar visualizador de áudio
+        startAudioVisualizer()
+
       } catch (permErr) {
         console.error("Permissão de microfone negada:", permErr)
+        addDebugLog(`Permissão negada: ${permErr}`)
         setError("Permissão de microfone negada. Por favor, permita o acesso ao microfone nas configurações do navegador.")
         return
       }
@@ -408,6 +414,7 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
         }
 
         setError(`Erro no reconhecimento de voz: ${event.error}`)
+        stopAudioVisualizer()
         setIsRecording(false)
       }
 
@@ -422,9 +429,11 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
       }
     } catch (err) {
       console.error("Erro ao iniciar reconhecimento de voz:", err)
+      addDebugLog(`EXCEÇÃO ao iniciar: ${err}`)
       setError(
         `Não foi possível acessar o microfone. ${err instanceof Error ? err.message : "Verifique as permissões do navegador."}`,
       )
+      stopAudioVisualizer()
       setIsRecording(false)
     }
   }
@@ -433,6 +442,7 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
     if (recognitionRef.current) {
       recognitionRef.current.stop()
     }
+    stopAudioVisualizer()
     setIsRecording(false)
   }
 
@@ -440,6 +450,7 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
     if (!voiceText.trim()) return
 
     setIsProcessing(true)
+    stopAudioVisualizer()
 
     try {
       // Processar o texto capturado
@@ -463,8 +474,9 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
 
   const handleCancel = () => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop()
+      recognitionRef.current.abort()
     }
+    stopAudioVisualizer()
     setVoiceText("")
     setIsRecording(false)
     setError(null)
