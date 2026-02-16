@@ -151,6 +151,50 @@ export class NotificationService {
     }
   }
 
+  async deleteNotification(notificationId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", notificationId)
+
+      if (error) {
+        console.error("Erro ao eliminar notificação:", error)
+        return false
+      }
+
+      return true
+    } catch (error) {
+      console.error("Erro ao eliminar notificação:", error)
+      return false
+    }
+  }
+
+  async deleteAllNotifications(userId: string, userType?: string): Promise<boolean> {
+    try {
+      let query = supabase
+        .from("notifications")
+        .delete()
+        .eq("user_id", userId)
+
+      if (userType) {
+        query = query.eq("user_type", userType)
+      }
+
+      const { error } = await query
+
+      if (error) {
+        console.error("Erro ao eliminar todas as notificações:", error)
+        return false
+      }
+
+      return true
+    } catch (error) {
+      console.error("Erro ao eliminar todas as notificações:", error)
+      return false
+    }
+  }
+
   /**
    * Subsbcribe to user notifications in realtime
    */

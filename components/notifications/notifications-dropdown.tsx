@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Bell, Check } from "lucide-react"
+import { Bell, Check, Trash2 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -121,6 +121,33 @@ export function NotificationsDropdown({ mode }: { mode?: "client" | "provider" |
     }
   }
 
+  const deleteNotification = async (id: string) => {
+    const success = await notificationService.deleteNotification(id)
+    if (success) {
+      setNotifications((prev) => prev.filter((n) => n.id !== id))
+      if (notifications.find(n => n.id === id && !n.read)) {
+        setUnreadCount((prev) => Math.max(0, prev - 1))
+      }
+      toast({
+        title: "Notificação eliminada",
+        description: "A notificação foi removida com sucesso.",
+      })
+    }
+  }
+
+  const deleteAllNotifications = async () => {
+    if (!user) return
+    const success = await notificationService.deleteAllNotifications(user.id, mode)
+    if (success) {
+      setNotifications([])
+      setUnreadCount(0)
+      toast({
+        title: "Notificações limpas",
+        description: "Todas as notificações foram eliminadas.",
+      })
+    }
+  }
+
   const getNotificationIcon = (type: Notification["type"], size: "sm" | "lg" = "sm") => {
     const iconClass = size === "lg" ? "h-6 w-6" : "h-4 w-4"
     switch (type) {
@@ -158,15 +185,25 @@ export function NotificationsDropdown({ mode }: { mode?: "client" | "provider" |
         <DropdownMenuContent className="w-80 shadow-2xl border-none p-0 overflow-hidden" align="end" forceMount>
           <DropdownMenuLabel className="flex items-center justify-between p-4 bg-muted/50">
             <span className="font-bold text-lg">Notificações</span>
-            {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={markAllAsRead}
-                className="h-auto px-2 py-1 text-[10px] uppercase font-bold tracking-wider text-muted-foreground hover:text-foreground"
-              >
-                Limpar tudo
-              </Button>
+            {notifications.length > 0 && (
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={markAllAsRead}
+                  className="h-auto px-2 py-1 text-[10px] uppercase font-bold tracking-wider text-muted-foreground hover:text-foreground"
+                >
+                  Lidas
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={deleteAllNotifications}
+                  className="h-auto px-2 py-1 text-[10px] uppercase font-bold tracking-wider text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  Limpar tudo
+                </Button>
+              </div>
             )}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="m-0" />
@@ -206,7 +243,21 @@ export function NotificationsDropdown({ mode }: { mode?: "client" | "provider" |
                         )}>
                           {notification.title}
                         </p>
-                        {!notification.read && <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0" />}
+                        <div className="flex items-center gap-1 shrink-0">
+                          {/* Botão de eliminar individual */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-full"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteNotification(notification.id);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                          {!notification.read && <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0" />}
+                        </div>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{notification.message}</p>
                       <p className="text-[10px] text-muted-foreground/60 font-medium pt-1 uppercase tracking-tighter">
