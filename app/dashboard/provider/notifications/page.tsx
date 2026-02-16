@@ -9,6 +9,7 @@ import { Bell, BellRing, CheckCheck, MessageSquare, FileText, User, AlertTriangl
 import { useAuth } from "@/contexts/auth-context"
 import { notificationService } from "@/lib/notifications/notification-service"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import {
     Dialog,
     DialogContent,
@@ -20,6 +21,8 @@ import {
 import { ExternalLink, Calendar as CalendarIcon } from "lucide-react"
 
 export default function ProviderNotificationsPage() {
+    const t = useTranslations("Dashboard.Notifications")
+    const commonT = useTranslations("Common")
     const { user } = useAuth()
     const router = useRouter()
     const [notifications, setNotifications] = useState<any[]>([])
@@ -101,10 +104,10 @@ export default function ProviderNotificationsPage() {
         const now = new Date()
         const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
 
-        if (diffInMinutes < 1) return "Agora"
-        if (diffInMinutes < 60) return `${diffInMinutes}m atrás`
-        if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h atrás`
-        return `${Math.floor(diffInMinutes / 1440)}d atrás`
+        if (diffInMinutes < 1) return t("time.now")
+        if (diffInMinutes < 60) return `${diffInMinutes}${t("time.minutes")}`
+        if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}${t("time.hours")}`
+        return `${Math.floor(diffInMinutes / 1440)}${t("time.days")}`
     }
 
     const unreadNotifications = notifications.filter((n) => !n.read)
@@ -113,7 +116,7 @@ export default function ProviderNotificationsPage() {
     if (!user) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <p className="text-muted-foreground">Por favor, faça login para ver as suas notificações.</p>
+                <p className="text-muted-foreground">{t("loginRequired")}</p>
             </div>
         )
     }
@@ -131,7 +134,7 @@ export default function ProviderNotificationsPage() {
                     </Button>
                     <Button variant="outline" size="sm" onClick={markAllAsRead} disabled={unreadNotifications.length === 0}>
                         <CheckCheck className="h-4 w-4 mr-2" />
-                        Marcar todas como lidas
+                        {t("markAllRead")}
                     </Button>
                 </div>
             </div>
@@ -139,21 +142,21 @@ export default function ProviderNotificationsPage() {
             {loading ? (
                 <div className="text-center py-20">
                     <div className="animate-spin inline-block w-8 h-8 border-[3px] border-current border-t-transparent text-primary rounded-full" role="status" aria-label="loading">
-                        <span className="sr-only">Carregando...</span>
+                        <span className="sr-only">{t("loading")}</span>
                     </div>
                 </div>
             ) : notifications.length === 0 ? (
                 <Card className="p-20 text-center">
                     <CardContent>
                         <Bell className="h-12 w-12 mx-auto text-muted-foreground opacity-20 mb-4" />
-                        <p className="text-muted-foreground">Sem notificações de prestador.</p>
+                        <p className="text-muted-foreground">{t("empty")}</p>
                     </CardContent>
                 </Card>
             ) : (
                 <Tabs defaultValue="all" className="space-y-4">
                     <TabsList>
-                        <TabsTrigger value="all">Todas ({notifications.length})</TabsTrigger>
-                        <TabsTrigger value="unread">Não Lidas ({unreadNotifications.length})</TabsTrigger>
+                        <TabsTrigger value="all">{t("tabs.all", { count: notifications.length })}</TabsTrigger>
+                        <TabsTrigger value="unread">{t("tabs.unread", { count: unreadNotifications.length })}</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="all" className="space-y-4">
@@ -189,7 +192,7 @@ export default function ProviderNotificationsPage() {
                                                             markAsRead(notification.id);
                                                         }}
                                                     >
-                                                        Marcar como lida
+                                                        {t("actions.markRead")}
                                                     </Button>
                                                 )}
                                             </div>
@@ -234,7 +237,7 @@ export default function ProviderNotificationsPage() {
                                     onClick={() => setSelectedNotification(null)}
                                     className="font-bold uppercase tracking-widest text-xs h-11"
                                 >
-                                    Fechar
+                                    {commonT("cancel")}
                                 </Button>
                                 {selectedNotification.data?.action_url && (
                                     <Button

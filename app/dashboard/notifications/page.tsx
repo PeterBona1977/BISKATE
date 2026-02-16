@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation"
 
 export default function NotificationsPage() {
   const t = useTranslations("Dashboard.Notifications")
+  const commonT = useTranslations("Common")
   const { user, profile } = useAuth()
   const router = useRouter()
   const [notifications, setNotifications] = useState<any[]>([])
@@ -406,7 +407,7 @@ export default function NotificationsPage() {
                   onClick={() => setSelectedNotification(null)}
                   className="font-bold uppercase tracking-widest text-xs h-11"
                 >
-                  {t("Common.cancel") || "Fechar"}
+                  {commonT("cancel")}
                 </Button>
                 {selectedNotification.data?.action_url && (
                   <Button
