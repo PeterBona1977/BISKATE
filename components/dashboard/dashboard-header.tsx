@@ -149,7 +149,7 @@ export function DashboardHeader() {
             </Sheet>
 
             {/* Logo */}
-            <Logo href="/dashboard" className="lg:hidden" />
+            <Logo href="/dashboard" className="ml-2 lg:ml-0" size="small" />
           </div>
 
           {/* Ações do utilizador */}

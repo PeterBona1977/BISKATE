@@ -113,10 +113,8 @@ export function DashboardSidebar() {
             >
                 <div className="flex flex-col h-full">
 
-                    {/* Logo & Status */}
-                    <div className="p-6 border-b space-y-4">
-                        <Logo />
-
+                    {/* Status & Org Switcher */}
+                    <div className="p-4 border-b space-y-4">
                         <OrgSwitcher />
 
                         {/* View Toggle for Providers */}
