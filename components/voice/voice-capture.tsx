@@ -94,6 +94,19 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
   }, [])
 
   const extractDataFromText = (text: string) => {
+    // Safety check: ensure text is defined and is a string
+    if (!text || typeof text !== 'string') {
+      console.warn('extractDataFromText called with invalid text:', text)
+      return {
+        title: "Serviço solicitado",
+        description: "",
+        category: "Outros",
+        price: 0,
+        location: "",
+        estimatedTime: "2-3 horas",
+      }
+    }
+
     const lowerText = text.toLowerCase()
 
     // Extrair preço
