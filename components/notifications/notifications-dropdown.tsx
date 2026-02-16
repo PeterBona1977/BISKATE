@@ -223,7 +223,10 @@ export function NotificationsDropdown({ mode }: { mode?: "client" | "provider" |
           <DropdownMenuSeparator className="m-0" />
           <DropdownMenuItem
             className="p-2 focus:bg-transparent cursor-pointer"
-            onSelect={() => router.push("/dashboard/notifications")}
+            onSelect={() => {
+              const path = mode === 'provider' ? '/dashboard/provider/notifications' : '/dashboard/notifications';
+              router.push(path);
+            }}
           >
             <Button
               variant="ghost"

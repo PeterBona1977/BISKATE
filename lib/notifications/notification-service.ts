@@ -123,6 +123,7 @@ export class NotificationService {
     title: string
     message: string
     type?: string
+    user_type?: string
     data?: any
   }): Promise<boolean> {
     try {
@@ -131,6 +132,7 @@ export class NotificationService {
         title: notification.title,
         message: notification.message,
         type: notification.type || "info",
+        user_type: notification.user_type || "client",
         data: notification.data || {},
         read: false,
         created_at: new Date().toISOString(),

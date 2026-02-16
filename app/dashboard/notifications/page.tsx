@@ -13,9 +13,16 @@ import { useTranslations } from "next-intl"
 
 export default function NotificationsPage() {
   const t = useTranslations("Dashboard.Notifications")
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
+  const router = useRouter()
   const [notifications, setNotifications] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (profile?.role === "provider" || profile?.is_provider === true) {
+      router.push("/dashboard/provider/notifications")
+    }
+  }, [profile, router])
 
   useEffect(() => {
     if (user) {
