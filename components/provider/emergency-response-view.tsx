@@ -42,6 +42,10 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
         fetchRequest()
     }, [requestId])
 
+    useEffect(() => {
+        fetchRequest()
+    }, [requestId])
+
     const fetchRequest = async () => {
         try {
             setLoading(true)
@@ -67,6 +71,9 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error("Não autenticado")
 
+            // Fetch provider profile to get name
+            const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+
             const { error } = await supabase
                 .from("emergency_responses")
                 .insert({
@@ -77,6 +84,18 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                 })
 
             if (error) throw error
+
+            // Trigger Notification for Client
+            if (request && profile) {
+                const { NotificationTriggers } = await import("@/lib/notifications/notification-triggers")
+                await NotificationTriggers.triggerEmergencyResponseReceived(
+                    requestId,
+                    request.client_id,
+                    user.id,
+                    profile.full_name || "Técnico",
+                    quote.eta
+                )
+            }
 
             toast({
                 title: "Resposta Enviada!",
@@ -96,15 +115,61 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
         }
     }
 
+    useEffect(() => {
+        // Subscribe to emergency request changes (e.g. if client cancels or accepts another provider)
+        const channel = supabase
+            .channel(`emergency_${requestId}`)
+            .on(
+                "postgres_changes",
+                {
+                    event: "UPDATE",
+                    schema: "public",
+                    table: "emergency_requests",
+                    filter: `id=eq.${requestId}`
+                },
+                (payload) => {
+                    setRequest(prev => ({ ...prev, ...payload.new } as EmergencyRequest))
+                    if (payload.new.status === 'cancelled') {
+                        toast({ title: "Atenção", description: "O cliente cancelou esta emergência.", variant: "destructive" })
+                    } else if (payload.new.status === 'accepted') {
+                        // In a real app we'd check if it was accepted for US or someone else
+                        // here we just refresh to see the new state
+                        fetchRequest()
+                    }
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [requestId])
+
     const handleStartJourney = async () => {
         try {
             setIsResponding(true)
+            const { data: { user } } = await supabase.auth.getUser()
+
             const { error } = await supabase
                 .from("emergency_requests")
                 .update({ status: 'in_progress' })
                 .eq("id", requestId)
 
             if (error) throw error
+
+            // Trigger Notification for Client
+            if (request && user) {
+                // Fetch provider profile to get name
+                const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+
+                const { NotificationTriggers } = await import("@/lib/notifications/notification-triggers")
+                await NotificationTriggers.triggerEmergencyJourneyStarted(
+                    requestId,
+                    request.client_id,
+                    user.id,
+                    profile?.full_name || "Técnico"
+                )
+            }
 
             toast({ title: "Boa viagem!", description: "O cliente foi informado que já está a caminho." })
             fetchRequest()

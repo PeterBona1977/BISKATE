@@ -265,6 +265,65 @@ export class NotificationTriggers {
       userEmail,
     })
   }
+
+  /**
+   * Dispara gatilho quando uma resposta de emergência é recebida
+   */
+  static async triggerEmergencyResponseReceived(
+    emergencyId: string,
+    clientId: string,
+    providerId: string,
+    providerName: string,
+    eta: string
+  ) {
+    console.log("🔔 Triggering: emergency_response_received")
+
+    await triggerNotificationAction("emergency_response_received", {
+      emergencyId,
+      userId: clientId, // Client receives notification
+      providerId,
+      userName: providerName,
+      eta
+    })
+  }
+
+  /**
+   * Dispara gatilho quando uma resposta de emergência é aceite
+   */
+  static async triggerEmergencyResponseAccepted(
+    emergencyId: string,
+    providerId: string,
+    clientId: string,
+    clientName: string
+  ) {
+    console.log("🔔 Triggering: emergency_response_accepted")
+
+    await triggerNotificationAction("emergency_response_accepted", {
+      emergencyId,
+      userId: providerId, // Provider receives notification
+      clientId,
+      userName: clientName
+    })
+  }
+
+  /**
+   * Dispara gatilho quando o profissional inicia o trajeto
+   */
+  static async triggerEmergencyJourneyStarted(
+    emergencyId: string,
+    clientId: string,
+    providerId: string,
+    providerName: string
+  ) {
+    console.log("🔔 Triggering: emergency_journey_started")
+
+    await triggerNotificationAction("emergency_journey_started", {
+      emergencyId,
+      userId: clientId, // Client receives notification
+      providerId,
+      userName: providerName
+    })
+  }
 }
 
 // Export constants from the separate file for backward compatibility

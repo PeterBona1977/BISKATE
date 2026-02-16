@@ -134,12 +134,30 @@ export default function EmergencyTrackingPage() {
         try {
             setIsSelecting(true)
             await EmergencyService.clientAcceptProvider(id, providerId)
+
+            // Trigger Notification for Provider
+            const provider = responses.find(r => r.provider_id === providerId)?.provider
+            if (provider) {
+                const { NotificationTriggers } = await import("@/lib/notifications/notification-triggers")
+                // Fetch client name (current user)
+                const { data: { user } } = await supabase.auth.getUser()
+                const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user?.id || '').single()
+
+                await NotificationTriggers.triggerEmergencyResponseAccepted(
+                    id,
+                    providerId,
+                    user?.id || '',
+                    profile?.full_name || "Cliente"
+                )
+            }
+
             toast({
                 title: "Técnico Selecionado!",
                 description: "O profissional foi confirmado e está a caminho.",
             })
             fetchRequest()
         } catch (err) {
+            console.error(err)
             toast({ title: "Erro", description: "Falha ao selecionar técnico.", variant: "destructive" })
         } finally {
             setIsSelecting(false)

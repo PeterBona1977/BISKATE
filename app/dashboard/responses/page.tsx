@@ -53,32 +53,65 @@ export default function ProposalsPage() {
   })
   const [selectedTab, setSelectedTab] = useState("all")
 
+  /* State for Gigs to enable subscription */
+  const [userGigIds, setUserGigIds] = useState<string[]>([])
+
   useEffect(() => {
     if (user) {
       loadProposals()
     }
   }, [user])
 
-  const loadProposals = async () => {
+  // Realtime Subscription
+  useEffect(() => {
+    if (!user || userGigIds.length === 0) return
+
+    const channel = supabase.channel('proposals_realtime')
+
+    // Subscribe to each gig's responses
+    userGigIds.forEach(gigId => {
+      channel.on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'gig_responses',
+          filter: `gig_id=eq.${gigId}`
+        },
+        () => {
+          // Re-fetch only proposals, or everything. 
+          // Since we need to join data, simplest is re-running the main fetch logic (minus the gigs fetch if we separated them, but re-fetching all is safe)
+          loadProposals(false) // Pass false to skip reloading gig IDs if they rarely change
+        }
+      )
+    })
+
+    channel.subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user, userGigIds])
+
+  const loadProposals = async (fetchGigs = true) => {
     if (!user) return
 
     try {
       setLoading(true)
 
-      // Buscar todas as propostas para os gigs do usuário
-      const { data: userGigs, error: gigsError } = await supabase.from("gigs").select("id").eq("author_id", user.id)
+      let gigIds = userGigIds
 
-      if (gigsError) {
-        console.error("Erro ao carregar gigs:", gigsError)
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os seus Gigs",
-          variant: "destructive",
-        })
-        return
+      if (fetchGigs) {
+        // Buscar todas as propostas para os gigs do usuário
+        const { data: userGigs, error: gigsError } = await supabase.from("gigs").select("id").eq("author_id", user.id)
+
+        if (gigsError) {
+          console.error("Erro ao carregar gigs:", gigsError)
+          return
+        }
+        gigIds = userGigs?.map((g) => g.id) || []
+        setUserGigIds(gigIds)
       }
-
-      const gigIds = userGigs?.map((g) => g.id) || []
 
       if (gigIds.length === 0) {
         setProposals([])

@@ -39,6 +39,26 @@ export default function MyGigsPage() {
   useEffect(() => {
     if (user) {
       fetchMyGigs()
+
+      const channel = supabase
+        .channel('my_gigs_realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'gigs',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => {
+            fetchMyGigs()
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
     }
   }, [user])
 

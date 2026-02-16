@@ -52,6 +52,23 @@ export default function MessagesPage() {
   useEffect(() => {
     if (user?.id) {
       loadConversations()
+
+      // Realtime subscription for conversation updates
+      const channel = supabase
+        .channel('conversations_list')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'conversations'
+        }, () => {
+          // Simplest is to reload the whole list to catch participant changes/last messages
+          loadConversations()
+        })
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
     }
   }, [user?.id])
 
