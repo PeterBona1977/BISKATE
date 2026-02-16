@@ -145,7 +145,6 @@ export function NotificationsDropdown({ mode }: { mode?: "client" | "provider" |
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="relative hover:bg-white/10 transition-colors">
             <Bell className="h-5 w-5" />
-            <div className="absolute -bottom-1 -left-1 bg-red-600 text-white text-[8px] px-0.5 rounded-full font-bold">V5</div>
             {unreadCount > 0 && (
               <Badge
                 variant="destructive"
