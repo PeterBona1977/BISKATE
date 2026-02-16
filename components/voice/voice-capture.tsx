@@ -280,6 +280,7 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
       // Manipular fim do reconhecimento
       recognition.onend = () => {
         console.log("Reconhecimento de voz terminou")
+        addDebugLog("Evento: onend (Voz terminou)")
         // Edge às vezes termina prematuramente. Só paramos se o usuário pediu ou se houve erro fatal.
         // Verificamos o estado 'isRecording' (que é gerenciado pelo React, cuidado com stale closures aqui)
         // Mas como onend é closure, precisamos usar a ref ou lógica externa se quisermos reiniciar.
@@ -290,6 +291,7 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
       // Manipular erros
       recognition.onerror = (event: any) => {
         console.error("Erro de reconhecimento de voz:", event.error)
+        addDebugLog(`Evento: onerror (${event.error})`)
 
         // Ignorar erros "no-speech" ou "aborted" que são comuns e não requerem feedback visual agressivo
         if (event.error === 'no-speech') {
@@ -306,8 +308,14 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
       }
 
       // Iniciar o reconhecimento
-      recognition.start()
-      setVoiceText("") // Limpar texto anterior ao começar nova gravação
+      addDebugLog("Chamando recognition.start()...")
+      try {
+        recognition.start()
+        setVoiceText("") // Limpar texto anterior ao começar nova gravação
+      } catch (startErr) {
+        addDebugLog(`Erro ao chamar start(): ${startErr}`)
+        throw startErr
+      }
     } catch (err) {
       console.error("Erro ao iniciar reconhecimento de voz:", err)
       setError(
