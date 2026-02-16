@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { notificationService } from "@/lib/notifications/notification-service"
 
 import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 
 export default function NotificationsPage() {
   const t = useTranslations("Dashboard.Notifications")
