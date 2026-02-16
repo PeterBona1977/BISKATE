@@ -221,8 +221,20 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
 
       // Configurar o reconhecimento
       recognition.lang = "pt-PT" // Português de Portugal
-      recognition.continuous = true
-      recognition.interimResults = true
+
+      // Edge fix: 'continuous' e 'interimResults' causam instabilidade no Edge.
+      // Desativamos para garantir funcionalidade básica.
+      const isEdge = navigator.userAgent.indexOf("Edg") !== -1
+
+      if (isEdge) {
+        console.log("Edge detectado: Usando modo de compatibilidade (sem contínuo/interim)")
+        recognition.continuous = false
+        recognition.interimResults = false
+      } else {
+        recognition.continuous = true
+        recognition.interimResults = true
+      }
+
       recognition.maxAlternatives = 1
 
       // Manipular resultados
