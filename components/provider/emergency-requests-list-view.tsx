@@ -55,14 +55,35 @@ export function EmergencyRequestsListView() {
     const fetchEmergencies = async () => {
         try {
             setLoading(true)
-            // Fetch all requests that are either pending OR involve this provider
-            const { data, error } = await supabase
+            if (!profile?.id) return
+
+            // 1. Fetch all requests
+            const { data: allRequests, error: reqError } = await supabase
                 .from("emergency_requests")
                 .select("*")
                 .order("created_at", { ascending: false })
 
-            if (error) throw error
-            setRequests(data || [])
+            if (reqError) throw reqError
+
+            // 2. Fetch my responses to check for rejections
+            const { data: myResponses, error: resError } = await supabase
+                .from("emergency_responses")
+                .select("emergency_id, status")
+                .eq("provider_id", profile.id)
+
+            if (resError) throw resError
+
+            // Filter logic
+            const currentRequests = (allRequests || []) as EmergencyRequest[]
+
+            // Map responses for easy lookup
+            const responseMap = new Map(myResponses?.map(r => [r.emergency_id, r.status]))
+
+            setRequests(currentRequests.map(r => ({
+                ...r,
+                my_response_status: responseMap.get(r.id)
+            })))
+
         } catch (err) {
             console.error("Error fetching emergencies:", err)
         } finally {
@@ -70,9 +91,27 @@ export function EmergencyRequestsListView() {
         }
     }
 
-    const activeRequests = requests.filter(r => r.status === 'pending')
-    const myRequests = requests.filter(r => r.provider_id === profile?.id)
-    const inactiveRequests = requests.filter(r => r.status !== 'pending' && r.provider_id !== profile?.id)
+    // NEW FILTER LOGIC:
+    // 1- "Novos Pedidos" - to show new active solicitations (pending)
+    const newRequests = requests.filter(r => r.status === 'pending')
+
+    // 2- "Ativas" - Accepted active emergencies (assigned to me)
+    const activeRequests = requests.filter(r =>
+        (r.status === 'accepted' || r.status === 'in_progress') && r.provider_id === profile?.id
+    )
+
+    // 3- "Recusadas" - solicitations not accepted by provider (my response was rejected OR client accepted someone else)
+    const refusedRequests = requests.filter(r =>
+        // I responded but was rejected
+        (r.my_response_status === 'rejected') ||
+        // It's no longer pending, not my job, and I HAD a response there
+        (r.status !== 'pending' && r.provider_id !== profile?.id && r.my_response_status) ||
+        // Explicitly cancelled after I was involved
+        (r.status === 'cancelled' && r.my_response_status)
+    )
+
+    // 4- "Concluidas" - Solicitations already Concluded by Provider
+    const concludedRequests = requests.filter(r => r.status === 'completed' && r.provider_id === profile?.id)
 
     const RequestCard = ({ req, isInactive }: { req: EmergencyRequest, isInactive?: boolean }) => (
         <Card
@@ -142,22 +181,35 @@ export function EmergencyRequestsListView() {
                 <p className="text-muted-foreground font-medium">Controle os seus serviços urgentes e visualize novas oportunidades.</p>
             </div>
 
-            <Tabs defaultValue="active" className="w-full">
+            <Tabs defaultValue="new" className="w-full">
                 <TabsList className="bg-gray-100 p-1 rounded-xl h-auto flex-wrap mb-6">
+                    <TabsTrigger value="new" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
+                        Novos Pedidos ({newRequests.length})
+                    </TabsTrigger>
                     <TabsTrigger value="active" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
                         Ativas ({activeRequests.length})
                     </TabsTrigger>
-                    <TabsTrigger value="my" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
-                        Realizadas ({myRequests.length})
+                    <TabsTrigger value="refused" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
+                        Recusadas ({refusedRequests.length})
                     </TabsTrigger>
-                    <TabsTrigger value="inactive" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
-                        Inativas ({inactiveRequests.length})
+                    <TabsTrigger value="concluded" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
+                        Concluídas ({concludedRequests.length})
                     </TabsTrigger>
                 </TabsList>
 
+                <TabsContent value="new" className="mt-0">
+                    {newRequests.length === 0 ? (
+                        <EmptyState message="Sem novos pedidos no momento." />
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {newRequests.map(req => <RequestCard key={req.id} req={req} />)}
+                        </div>
+                    )}
+                </TabsContent>
+
                 <TabsContent value="active" className="mt-0">
                     {activeRequests.length === 0 ? (
-                        <EmptyState message="Sem emergências pendentes no radar." />
+                        <EmptyState message="Não tem emergências ativas." />
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {activeRequests.map(req => <RequestCard key={req.id} req={req} />)}
@@ -165,22 +217,22 @@ export function EmergencyRequestsListView() {
                     )}
                 </TabsContent>
 
-                <TabsContent value="my" className="mt-0">
-                    {myRequests.length === 0 ? (
-                        <EmptyState message="Ainda não realizou serviços de emergência." />
+                <TabsContent value="refused" className="mt-0">
+                    {refusedRequests.length === 0 ? (
+                        <EmptyState message="Nenhuma solicitação recusada." />
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {myRequests.map(req => <RequestCard key={req.id} req={req} />)}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-muted-foreground">
+                            {refusedRequests.map(req => <RequestCard key={req.id} req={req} isInactive />)}
                         </div>
                     )}
                 </TabsContent>
 
-                <TabsContent value="inactive" className="mt-0">
-                    {inactiveRequests.length === 0 ? (
-                        <EmptyState message="Nenhuma emergência inativa registada." />
+                <TabsContent value="concluded" className="mt-0">
+                    {concludedRequests.length === 0 ? (
+                        <EmptyState message="Ainda não concluiu serviços de emergência." />
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-muted-foreground">
-                            {inactiveRequests.map(req => <RequestCard key={req.id} req={req} isInactive />)}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {concludedRequests.map(req => <RequestCard key={req.id} req={req} />)}
                         </div>
                     )}
                 </TabsContent>

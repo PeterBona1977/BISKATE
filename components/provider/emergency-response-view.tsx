@@ -11,6 +11,7 @@ import { Loader2, MapPin, Clock, DollarSign, Phone, CheckCircle2, AlertTriangle,
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { EmergencyService } from "@/lib/emergency/emergency-service"
 
 interface EmergencyRequest {
     id: string
@@ -23,6 +24,7 @@ interface EmergencyRequest {
     price_multiplier: number
     created_at: string
     client_id: string
+    provider_id?: string
 }
 
 export function EmergencyResponseView({ requestId }: { requestId: string }) {
@@ -71,31 +73,13 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error("Não autenticado")
 
-            // Fetch provider profile to get name
-            const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
-
-            const { error } = await supabase
-                .from("emergency_responses")
-                .insert({
-                    emergency_id: requestId,
-                    provider_id: user.id,
-                    quote_details: quote,
-                    status: 'pending'
-                })
+            const { error } = await EmergencyService.respondToEmergency({
+                requestId,
+                providerId: user.id,
+                quote
+            })
 
             if (error) throw error
-
-            // Trigger Notification for Client
-            if (request && profile) {
-                const { NotificationTriggers } = await import("@/lib/notifications/notification-triggers")
-                await NotificationTriggers.triggerEmergencyResponseReceived(
-                    requestId,
-                    request.client_id,
-                    user.id,
-                    profile.full_name || "Técnico",
-                    quote.eta
-                )
-            }
 
             toast({
                 title: "Resposta Enviada!",
@@ -148,8 +132,6 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
     const handleStartJourney = async () => {
         try {
             setIsResponding(true)
-            const { data: { user } } = await supabase.auth.getUser()
-
             const { error } = await supabase
                 .from("emergency_requests")
                 .update({ status: 'in_progress' })
@@ -157,25 +139,28 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
 
             if (error) throw error
 
-            // Trigger Notification for Client
-            if (request && user) {
-                // Fetch provider profile to get name
-                const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
-
-                const { NotificationTriggers } = await import("@/lib/notifications/notification-triggers")
-                await NotificationTriggers.triggerEmergencyJourneyStarted(
-                    requestId,
-                    request.client_id,
-                    user.id,
-                    profile?.full_name || "Técnico"
-                )
-            }
-
             toast({ title: "Boa viagem!", description: "O cliente foi informado que já está a caminho." })
             fetchRequest()
         } catch (err: any) {
             console.error("Error starting journey:", err)
             toast({ title: "Erro", description: "Falha ao iniciar trajeto.", variant: "destructive" })
+        } finally {
+            setIsResponding(false)
+        }
+    }
+
+    const handleComplete = async () => {
+        try {
+            setIsResponding(true)
+            const { error } = await EmergencyService.completeEmergency(requestId)
+
+            if (error) throw error
+
+            toast({ title: "Serviço Concluído!", description: "O cliente foi notificado da conclusão do serviço." })
+            fetchRequest()
+        } catch (err: any) {
+            console.error("Error completing emergency:", err)
+            toast({ title: "Erro", description: "Falha ao concluir serviço.", variant: "destructive" })
         } finally {
             setIsResponding(false)
         }
@@ -202,7 +187,9 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
     }
 
     const isPending = request.status === "pending"
-    const isAcceptedByMe = request.status === "accepted" // Simplification: in real app, check if provider_id === current user
+    const isAccepted = request.status === "accepted"
+    const isInProgress = request.status === "in_progress"
+    const isCompleted = request.status === "completed"
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -331,7 +318,7 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                         <p className="text-xl font-black uppercase italic">Serviço Confirmado!</p>
                                     </div>
 
-                                    {request.status === 'accepted' ? (
+                                    {isAccepted ? (
                                         <Button
                                             className="w-full h-16 text-xl font-bold bg-white text-green-600 hover:bg-gray-100 shadow-xl"
                                             onClick={handleStartJourney}
@@ -339,11 +326,24 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                         >
                                             INICIAR TRAJETO
                                         </Button>
-                                    ) : (
+                                    ) : isInProgress ? (
+                                        <div className="space-y-4">
+                                            <Badge className="w-full py-3 bg-white/20 text-white text-lg font-bold border-none uppercase">
+                                                EM TRAJETO...
+                                            </Badge>
+                                            <Button
+                                                className="w-full h-16 text-xl font-bold bg-white text-blue-600 hover:bg-gray-100 shadow-xl"
+                                                onClick={handleComplete}
+                                                disabled={isResponding}
+                                            >
+                                                FINALIZAR SERVIÇO
+                                            </Button>
+                                        </div>
+                                    ) : isCompleted ? (
                                         <Badge className="w-full py-3 bg-white/20 text-white text-lg font-bold border-none uppercase">
-                                            EM TRAJETO...
+                                            SERVIÇO CONCLUÍDO
                                         </Badge>
-                                    )}
+                                    ) : null}
 
                                     <Button
                                         variant="outline"

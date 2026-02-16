@@ -135,21 +135,11 @@ export default function EmergencyTrackingPage() {
             setIsSelecting(true)
             await EmergencyService.clientAcceptProvider(id, providerId)
 
-            // Trigger Notification for Provider
-            const provider = responses.find(r => r.provider_id === providerId)?.provider
-            if (provider) {
-                const { NotificationTriggers } = await import("@/lib/notifications/notification-triggers")
-                // Fetch client name (current user)
-                const { data: { user } } = await supabase.auth.getUser()
-                const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user?.id || '').single()
-
-                await NotificationTriggers.triggerEmergencyResponseAccepted(
-                    id,
-                    providerId,
-                    user?.id || '',
-                    profile?.full_name || "Cliente"
-                )
-            }
+            toast({
+                title: "Técnico Selecionado!",
+                description: "O profissional foi confirmado e está a caminho.",
+            })
+            fetchRequest()
 
             toast({
                 title: "Técnico Selecionado!",
@@ -223,6 +213,7 @@ export default function EmergencyTrackingPage() {
     ].filter(m => m.lat && m.lng)
 
     const isAccepted = request.status === 'accepted' || request.status === 'in_progress'
+    const isCompleted = request.status === 'completed'
 
     return (
         <div className="max-w-7xl mx-auto pb-20 px-4 md:px-8">
@@ -415,6 +406,38 @@ export default function EmergencyTrackingPage() {
                             </Button>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {isCompleted && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                    <Card className="max-w-md w-full border-none shadow-2xl rounded-3xl overflow-hidden bg-white animate-in zoom-in-95 duration-500">
+                        <div className="bg-green-600 h-2 w-full" />
+                        <CardContent className="p-8 text-center space-y-6">
+                            <div className="h-24 w-24 bg-green-50 rounded-full flex items-center justify-center mx-auto border-4 border-green-100">
+                                <CheckCircle2 className="h-12 w-12 text-green-600" />
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-3xl font-black italic tracking-tight uppercase text-gray-900">Serviço Concluído!</h3>
+                                <p className="text-gray-600">A sua emergência foi resolvida com sucesso. Esperamos ter ajudado!</p>
+                            </div>
+                            <div className="pt-4 space-y-3">
+                                <Button
+                                    className="w-full h-14 bg-black text-white hover:bg-gray-800 font-black rounded-2xl"
+                                    onClick={() => router.push('/dashboard')}
+                                >
+                                    VOLTAR AO DASHBOARD
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-12 border-2 border-gray-100 font-bold rounded-2xl"
+                                    onClick={() => router.push(`/dashboard/emergency/${id}/invoice`)}
+                                >
+                                    VER FATURA / DETALHES
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
             )}
 

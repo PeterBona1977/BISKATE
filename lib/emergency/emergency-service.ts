@@ -203,7 +203,13 @@ export class EmergencyService {
             eta: string
         }
     }) {
-        return supabase
+        const { data: request } = await supabase
+            .from("emergency_requests")
+            .select("client_id, category")
+            .eq("id", data.requestId)
+            .single()
+
+        const response = await supabase
             .from("emergency_responses")
             .insert({
                 emergency_id: data.requestId,
@@ -211,6 +217,21 @@ export class EmergencyService {
                 quote_details: data.quote,
                 status: 'pending'
             })
+            .select()
+            .single()
+
+        if (request) {
+            await notificationService.createNotification({
+                user_id: request.client_id,
+                title: "🚨 Nova Proposta de Emergência",
+                message: `Um prestador respondeu ao seu pedido de ${request.category}.`,
+                type: "info",
+                user_type: "client",
+                action_url: `/dashboard/emergency/${data.requestId}`
+            })
+        }
+
+        return response
     }
 
     /**
@@ -230,18 +251,18 @@ export class EmergencyService {
         // 1. Get the quote first to know amount
         const { data: response } = await supabase
             .from("emergency_responses")
-            .select("quote_details")
+            .select("quote_details, emergency:emergency_requests(client_id, category)")
             .eq("emergency_id", requestId)
             .eq("provider_id", providerId)
             .single()
 
         if (!response) throw new Error("Response not found")
+        const request = response.emergency as any
 
         // PLACEHOLDER: Debit Logic
         // In a real app, this would call Stripe/Payment Provider to capture funds
         // Amount = response.quote_details.price_per_hour * response.quote_details.min_hours
         console.log(`💰 DEBITING CLIENT: Quote accepted for ${requestId}. Provider: ${providerId}`)
-        console.log(`💳 Amount: ${response.quote_details.price_per_hour * response.quote_details.min_hours}€`)
 
         // 2. Update the request with the chosen provider
         const { error: requestError } = await supabase
@@ -252,7 +273,6 @@ export class EmergencyService {
                 accepted_at: new Date().toISOString(),
             })
             .eq("id", requestId)
-            // Safety check: ensure it's not already accepted
             .neq("status", "accepted")
 
         if (requestError) throw requestError
@@ -265,21 +285,37 @@ export class EmergencyService {
             .eq("provider_id", providerId)
 
         // 4. Reject other responses
-        await supabase
+        const { data: otherResponses } = await supabase
             .from("emergency_responses")
             .update({ status: 'rejected' })
             .eq("emergency_id", requestId)
             .neq("provider_id", providerId)
+            .select("provider_id")
 
-        // 5. Create Transaction Record (Placeholder)
-        await supabase.from("transactions").insert({
-            user_id: (await supabase.auth.getUser()).data.user?.id, // Client
-            provider_id: providerId,
-            amount: response.quote_details.price_per_hour * response.quote_details.min_hours,
-            type: "emergency_debit",
-            status: "completed",
-            description: "Emergency Service Hold"
-        }).select().maybeSingle() // Use maybeSingle to avoid throw if table missing/RLS
+        // 5. Notifications
+        // Notify accepted provider
+        await notificationService.createNotification({
+            user_id: providerId,
+            title: "✅ Proposta Aceite!",
+            message: `O cliente aceitou a sua proposta para a emergência de ${request.category}.`,
+            type: "success",
+            user_type: "provider",
+            action_url: `/dashboard/provider/emergency/${requestId}`
+        })
+
+        // Notify rejected providers
+        if (otherResponses && otherResponses.length > 0) {
+            await Promise.all(otherResponses.map(r =>
+                notificationService.createNotification({
+                    user_id: r.provider_id,
+                    title: "❌ Proposta Recusada",
+                    message: `O cliente escolheu outro prestador para a emergência de ${request.category}.`,
+                    type: "warning",
+                    user_type: "provider",
+                    action_url: `/dashboard/provider/emergency`
+                })
+            ))
+        }
 
         return { success: true }
     }
@@ -288,17 +324,74 @@ export class EmergencyService {
      * Cancel an emergency request
      */
     static async cancelEmergency(requestId: string) {
-        // Check current status first to prevent cancelling accepted jobs without penalty logic
-        const { data: req } = await supabase.from("emergency_requests").select("status").eq("id", requestId).single()
+        // Check current status first
+        const { data: req } = await supabase
+            .from("emergency_requests")
+            .select("status, provider_id, category, client_id")
+            .eq("id", requestId)
+            .single()
 
         if (req?.status === 'accepted' || req?.status === 'in_progress') {
             throw new Error("Cannot cancel an accepted emergency job without support intervention. Fee applies.")
         }
 
-        return supabase
+        const result = await supabase
             .from("emergency_requests")
             .update({ status: 'cancelled' })
             .eq("id", requestId)
+
+        // Notify providers who responded
+        const { data: responses } = await supabase
+            .from("emergency_responses")
+            .select("provider_id")
+            .eq("emergency_id", requestId)
+
+        if (responses && responses.length > 0) {
+            await Promise.all(responses.map(r =>
+                notificationService.createNotification({
+                    user_id: r.provider_id,
+                    title: "🚫 Emergência Cancelada",
+                    message: `O cliente cancelou o pedido de emergência (${req?.category}).`,
+                    type: "warning",
+                    user_type: "provider"
+                })
+            ))
+        }
+
+        return result
+    }
+
+    /**
+     * Mark emergency as completed
+     */
+    static async completeEmergency(requestId: string) {
+        const { data: req } = await supabase
+            .from("emergency_requests")
+            .select("client_id, category, provider_id")
+            .eq("id", requestId)
+            .single()
+
+        const result = await supabase
+            .from("emergency_requests")
+            .update({
+                status: 'completed',
+                completed_at: new Date().toISOString()
+            })
+            .eq("id", requestId)
+
+        if (req) {
+            // Notify client
+            await notificationService.createNotification({
+                user_id: req.client_id,
+                title: "🏁 Emergência Concluída",
+                message: `O prestador marcou o serviço de ${req.category} como concluído.`,
+                type: "success",
+                user_type: "client",
+                action_url: `/dashboard/emergency/${requestId}`
+            })
+        }
+
+        return result
     }
 
     /**
