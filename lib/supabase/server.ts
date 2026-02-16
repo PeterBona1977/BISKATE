@@ -47,6 +47,8 @@ export const createServerSupabaseClient = createClient
 
 export async function getServerSession() {
   const supabase = await createClient()
+  if (!supabase) return null
+
   try {
     const {
       data: { session },
@@ -60,6 +62,8 @@ export async function getServerSession() {
 
 export async function getServerUser() {
   const supabase = await createClient()
+  if (!supabase) return null
+
   try {
     const {
       data: { user },
