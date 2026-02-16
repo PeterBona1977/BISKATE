@@ -41,8 +41,98 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
   const [permissionStatus, setPermissionStatus] = useState<PermissionState | null>(null)
   const [debugLogs, setDebugLogs] = useState<string[]>([])
 
+  // Audio Input State
+  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([])
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("")
+  const [audioLevel, setAudioLevel] = useState<number>(0)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const animationFrameRef = useRef<number | null>(null)
+
   const addDebugLog = (msg: string) => {
     setDebugLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 10))
+  }
+
+  // Listar dispositivos
+  const enumerateDevices = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const audioInputs = devices.filter(d => d.kind === 'audioinput')
+      setAudioDevices(audioInputs)
+      // Se já tivermos um selecionado, mantemos. Se não, pegamos o padrão.
+      if (!selectedDeviceId && audioInputs.length > 0) {
+        // Tenta achar o 'default' ou pega o primeiro
+        const defaultDevice = audioInputs.find(d => d.deviceId === 'default') || audioInputs[0]
+        setSelectedDeviceId(defaultDevice.deviceId)
+      }
+      addDebugLog(`Dispositivos encontrados: ${audioInputs.length}`)
+    } catch (err) {
+      console.error("Erro ao listar dispositivos", err)
+      addDebugLog("Erro ao listar dispositivos de áudio")
+    }
+  }
+
+  // Inicializar o monitoramento de áudio (Visualizador)
+  const startAudioVisualizer = async () => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+      }
+
+      const constraints = {
+        audio: selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : true
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+
+      const analyser = audioContextRef.current.createAnalyser()
+      analyser.fftSize = 256
+      const source = audioContextRef.current.createMediaStreamSource(stream)
+      source.connect(analyser)
+
+      analyserRef.current = analyser
+      sourceRef.current = source
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount)
+
+      const updateLevel = () => {
+        if (!analyserRef.current) return
+        analyserRef.current.getByteFrequencyData(dataArray)
+
+        // Média simples do volume
+        let sum = 0
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i]
+        }
+        const average = sum / dataArray.length
+        setAudioLevel(average / 128) // Normaliza 0-2 (aproximadamente)
+
+        animationFrameRef.current = requestAnimationFrame(updateLevel)
+      }
+
+      updateLevel()
+    } catch (err) {
+      console.error("Erro ao iniciar visualizador de áudio", err)
+    }
+  }
+
+  const stopAudioVisualizer = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current)
+    }
+    if (sourceRef.current) {
+      sourceRef.current.disconnect()
+      // Importante: parar as tracks do stream para soltar o microfone
+      if (sourceRef.current.mediaStream) {
+        sourceRef.current.mediaStream.getTracks().forEach(t => t.stop())
+      }
+    }
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close()
+      audioContextRef.current = null
+    }
+    setAudioLevel(0)
   }
 
   // Referências para o reconhecimento de voz
@@ -76,18 +166,28 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
         .query({ name: "microphone" as PermissionName })
         .then((status) => {
           setPermissionStatus(status.state)
+          if (status.state === 'granted') {
+            enumerateDevices()
+          }
 
           status.onchange = () => {
             setPermissionStatus(status.state)
+            if (status.state === 'granted') {
+              enumerateDevices()
+            }
           }
         })
         .catch((err) => {
           console.error("Erro ao verificar permissão:", err)
         })
+    } else {
+      // Fallback for browsers without permissions API
+      enumerateDevices()
     }
 
     // Limpar ao desmontar
     return () => {
+      stopAudioVisualizer()
       if (recognitionRef.current) {
         recognitionRef.current.onresult = null
         recognitionRef.current.onend = null
@@ -391,25 +491,58 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
             </Alert>
           )}
 
+          {/* Seletor de Microfone */}
+          <div className="flex flex-col space-y-2">
+            <Label htmlFor="mic-select" className="text-xs text-gray-500">Microfone</Label>
+            <select
+              id="mic-select"
+              className="w-full text-sm border rounded p-1.5 bg-white"
+              value={selectedDeviceId}
+              onChange={(e) => setSelectedDeviceId(e.target.value)}
+              disabled={isRecording}
+            >
+              {audioDevices.length === 0 && <option value="">Padrão</option>}
+              {audioDevices.map((device) => (
+                <option key={device.deviceId} value={device.deviceId}>
+                  {device.label || `Microfone ${device.deviceId.slice(0, 5)}...`}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-blue-500 cursor-pointer hover:underline" onClick={enumerateDevices}>
+              🔄 Atualizar lista
+            </p>
+          </div>
+
           {/* Indicador de gravação */}
           <div className="flex flex-col items-center space-y-4 py-6">
             <div
               className={cn(
                 "relative flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300",
                 isRecording
-                  ? "bg-red-100 border-4 border-red-300 animate-pulse"
+                  ? "bg-red-100 border-4 border-red-300" // Removido animate-pulse para usar visualizador real
                   : "bg-gray-100 border-4 border-gray-300",
               )}
+              style={{
+                transform: isRecording ? `scale(${1 + Math.min(audioLevel * 2, 0.5)})` : 'scale(1)',
+                boxShadow: isRecording ? `0 0 ${audioLevel * 50}px rgba(239, 68, 68, 0.6)` : 'none'
+              }}
             >
               {isRecording ? <MicOff className="h-8 w-8 text-red-600" /> : <Mic className="h-8 w-8 text-gray-600" />}
-
-              {isRecording && <div className="absolute inset-0 rounded-full border-4 border-red-400 animate-ping" />}
             </div>
 
             {isRecording && (
-              <div className="flex items-center space-x-2 text-red-600">
-                <Volume2 className="h-4 w-4 animate-pulse" />
-                <span className="text-sm font-medium">A gravar... Fale agora!</span>
+              <div className="flex flex-col items-center space-y-1">
+                <div className="flex items-center space-x-2 text-red-600">
+                  <Volume2 className="h-4 w-4" />
+                  <span className="text-sm font-medium">A ouvir...</span>
+                </div>
+                {/* Barra de volume visual */}
+                <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-green-500 transition-all duration-100"
+                    style={{ width: `${Math.min(audioLevel * 100 * 3, 100)}%` }}
+                  />
+                </div>
               </div>
             )}
 
