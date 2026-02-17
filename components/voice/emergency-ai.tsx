@@ -356,7 +356,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         }
     }
 
-    const startListening = () => {
+    const startListening = async () => {
         if (!recognitionRef.current) return
 
         // Safety: If already listening, stop first to avoid 'InvalidStateError'
@@ -371,10 +371,25 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         // Stop assistant from talking when user wants to speak
         ttsService.stop()
 
+        // Explicitly request microphone permission to ensure prompt appears
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            // Clean up stream immediately, we just needed the permission
+            stream.getTracks().forEach(track => track.stop())
+        } catch (err) {
+            console.error("Microphone permission denied:", err)
+            toast({
+                title: "Permissão Negada",
+                description: "Por favor, permita o acesso ao microfone para usar o assistente de voz.",
+                variant: "destructive"
+            })
+            return
+        }
+
         setIsListening(true)
         setTranscript("")
 
-        recognitionRef.current.onresult = (event) => {
+        recognitionRef.current.onresult = (event: any) => {
             let current = ""
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 current += event.results[i][0].transcript
@@ -386,7 +401,11 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             setTranscript(current)
         }
 
-        recognitionRef.current.onerror = () => setIsListening(false)
+        recognitionRef.current.onerror = (event: any) => {
+            console.log("Speech Error:", event.error)
+            setIsListening(false)
+        }
+
         recognitionRef.current.onend = () => setIsListening(false)
 
         try {
