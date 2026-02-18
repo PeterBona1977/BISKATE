@@ -120,73 +120,12 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         // Safety cleanup for previous runs
         stopListening()
 
-        // 2. Request microphone and setup Visualizer
+        // 2. Pure Mode: Quick permission check then release
         try {
-            addDebugLog("Solicitando microfone...")
+            addDebugLog("Modo Puro: Solicitando acesso...")
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-            const activeMic = stream.getAudioTracks()[0]?.label || "Desconhecido"
-            const settings = stream.getAudioTracks()[0]?.getSettings()
-
-            addDebugLog(`Mic: ${activeMic.substring(0, 30)}...`)
-            addDebugLog(`Hz: ${settings?.sampleRate || '?'}`)
-            streamRef.current = stream
-
-            // Setup real-time audio level monitoring
-            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
-            addDebugLog(`AudioCtx: ${audioCtx.state} @ ${audioCtx.sampleRate}Hz`)
-
-            if (audioCtx.state === 'suspended') {
-                await audioCtx.resume()
-            }
-
-            const analyser = audioCtx.createAnalyser()
-            const source = audioCtx.createMediaStreamSource(stream)
-            source.connect(analyser)
-            sourceRef.current = source
-            analyser.fftSize = 256
-
-            audioContextRef.current = audioCtx
-            analyserRef.current = analyser
-
-            const dataArray = new Uint8Array(analyser.frequencyBinCount)
-            let hasReportedSignal = false
-            let reportSilenceTimer: NodeJS.Timeout | null = null
-
-            const updateLevel = () => {
-                if (!analyserRef.current) return
-                analyserRef.current.getByteFrequencyData(dataArray)
-                let sum = 0
-                let max = 0
-                for (let i = 0; i < dataArray.length; i++) {
-                    sum += dataArray[i]
-                    if (dataArray[i] > max) max = dataArray[i]
-                }
-                const average = sum / dataArray.length
-
-                // Nuclear logging: report any signal > 1 to see if it's "almost" working
-                if (average > 1 && !hasReportedSignal) {
-                    addDebugLog(`Sinal: Avg=${average.toFixed(1)}, Max=${max}`)
-                    if (average > 5) hasReportedSignal = true
-                }
-
-                setAudioLevel(average / 128)
-                animationFrameRef.current = requestAnimationFrame(updateLevel)
-            }
-            updateLevel()
-            addDebugLog("Visualizador ativo")
-
-            // IMPORTANT: Allow visualizer to stabilize before starting recognition
-            // This avoids hardware "busy" locks in some Android/Chrome versions
-            await new Promise(resolve => setTimeout(resolve, 500))
-
-            // Atomic silence detection
-            reportSilenceTimer = setTimeout(() => {
-                if (!hasReportedSignal && isListening) {
-                    addDebugLog("AVISO: Silêncio total detetado.")
-                    addDebugLog("DICA: Tente recarregar a página (F5).")
-                }
-            }, 5000)
-
+            stream.getTracks().forEach(track => track.stop()) // Release mic immediately
+            addDebugLog("Microfone pronto")
         } catch (err) {
             console.error("Mic error:", err)
             addDebugLog(`Erro Mic: ${err}`)
@@ -202,9 +141,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         const recognition = new SpeechRecognition()
         recognitionRef.current = recognition
 
-        // Continuous: true helps on Mobile/Chrome to keep motor alive after onnomatch
-        const isEdge = /Edg/.test(navigator.userAgent)
-        recognition.continuous = !isEdge
+        recognition.continuous = true
         recognition.interimResults = true
         recognition.lang = "pt-PT"
 
@@ -213,19 +150,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
         // 4. Event Handlers
         recognition.onstart = () => {
-            addDebugLog("Evento: onstart (Motor ativo)")
-        }
-
-        recognition.onaudiostart = () => {
-            addDebugLog("Evento: onaudiostart")
-        }
-
-        recognition.onsoundstart = () => {
-            addDebugLog("Evento: onsoundstart")
-        }
-
-        recognition.onspeechstart = () => {
-            addDebugLog("Evento: onspeechstart (Fala detetada!)")
+            addDebugLog("Motor ATIVO (Modo Puro)")
         }
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -235,9 +160,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 const text = event.results[i][0].transcript
                 current += text
-                if (event.results[i].isFinal) {
-                    isFinal = true
-                }
+                if (event.results[i].isFinal) isFinal = true
             }
 
             if (current) {
@@ -250,6 +173,10 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                     addDebugLog(`Parcial: ${current}`)
                 }
             }
+        }
+
+        recognition.onspeechstart = () => {
+            addDebugLog("!!! FALA DETETADA !!!")
         }
 
         recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
