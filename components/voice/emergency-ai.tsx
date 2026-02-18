@@ -11,37 +11,6 @@ import { Input } from "@/components/ui/input"
 import { ttsService } from "@/lib/voice/text-to-speech-service"
 import { supabase } from "@/lib/supabase/client"
 
-interface SpeechRecognitionEvent extends Event {
-    results: SpeechRecognitionResultList
-    resultIndex: number
-}
-
-interface SpeechRecognitionErrorEvent extends Event {
-    error: string
-}
-
-interface SpeechRecognition extends EventTarget {
-    continuous: boolean
-    interimResults: boolean
-    lang: string
-    start(): void
-    stop(): void
-    onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null
-    onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any) | null
-    onend: ((this: SpeechRecognition, ev: Event) => any) | null
-}
-
-interface SpeechRecognitionStatic {
-    new(): SpeechRecognition
-}
-
-declare global {
-    interface Window {
-        SpeechRecognition: SpeechRecognitionStatic
-        webkitSpeechRecognition: SpeechRecognitionStatic
-    }
-}
-
 interface Message {
     id: string
     role: "user" | "assistant"
@@ -78,12 +47,14 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     // Use HTMLDivElement for generic div, or specific if needed. The error 'scrollRef is not defined' is the priority.
     // Also adding recognitionRef since it's used in startListening.
     const scrollRef = useRef<HTMLDivElement>(null)
-    const recognitionRef = useRef<any>(null)
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+    const audioChunksRef = useRef<Blob[]>([])
     const streamRef = useRef<MediaStream | null>(null)
     const audioContextRef = useRef<AudioContext | null>(null)
     const analyserRef = useRef<AnalyserNode | null>(null)
     const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null)
     const animationFrameRef = useRef<number | null>(null)
+    const silenceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
     const addDebugLog = (msg: string) => {
         setDebugLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 10))
@@ -99,118 +70,106 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     // ... (rest of effects)
 
     const startListening = async () => {
-        addDebugLog("startListening() chamada!")
-        addDebugLog(`UA: ${navigator.userAgent.substring(0, 50)}...`)
-
-        // 1. Initial Check and cleanup
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-        if (!SpeechRecognition) {
-            addDebugLog("ERRO: SpeechRecognition NÃO disponível neste browser!")
-            toast({
-                title: "Voz Indisponível",
-                description: "O seu browser não suporta reconhecimento de voz. Tente Chrome ou Edge.",
-                variant: "destructive"
-            })
-            return
-        }
-
-        // Stop assistant from talking
+        addDebugLog("Modo Cloud STT: Iniciando...")
         ttsService.stop()
-
-        // Safety cleanup for previous runs
         stopListening()
 
-        // 2. Pure Mode: Quick permission check then release
         try {
-            addDebugLog("Modo Puro: Solicitando acesso...")
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-            stream.getTracks().forEach(track => track.stop()) // Release mic immediately
-            addDebugLog("Microfone pronto")
-        } catch (err) {
-            console.error("Mic error:", err)
-            addDebugLog(`Erro Mic: ${err}`)
-            toast({
-                title: "Microfone indisponível",
-                description: "Verifique se deu permissão de microfone.",
-                variant: "destructive"
-            })
-            return
-        }
+            streamRef.current = stream
 
-        // 3. Configure Recognition
-        const recognition = new SpeechRecognition()
-        recognitionRef.current = recognition
+            // 1. Setup Visualizer (Feedback visual)
+            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+            const analyser = audioCtx.createAnalyser()
+            const source = audioCtx.createMediaStreamSource(stream)
+            source.connect(analyser)
+            sourceRef.current = source
+            analyser.fftSize = 256
+            audioContextRef.current = audioCtx
+            analyserRef.current = analyser
 
-        recognition.continuous = true
-        recognition.interimResults = true
-        recognition.lang = "pt-PT"
+            const dataArray = new Uint8Array(analyser.frequencyBinCount)
+            let lastActiveTime = Date.now()
 
-        setIsListening(true)
-        setTranscript("")
+            const updateLevel = () => {
+                if (!analyserRef.current) return
+                analyserRef.current.getByteFrequencyData(dataArray)
+                let sum = 0
+                for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
+                const average = sum / dataArray.length
 
-        // 4. Event Handlers
-        recognition.onstart = () => {
-            addDebugLog("Motor ATIVO (Modo Puro)")
-        }
+                if (average > 3) lastActiveTime = Date.now()
+                setAudioLevel(average / 128)
+                animationFrameRef.current = requestAnimationFrame(updateLevel)
+            }
+            updateLevel()
 
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-            let current = ""
-            let isFinal = false
+            // 2. Setup MediaRecorder
+            const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" })
+            mediaRecorderRef.current = mediaRecorder
+            audioChunksRef.current = []
 
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const text = event.results[i][0].transcript
-                current += text
-                if (event.results[i].isFinal) isFinal = true
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) audioChunksRef.current.push(e.data)
             }
 
-            if (current) {
-                setTranscript(current)
-                if (isFinal) {
-                    addDebugLog(`Final: ${current}`)
-                    processInput(current)
-                    stopListening()
-                } else {
-                    addDebugLog(`Parcial: ${current}`)
+            mediaRecorder.onstop = async () => {
+                addDebugLog("Processando áudio...")
+                const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" })
+                const reader = new FileReader()
+                reader.readAsDataURL(audioBlob)
+                reader.onloadend = async () => {
+                    const base64Audio = (reader.result as string).split(",")[1]
+                    try {
+                        setIsProcessing(true)
+                        const response = await fetch("/api/ai/stt", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ audio: base64Audio })
+                        })
+                        const data = await response.json()
+                        if (data.transcription) {
+                            addDebugLog(`Voz: ${data.transcription}`)
+                            setTranscript(data.transcription)
+                            processInput(data.transcription)
+                        } else if (data.error) {
+                            addDebugLog(`Erro STT: ${data.error}`)
+                        } else {
+                            addDebugLog("Nenhum texto reconhecido.")
+                        }
+                    } catch (err) {
+                        addDebugLog(`Erro Central: ${err}`)
+                    } finally {
+                        setIsProcessing(false)
+                        setIsListening(false)
+                        setTranscript("")
+                    }
                 }
             }
-        }
 
-        recognition.onspeechstart = () => {
-            addDebugLog("!!! FALA DETETADA !!!")
-        }
+            mediaRecorder.start()
+            setIsListening(true)
+            setTranscript("A ouvir...")
+            addDebugLog("Gravando...")
 
-        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-            // Ignore 'aborted' as it's usually a result of calling stopListening()
-            if (event.error === 'aborted') return
+            // 3. Silence / Timeout Controls
+            silenceTimerRef.current = setInterval(() => {
+                if (Date.now() - lastActiveTime > 4000) { // 4s of silence
+                    addDebugLog("Silêncio detetado.")
+                    stopListening()
+                }
+            }, 1000)
 
-            addDebugLog(`Erro Speech: ${event.error}`)
-            if (event.error !== "no-speech") {
-                toast({
-                    title: "Erro de voz",
-                    description: `Erro: ${event.error}`,
-                    variant: "destructive"
-                })
-            }
-            stopListening()
-        }
+            setTimeout(() => {
+                if (mediaRecorderRef.current?.state === "recording") {
+                    addDebugLog("Limite de tempo (10s)")
+                    stopListening()
+                }
+            }, 10000)
 
-        recognition.onnomatch = () => {
-            addDebugLog("Evento: onnomatch")
-        }
-
-        recognition.onend = () => {
-            addDebugLog("Evento: onend")
-            const wasEmpty = !transcript && !isProcessing
+        } catch (err) {
+            addDebugLog(`Erro Mic: ${err}`)
             setIsListening(false)
-            if (wasEmpty) stopListening()
-        }
-
-        try {
-            recognition.start()
-            addDebugLog("Reconhecimento iniciado!")
-        } catch (e) {
-            addDebugLog(`Exceção: ${e}`)
-            stopListening()
         }
     }
 
@@ -258,21 +217,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
     const stopAllAudio = () => {
         ttsService.stop()
-
-        if (recognitionRef.current) {
-            try {
-                recognitionRef.current.stop()
-            } catch (e) { /* ignore */ }
-            recognitionRef.current = null
-        }
-
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop())
-            streamRef.current = null
-        }
-
-        setIsListening(false)
-        setIsSpeaking(false)
+        stopListening()
     }
 
     const addMessage = useCallback((role: "user" | "assistant", content: string) => {
@@ -490,37 +435,31 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
 
     const stopListening = () => {
-        if (recognitionRef.current) {
-            try {
-                // Remove listeners first to avoid 'aborted' error loops
-                recognitionRef.current.onresult = null
-                recognitionRef.current.onerror = null
-                recognitionRef.current.onend = null
-                recognitionRef.current.abort()
-            } catch (e) { /* ignore */ }
-            recognitionRef.current = null
+        if (silenceTimerRef.current) {
+            clearInterval(silenceTimerRef.current)
+            silenceTimerRef.current = null
         }
-        if (sourceRef.current) {
-            sourceRef.current.disconnect()
-            sourceRef.current = null
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+            try { mediaRecorderRef.current.stop() } catch (e) { }
+            mediaRecorderRef.current = null
         }
         if (animationFrameRef.current) {
             cancelAnimationFrame(animationFrameRef.current)
             animationFrameRef.current = null
         }
-
         if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
             audioContextRef.current.close().catch(() => { })
             audioContextRef.current = null
         }
-
         analyserRef.current = null
-
+        if (sourceRef.current) {
+            sourceRef.current.disconnect()
+            sourceRef.current = null
+        }
         if (streamRef.current) {
             streamRef.current.getTracks().forEach(track => track.stop())
             streamRef.current = null
         }
-
         setIsListening(false)
         setAudioLevel(0)
     }
