@@ -160,6 +160,23 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             console.log("Speech Error:", event.error)
             addDebugLog(`Erro Speech: ${event.error}`)
             setIsListening(false)
+
+            if (event.error === "network") {
+                toast({
+                    title: "⚠️ Erro de Rede",
+                    description: "O reconhecimento de voz falhou (erro de rede). Use o campo de texto para escrever.",
+                    variant: "destructive"
+                })
+                addDebugLog("DICA: Use o campo de texto em baixo para escrever.")
+            } else if (event.error === "not-allowed") {
+                toast({
+                    title: "Microfone Bloqueado",
+                    description: "Permissão de microfone negada. Verifique as configurações do browser.",
+                    variant: "destructive"
+                })
+            } else if (event.error === "no-speech") {
+                addDebugLog("Nenhuma fala detetada, tente novamente.")
+            }
         }
 
         recognitionRef.current.onend = () => {
