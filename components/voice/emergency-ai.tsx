@@ -127,6 +127,9 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                     setIsListening(false)
                     return
                 }
+
+                const reader = new FileReader()
+                reader.readAsDataURL(audioBlob)
                 reader.onloadend = async () => {
                     const base64Audio = (reader.result as string).split(",")[1]
                     try {
