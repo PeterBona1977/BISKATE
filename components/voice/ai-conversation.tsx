@@ -316,16 +316,16 @@ export function AIConversation({ isOpen, onClose, onComplete }: AIConversationPr
     }
 
     // Price detection
-    const priceMatch = input.match(/(\d+)\s*\$|\$\s*(\d+)/)
+    const priceMatch = (input || "").match(/(\d+)\s*\$|\$\s*(\d+)/)
     if (priceMatch) {
-      price = Number.parseInt(priceMatch[1] || priceMatch[2])
+      price = Number.parseInt(priceMatch[1] || priceMatch[2] || "0")
     }
 
     // Duration detection
-    const durationMatch = input.match(/(\d+)\s*(hour|hours|day|days)/)
+    const durationMatch = (input || "").match(/(\d+)\s*(hour|hours|day|days)/)
     if (durationMatch) {
-      estimated_duration = Number.parseInt(durationMatch[1])
-      duration_unit = durationMatch[2].includes("day") ? "days" : "hours"
+      estimated_duration = Number.parseInt(durationMatch[1] || "0")
+      duration_unit = (durationMatch[2] || "").includes("day") ? "days" : "hours"
     }
 
     const extractedData: CollectedData = {}

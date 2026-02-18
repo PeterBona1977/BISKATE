@@ -215,7 +215,7 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
     const lowerText = text.toLowerCase()
 
     // Extrair preço
-    const priceMatch = text.match(/(\d+(?:[.,]\d+)?)\s*(?:euros?|€|eur)/i)
+    const priceMatch = (text || "").match(/(\d+(?:[.,]\d+)?)\s*(?:euros?|€|eur)/i)
     const price = priceMatch ? Number.parseFloat(priceMatch[1].replace(",", ".")) : 0
 
     // Extrair localização (procurar por cidades portuguesas comuns e padrões)
@@ -226,7 +226,7 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
 
     let location = ""
     for (const pattern of locationPatterns) {
-      const match = text.match(pattern)
+      const match = (text || "").match(pattern)
       if (match) {
         location = match[1] || match[0]
         location = location.replace(/^(em|de|para|na|no)\s+/i, "").trim()
@@ -251,7 +251,7 @@ export function VoiceCapture({ onVoiceProcessed, isOpen, onClose }: VoiceCapture
     ]
 
     for (const pattern of titlePatterns) {
-      const match = text.match(pattern)
+      const match = (text || "").match(pattern)
       if (match && match[1]) {
         title = match[1].trim()
         // Limpar palavras desnecessárias do início

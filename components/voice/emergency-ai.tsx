@@ -78,10 +78,11 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     // Use HTMLDivElement for generic div, or specific if needed. The error 'scrollRef is not defined' is the priority.
     // Also adding recognitionRef since it's used in startListening.
     const scrollRef = useRef<HTMLDivElement>(null)
-    const recognitionRef = useRef<SpeechRecognition | null>(null)
+    const recognitionRef = useRef<any>(null)
     const streamRef = useRef<MediaStream | null>(null)
     const audioContextRef = useRef<AudioContext | null>(null)
     const analyserRef = useRef<AnalyserNode | null>(null)
+    const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null)
     const animationFrameRef = useRef<number | null>(null)
 
     const addDebugLog = (msg: string) => {
@@ -99,6 +100,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
     const startListening = async () => {
         addDebugLog("startListening() chamada!")
+        addDebugLog(`UA: ${navigator.userAgent.substring(0, 50)}...`)
 
         // 1. Initial Check and cleanup
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -124,15 +126,22 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
             const activeMic = stream.getAudioTracks()[0]?.label || "Desconhecido"
             addDebugLog(`Mic ativo: ${activeMic}`)
+            addDebugLog(`Track estado: ${stream.getAudioTracks()[0]?.enabled ? 'Ligada' : 'Desligada'}`)
             streamRef.current = stream
 
             // Setup real-time audio level monitoring
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
-            await audioCtx.resume() // Essential for Chrome
+            addDebugLog(`AudioCtx Inicial: ${audioCtx.state}`)
+
+            if (audioCtx.state === 'suspended') {
+                await audioCtx.resume()
+                addDebugLog(`AudioCtx após resume: ${audioCtx.state}`)
+            }
 
             const analyser = audioCtx.createAnalyser()
             const source = audioCtx.createMediaStreamSource(stream)
             source.connect(analyser)
+            sourceRef.current = source // Keep reference to prevent GC
             analyser.fftSize = 256
 
             audioContextRef.current = audioCtx
@@ -140,24 +149,43 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
             const dataArray = new Uint8Array(analyser.frequencyBinCount)
             let hasReportedSignal = false
+            let silcenceCheckCount = 0
 
             const updateLevel = () => {
                 if (!analyserRef.current) return
                 analyserRef.current.getByteFrequencyData(dataArray)
                 let sum = 0
-                for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
+                let max = 0
+                for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i]
+                    if (dataArray[i] > max) max = dataArray[i]
+                }
                 const average = sum / dataArray.length
 
                 if (average > 5 && !hasReportedSignal) {
-                    addDebugLog("Volume detetado! (Sinal OK)")
+                    addDebugLog(`Sinal DETETADO! (Avg: ${average.toFixed(1)}, Max: ${max})`)
                     hasReportedSignal = true
                 }
 
-                setAudioLevel(average / 128) // Normalized 0-2 range
+                if (!hasReportedSignal && silcenceCheckCount % 100 === 0) {
+                    // Log silence status every ~2 seconds
+                    console.log("Visualizer still silent...", average)
+                }
+                silcenceCheckCount++
+
+                setAudioLevel(average / 128)
                 animationFrameRef.current = requestAnimationFrame(updateLevel)
             }
             updateLevel()
             addDebugLog("Visualizador iniciado")
+
+            // Signal detection timeout
+            setTimeout(() => {
+                if (!hasReportedSignal && isListening) {
+                    addDebugLog("AVISO: Nenhum sinal de áudio detetado após 3s.")
+                    addDebugLog("DICA: Verifique se o microfone não está mutado no hardware.")
+                }
+            }, 3000)
 
         } catch (err) {
             console.error("Mic error:", err)
@@ -536,7 +564,10 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             } catch (e) { /* ignore */ }
             recognitionRef.current = null
         }
-
+        if (sourceRef.current) {
+            sourceRef.current.disconnect()
+            sourceRef.current = null
+        }
         if (animationFrameRef.current) {
             cancelAnimationFrame(animationFrameRef.current)
             animationFrameRef.current = null
