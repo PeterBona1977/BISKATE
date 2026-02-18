@@ -72,6 +72,12 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
     const [debugLogs, setDebugLogs] = useState<string[]>([])
 
+    // Refs
+    // Use HTMLDivElement for generic div, or specific if needed. The error 'scrollRef is not defined' is the priority.
+    // Also adding recognitionRef since it's used in startListening.
+    const scrollRef = useRef<HTMLDivElement>(null)
+    const recognitionRef = useRef<SpeechRecognition | null>(null)
+
     const addDebugLog = (msg: string) => {
         setDebugLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 10))
     }
