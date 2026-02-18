@@ -69,12 +69,11 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     const [addressInput, setAddressInput] = useState("")
     const [isLocating, setIsLocating] = useState(false)
 
-    // New State for Conversational Flow
-    const [step, setStep] = useState<Step>("chat")
-    const [detectedCategory, setDetectedCategory] = useState<{ id: string; name: string; confidence: number } | null>(null)
+    const [debugLogs, setDebugLogs] = useState<string[]>([])
 
-    const recognitionRef = useRef<SpeechRecognition | null>(null)
-    const scrollRef = useRef<HTMLDivElement>(null)
+    const addDebugLog = (msg: string) => {
+        setDebugLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 10))
+    }
 
     // Scroll to bottom of chat
     useEffect(() => {
@@ -82,6 +81,83 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight
         }
     }, [messages, transcript])
+
+    // ... (rest of effects)
+
+    const startListening = async () => {
+        if (!recognitionRef.current) return
+
+        // Safety: If already listening, stop first to avoid 'InvalidStateError'
+        if (isListening) {
+            try {
+                recognitionRef.current.stop()
+            } catch (e) { /* ignore */ }
+            setIsListening(false)
+            return
+        }
+
+        // Stop assistant from talking when user wants to speak
+        ttsService.stop()
+        addDebugLog("Iniciando reconhecimento...")
+
+        // Explicitly request microphone permission to ensure prompt appears
+        try {
+            addDebugLog("Solicitando getUserMedia...")
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            addDebugLog("Permissão getUserMedia concedida")
+            // Clean up stream immediately, we just needed the permission
+            stream.getTracks().forEach(track => track.stop())
+        } catch (err) {
+            console.error("Microphone permission denied:", err)
+            addDebugLog(`Erro getUserMedia: ${err}`)
+            toast({
+                title: "Permissão Negada",
+                description: "Por favor, permita o acesso ao microfone para usar o assistente de voz.",
+                variant: "destructive"
+            })
+            return
+        }
+
+        setIsListening(true)
+        setTranscript("")
+
+        recognitionRef.current.onstart = () => {
+            addDebugLog("Evento: onstart")
+        }
+
+        recognitionRef.current.onresult = (event: any) => {
+            let current = ""
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                current += event.results[i][0].transcript
+                if (event.results[i].isFinal) {
+                    addDebugLog(`Final: ${current}`)
+                    processInput(current)
+                    setIsListening(false)
+                }
+            }
+            setTranscript(current)
+        }
+
+        recognitionRef.current.onerror = (event: any) => {
+            console.log("Speech Error:", event.error)
+            addDebugLog(`Erro Speech: ${event.error}`)
+            setIsListening(false)
+        }
+
+        recognitionRef.current.onend = () => {
+            addDebugLog("Evento: onend")
+            setIsListening(false)
+        }
+
+        try {
+            addDebugLog("Chamando recognition.start()")
+            recognitionRef.current.start()
+        } catch (e) {
+            console.error("Speech Recognition start error:", e)
+            addDebugLog(`Exceção start(): ${e}`)
+            setIsListening(false)
+        }
+    }
 
     // Monitor speaking state
     useEffect(() => {
@@ -560,27 +636,52 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                                 )}
                             </Button>
 
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 p-4 border-t border-red-100 bg-white/50">
                                 <Input
-                                    placeholder="Ou escreva aqui..."
                                     value={textInput}
                                     onChange={(e) => setTextInput(e.target.value)}
-                                    // Submit on Enter
-                                    onKeyDown={(e) => e.key === 'Enter' && processInput(textInput)}
-                                    className="rounded-xl border-red-100 focus:ring-red-500 h-10"
+                                    placeholder="Escreva a sua resposta..."
+                                    className="flex-1 bg-white border-red-200 focus-visible:ring-red-500"
+                                    onKeyDown={(e) => e.key === "Enter" && processInput(textInput)}
+                                    disabled={isProcessing}
                                 />
                                 <Button
-                                    variant="outline"
                                     size="icon"
-                                    className="rounded-xl border-red-200 text-red-600 h-10 w-10 hover:bg-red-50"
                                     onClick={() => processInput(textInput)}
+                                    disabled={!textInput.trim() || isProcessing}
+                                    className="bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-200"
                                 >
                                     <Send className="h-4 w-4" />
                                 </Button>
+                                <Button
+                                    size="icon"
+                                    variant={isListening ? "destructive" : "outline"}
+                                    onClick={isListening ? stopListening : startListening}
+                                    className={cn(
+                                        "shadow-md transition-all duration-300",
+                                        isListening ? "animate-pulse ring-2 ring-red-400 ring-offset-2" : "border-red-200 text-red-600 hover:bg-red-50"
+                                    )}
+                                    disabled={isProcessing}
+                                >
+                                    {isListening ? <StopCircle className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                                </Button>
                             </div>
-                        </div>
+
+                            {/* Área de Debug (Visível apenas se houver logs) */}
+                            {debugLogs.length > 0 && (
+                                <div className="mx-4 mb-4 p-2 bg-gray-900 text-green-400 rounded text-xs font-mono max-h-32 overflow-y-auto border border-gray-700">
+                                    <p className="font-bold text-gray-500 mb-1 border-b border-gray-700 pb-1">Debug Logs:</p>
+                                    {debugLogs.map((log, i) => (
+                                        <div key={i} className="whitespace-nowrap">
+                                            {log}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </DialogContent>
+        </Dialog>                </div>
                     )}
-                </div>
+        </div>
             </DialogContent >
         </Dialog >
     )
