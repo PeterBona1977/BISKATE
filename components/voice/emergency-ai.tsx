@@ -75,7 +75,13 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         stopListening()
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    autoGainControl: true
+                }
+            })
             streamRef.current = stream
 
             // 1. Setup Visualizer (Feedback visual)
@@ -90,15 +96,22 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
             const dataArray = new Uint8Array(analyser.frequencyBinCount)
             let lastActiveTime = Date.now()
+            let peakSignal = 0
 
             const updateLevel = () => {
                 if (!analyserRef.current) return
                 analyserRef.current.getByteFrequencyData(dataArray)
                 let sum = 0
-                for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
+                let currentMax = 0
+                for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i]
+                    if (dataArray[i] > currentMax) currentMax = dataArray[i]
+                }
                 const average = sum / dataArray.length
 
-                if (average > 1) lastActiveTime = Date.now()
+                if (average > 0.5) lastActiveTime = Date.now()
+                if (currentMax > peakSignal) peakSignal = currentMax
+
                 setAudioLevel(average / 128)
                 animationFrameRef.current = requestAnimationFrame(updateLevel)
             }
@@ -120,10 +133,10 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
             mediaRecorder.onstop = async () => {
                 const audioBlob = new Blob(audioChunksRef.current, { type: mimeType })
-                addDebugLog(`Processando: ${(audioBlob.size / 1024).toFixed(1)}KB`)
+                addDebugLog(`Peak: ${peakSignal.toFixed(0)} | Size: ${(audioBlob.size / 1024).toFixed(1)}KB`)
 
-                if (audioBlob.size < 1024) {
-                    addDebugLog("Aviso: Áudio muito curto.")
+                if (audioBlob.size < 500) {
+                    addDebugLog("Aviso: Áudio curto.")
                     setIsListening(false)
                     return
                 }
