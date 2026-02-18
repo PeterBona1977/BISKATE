@@ -77,12 +77,15 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
-                    echoCancellation: false,
-                    noiseSuppression: false,
+                    echoCancellation: true,
+                    noiseSuppression: true,
                     autoGainControl: true
                 }
             })
             streamRef.current = stream
+
+            const track = stream.getAudioTracks()[0]
+            addDebugLog(`Track: ${track?.enabled ? 'LIGADA' : 'DESLIGADA'} | State: ${track?.readyState}`)
 
             // 1. Setup Visualizer (Feedback visual)
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
