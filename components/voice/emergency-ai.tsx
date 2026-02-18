@@ -63,6 +63,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     const [isListening, setIsListening] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false)
     const [isSpeaking, setIsSpeaking] = useState(false)
+    const [audioLevel, setAudioLevel] = useState(0)
     const [transcript, setTranscript] = useState("")
     const [textInput, setTextInput] = useState("")
     const [location, setLocation] = useState<{ lat: number; lng: number; address?: string } | null>(null)
@@ -78,6 +79,10 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     // Also adding recognitionRef since it's used in startListening.
     const scrollRef = useRef<HTMLDivElement>(null)
     const recognitionRef = useRef<SpeechRecognition | null>(null)
+    const streamRef = useRef<MediaStream | null>(null)
+    const audioContextRef = useRef<AudioContext | null>(null)
+    const analyserRef = useRef<AnalyserNode | null>(null)
+    const animationFrameRef = useRef<number | null>(null)
 
     const addDebugLog = (msg: string) => {
         setDebugLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 10))
@@ -95,7 +100,9 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     const startListening = async () => {
         addDebugLog("startListening() chamada!")
 
-        if (!recognitionRef.current) {
+        // 1. Initial Check and cleanup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+        if (!SpeechRecognition) {
             addDebugLog("ERRO: SpeechRecognition NÃO disponível neste browser!")
             toast({
                 title: "Voz Indisponível",
@@ -105,92 +112,141 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             return
         }
 
-        // Safety: If already listening, stop first to avoid 'InvalidStateError'
-        if (isListening) {
-            try {
-                recognitionRef.current.stop()
-            } catch (e) { /* ignore */ }
-            setIsListening(false)
-            return
-        }
-
-        // Stop assistant from talking when user wants to speak
+        // Stop assistant from talking
         ttsService.stop()
-        addDebugLog("Iniciando reconhecimento...")
 
-        // Explicitly request microphone permission to ensure prompt appears
+        // Safety cleanup for previous runs
+        stopListening()
+
+        // 2. Request microphone and setup Visualizer
         try {
-            addDebugLog("Solicitando getUserMedia...")
+            addDebugLog("Solicitando microfone...")
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-            addDebugLog("Permissão getUserMedia concedida")
-            // Clean up stream immediately, we just needed the permission
-            stream.getTracks().forEach(track => track.stop())
+            const activeMic = stream.getAudioTracks()[0]?.label || "Desconhecido"
+            addDebugLog(`Mic ativo: ${activeMic}`)
+            streamRef.current = stream
+
+            // Setup real-time audio level monitoring
+            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+            await audioCtx.resume() // Essential for Chrome
+
+            const analyser = audioCtx.createAnalyser()
+            const source = audioCtx.createMediaStreamSource(stream)
+            source.connect(analyser)
+            analyser.fftSize = 256
+
+            audioContextRef.current = audioCtx
+            analyserRef.current = analyser
+
+            const dataArray = new Uint8Array(analyser.frequencyBinCount)
+            let hasReportedSignal = false
+
+            const updateLevel = () => {
+                if (!analyserRef.current) return
+                analyserRef.current.getByteFrequencyData(dataArray)
+                let sum = 0
+                for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
+                const average = sum / dataArray.length
+
+                if (average > 5 && !hasReportedSignal) {
+                    addDebugLog("Volume detetado! (Sinal OK)")
+                    hasReportedSignal = true
+                }
+
+                setAudioLevel(average / 128) // Normalized 0-2 range
+                animationFrameRef.current = requestAnimationFrame(updateLevel)
+            }
+            updateLevel()
+            addDebugLog("Visualizador iniciado")
+
         } catch (err) {
-            console.error("Microphone permission denied:", err)
-            addDebugLog(`Erro getUserMedia: ${err}`)
+            console.error("Mic error:", err)
+            addDebugLog(`Erro Mic: ${err}`)
             toast({
-                title: "Permissão Negada",
-                description: "Por favor, permita o acesso ao microfone para usar o assistente de voz.",
+                title: "Microfone indisponível",
+                description: "Verifique se deu permissão de microfone.",
                 variant: "destructive"
             })
             return
         }
 
+        // 3. Configure Recognition
+        const recognition = new SpeechRecognition()
+        recognitionRef.current = recognition
+
+        // Continuous: false is safer for debugging and ensures 'onend' fires quickly
+        recognition.continuous = false
+        recognition.interimResults = true
+        recognition.lang = "pt-PT"
+
         setIsListening(true)
         setTranscript("")
 
-        recognitionRef.current.onstart = () => {
-            addDebugLog("Evento: onstart")
+        // 4. Event Handlers
+        recognition.onstart = () => {
+            addDebugLog("Evento: onstart (Motor ativo)")
         }
 
-        recognitionRef.current.onresult = (event: any) => {
+        recognition.onaudiostart = () => {
+            addDebugLog("Evento: onaudiostart")
+        }
+
+        recognition.onsoundstart = () => {
+            addDebugLog("Evento: onsoundstart (Som detetado)")
+        }
+
+        recognition.onspeechstart = () => {
+            addDebugLog("Evento: onspeechstart (Fala detetada)")
+        }
+
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
             let current = ""
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 current += event.results[i][0].transcript
                 if (event.results[i].isFinal) {
                     addDebugLog(`Final: ${current}`)
                     processInput(current)
-                    setIsListening(false)
+                    // In continuous mode, we might want to stop after first final command
+                    // but for emergency chat, keeping it open might be better.
+                    // For now, let's stop listening after a final result to behave like a walkie-talkie.
+                    stopListening()
                 }
             }
             setTranscript(current)
         }
 
-        recognitionRef.current.onerror = (event: any) => {
-            console.log("Speech Error:", event.error)
-            addDebugLog(`Erro Speech: ${event.error}`)
-            setIsListening(false)
+        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+            // Ignore 'aborted' as it's usually a result of calling stopListening()
+            if (event.error === 'aborted') return
 
-            if (event.error === "network") {
+            addDebugLog(`Erro Speech: ${event.error}`)
+            if (event.error !== "no-speech") {
                 toast({
-                    title: "⚠️ Erro de Rede",
-                    description: "O reconhecimento de voz falhou (erro de rede). Use o campo de texto para escrever.",
+                    title: "Erro de voz",
+                    description: `Erro: ${event.error}`,
                     variant: "destructive"
                 })
-                addDebugLog("DICA: Use o campo de texto em baixo para escrever.")
-            } else if (event.error === "not-allowed") {
-                toast({
-                    title: "Microfone Bloqueado",
-                    description: "Permissão de microfone negada. Verifique as configurações do browser.",
-                    variant: "destructive"
-                })
-            } else if (event.error === "no-speech") {
-                addDebugLog("Nenhuma fala detetada, tente novamente.")
             }
+            stopListening()
         }
 
-        recognitionRef.current.onend = () => {
+        recognition.onnomatch = () => {
+            addDebugLog("Evento: onnomatch")
+        }
+
+        recognition.onend = () => {
             addDebugLog("Evento: onend")
+            const wasEmpty = !transcript && !isProcessing
             setIsListening(false)
+            if (wasEmpty) stopListening()
         }
 
         try {
-            addDebugLog("Chamando recognition.start()")
-            recognitionRef.current.start()
+            recognition.start()
+            addDebugLog("Reconhecimento iniciado!")
         } catch (e) {
-            console.error("Speech Recognition start error:", e)
-            addDebugLog(`Exceção start(): ${e}`)
-            setIsListening(false)
+            addDebugLog(`Exceção: ${e}`)
+            stopListening()
         }
     }
 
@@ -202,18 +258,6 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         return () => clearInterval(checkSpeaking)
     }, [])
 
-    // Initialize speech
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-            if (SpeechRecognition) {
-                recognitionRef.current = new SpeechRecognition()
-                recognitionRef.current.continuous = false
-                recognitionRef.current.interimResults = true
-                recognitionRef.current.lang = "pt-PT" // Default to Portuguese
-            }
-        }
-    }, [])
 
     // Google Maps Autocomplete removed to prevent input blocking issues.
     // Manual entry is prioritized if Geolocation fails.
@@ -250,7 +294,19 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
     const stopAllAudio = () => {
         ttsService.stop()
-        if (recognitionRef.current) recognitionRef.current.stop()
+
+        if (recognitionRef.current) {
+            try {
+                recognitionRef.current.stop()
+            } catch (e) { /* ignore */ }
+            recognitionRef.current = null
+        }
+
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop())
+            streamRef.current = null
+        }
+
         setIsListening(false)
         setIsSpeaking(false)
     }
@@ -470,8 +526,36 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
 
     const stopListening = () => {
-        if (recognitionRef.current) recognitionRef.current.stop()
+        if (recognitionRef.current) {
+            try {
+                // Remove listeners first to avoid 'aborted' error loops
+                recognitionRef.current.onresult = null
+                recognitionRef.current.onerror = null
+                recognitionRef.current.onend = null
+                recognitionRef.current.abort()
+            } catch (e) { /* ignore */ }
+            recognitionRef.current = null
+        }
+
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current)
+            animationFrameRef.current = null
+        }
+
+        if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+            audioContextRef.current.close().catch(() => { })
+            audioContextRef.current = null
+        }
+
+        analyserRef.current = null
+
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop())
+            streamRef.current = null
+        }
+
         setIsListening(false)
+        setAudioLevel(0)
     }
 
     return (
@@ -597,6 +681,10 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                                 )}
                                 onClick={isListening ? stopListening : isSpeaking ? () => ttsService.stop() : startListening}
                                 disabled={isProcessing}
+                                style={{
+                                    transform: isListening ? `scale(${1 + Math.min(audioLevel * 0.2, 0.1)})` : 'scale(1)',
+                                    boxShadow: isListening ? `0 0 ${audioLevel * 30}px rgba(239, 68, 68, 0.6)` : 'none'
+                                }}
                             >
                                 {isListening ? (
                                     <>
