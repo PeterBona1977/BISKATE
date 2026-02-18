@@ -98,14 +98,19 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                 for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
                 const average = sum / dataArray.length
 
-                if (average > 3) lastActiveTime = Date.now()
+                if (average > 1) lastActiveTime = Date.now()
                 setAudioLevel(average / 128)
                 animationFrameRef.current = requestAnimationFrame(updateLevel)
             }
             updateLevel()
 
             // 2. Setup MediaRecorder
-            const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" })
+            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+                ? "audio/webm;codecs=opus"
+                : "audio/webm"
+
+            addDebugLog(`Gravação: ${mimeType.split(';')[1] || 'webm'}`)
+            const mediaRecorder = new MediaRecorder(stream, { mimeType })
             mediaRecorderRef.current = mediaRecorder
             audioChunksRef.current = []
 
@@ -114,10 +119,14 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             }
 
             mediaRecorder.onstop = async () => {
-                addDebugLog("Processando áudio...")
-                const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" })
-                const reader = new FileReader()
-                reader.readAsDataURL(audioBlob)
+                const audioBlob = new Blob(audioChunksRef.current, { type: mimeType })
+                addDebugLog(`Processando: ${(audioBlob.size / 1024).toFixed(1)}KB`)
+
+                if (audioBlob.size < 1024) {
+                    addDebugLog("Aviso: Áudio muito curto.")
+                    setIsListening(false)
+                    return
+                }
                 reader.onloadend = async () => {
                     const base64Audio = (reader.result as string).split(",")[1]
                     try {

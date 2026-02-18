@@ -27,10 +27,10 @@ export async function POST(request: NextRequest) {
         const requestBody = {
             config: {
                 encoding: "WEBM_OPUS",
-                sampleRateHertz: 48000,
                 languageCode: languageCode,
                 enableAutomaticPunctuation: true,
-                model: "latest_long"
+                model: "default",
+                useEnhanced: true
             },
             audio: {
                 content: audio // Base64 string
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
         if (!response.ok) {
             const errorData = await response.json()
-            console.error("❌ Google STT API Error:", errorData)
+            console.error("❌ Google STT Error:", JSON.stringify(errorData))
             return NextResponse.json(
                 { error: errorData.error?.message || "STT API Failed" },
                 { status: response.status }
@@ -53,6 +53,11 @@ export async function POST(request: NextRequest) {
         }
 
         const data = await response.json()
+
+        // Log if empty (debug)
+        if (!data.results || data.results.length === 0) {
+            console.log("ℹ️ Google STT: Empty Results. Check audio format/volume.")
+        }
 
         // Extract the best transcription
         const transcription = data.results
