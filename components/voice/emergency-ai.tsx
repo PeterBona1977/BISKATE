@@ -123,26 +123,16 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         // 2. Request microphone and setup Visualizer
         try {
             addDebugLog("Solicitando microfone...")
-            const constraints = {
-                audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true,
-                    sampleRate: 44100
-                }
-            }
-            const stream = await navigator.mediaDevices.getUserMedia(constraints)
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
             const activeMic = stream.getAudioTracks()[0]?.label || "Desconhecido"
             const settings = stream.getAudioTracks()[0]?.getSettings()
 
             addDebugLog(`Mic: ${activeMic.substring(0, 30)}...`)
-            addDebugLog(`Hz: ${settings?.sampleRate || '?'}, Ch: ${settings?.channelCount || '?'}`)
+            addDebugLog(`Hz: ${settings?.sampleRate || '?'}`)
             streamRef.current = stream
 
             // Setup real-time audio level monitoring
-            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)({
-                sampleRate: 44100 // Force match with constraints
-            })
+            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
             addDebugLog(`AudioCtx: ${audioCtx.state} @ ${audioCtx.sampleRate}Hz`)
 
             if (audioCtx.state === 'suspended') {
@@ -208,8 +198,9 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         const recognition = new SpeechRecognition()
         recognitionRef.current = recognition
 
-        // Continuous: false is safer for debugging and ensures 'onend' fires quickly
-        recognition.continuous = false
+        // Continuous: true helps on Mobile/Chrome to keep motor alive after onnomatch
+        const isEdge = /Edg/.test(navigator.userAgent)
+        recognition.continuous = !isEdge
         recognition.interimResults = true
         recognition.lang = "pt-PT"
 
@@ -226,27 +217,36 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         }
 
         recognition.onsoundstart = () => {
-            addDebugLog("Evento: onsoundstart (Som detetado)")
+            addDebugLog("Evento: onsoundstart")
         }
 
         recognition.onspeechstart = () => {
-            addDebugLog("Evento: onspeechstart (Fala detetada)")
+            addDebugLog("Evento: onspeechstart")
         }
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
             let current = ""
+            let isFinal = false
+
             for (let i = event.resultIndex; i < event.results.length; i++) {
-                current += event.results[i][0].transcript
+                const text = event.results[i][0].transcript
+                current += text
                 if (event.results[i].isFinal) {
-                    addDebugLog(`Final: ${current}`)
-                    processInput(current)
-                    // In continuous mode, we might want to stop after first final command
-                    // but for emergency chat, keeping it open might be better.
-                    // For now, let's stop listening after a final result to behave like a walkie-talkie.
-                    stopListening()
+                    isFinal = true
                 }
             }
-            setTranscript(current)
+
+            if (current) {
+                setTranscript(current)
+                if (isFinal) {
+                    addDebugLog(`Final: ${current}`)
+                    processInput(current)
+                    stopListening()
+                } else {
+                    // Log interim for debugging only if it's significant
+                    console.log("Interim:", current)
+                }
+            }
         }
 
         recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
