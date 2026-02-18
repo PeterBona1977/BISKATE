@@ -69,6 +69,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     const [addressInput, setAddressInput] = useState("")
     const [isLocating, setIsLocating] = useState(false)
     const [detectedCategory, setDetectedCategory] = useState<{ id: string; name: string; confidence?: number } | null>(null)
+    const [step, setStep] = useState<Step>("chat")
 
     const [debugLogs, setDebugLogs] = useState<string[]>([])
 
