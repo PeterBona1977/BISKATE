@@ -678,12 +678,11 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                                     ))}
                                 </div>
                             )}
-                        </DialogContent>
-        </Dialog>                </div>
+                        </div>
                     )}
-        </div>
-            </DialogContent >
-        </Dialog >
+                </div>
+            </DialogContent>
+        </Dialog>
     )
 }
 
