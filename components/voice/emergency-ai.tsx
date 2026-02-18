@@ -93,7 +93,17 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     // ... (rest of effects)
 
     const startListening = async () => {
-        if (!recognitionRef.current) return
+        addDebugLog("startListening() chamada!")
+
+        if (!recognitionRef.current) {
+            addDebugLog("ERRO: SpeechRecognition NÃO disponível neste browser!")
+            toast({
+                title: "Voz Indisponível",
+                description: "O seu browser não suporta reconhecimento de voz. Tente Chrome ou Edge.",
+                variant: "destructive"
+            })
+            return
+        }
 
         // Safety: If already listening, stop first to avoid 'InvalidStateError'
         if (isListening) {
