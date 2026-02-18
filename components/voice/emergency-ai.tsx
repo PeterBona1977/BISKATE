@@ -123,25 +123,36 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         // 2. Request microphone and setup Visualizer
         try {
             addDebugLog("Solicitando microfone...")
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            const constraints = {
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
+                    sampleRate: 44100
+                }
+            }
+            const stream = await navigator.mediaDevices.getUserMedia(constraints)
             const activeMic = stream.getAudioTracks()[0]?.label || "Desconhecido"
-            addDebugLog(`Mic ativo: ${activeMic}`)
-            addDebugLog(`Track estado: ${stream.getAudioTracks()[0]?.enabled ? 'Ligada' : 'Desligada'}`)
+            const settings = stream.getAudioTracks()[0]?.getSettings()
+
+            addDebugLog(`Mic: ${activeMic.substring(0, 30)}...`)
+            addDebugLog(`Hz: ${settings?.sampleRate || '?'}, Ch: ${settings?.channelCount || '?'}`)
             streamRef.current = stream
 
             // Setup real-time audio level monitoring
-            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
-            addDebugLog(`AudioCtx Inicial: ${audioCtx.state}`)
+            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)({
+                sampleRate: 44100 // Force match with constraints
+            })
+            addDebugLog(`AudioCtx: ${audioCtx.state} @ ${audioCtx.sampleRate}Hz`)
 
             if (audioCtx.state === 'suspended') {
                 await audioCtx.resume()
-                addDebugLog(`AudioCtx após resume: ${audioCtx.state}`)
             }
 
             const analyser = audioCtx.createAnalyser()
             const source = audioCtx.createMediaStreamSource(stream)
             source.connect(analyser)
-            sourceRef.current = source // Keep reference to prevent GC
+            sourceRef.current = source
             analyser.fftSize = 256
 
             audioContextRef.current = audioCtx
@@ -149,7 +160,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
             const dataArray = new Uint8Array(analyser.frequencyBinCount)
             let hasReportedSignal = false
-            let silcenceCheckCount = 0
+            let reportSilenceTimer: NodeJS.Timeout | null = null
 
             const updateLevel = () => {
                 if (!analyserRef.current) return
@@ -162,30 +173,25 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                 }
                 const average = sum / dataArray.length
 
-                if (average > 5 && !hasReportedSignal) {
-                    addDebugLog(`Sinal DETETADO! (Avg: ${average.toFixed(1)}, Max: ${max})`)
-                    hasReportedSignal = true
+                // Nuclear logging: report any signal > 1 to see if it's "almost" working
+                if (average > 1 && !hasReportedSignal) {
+                    addDebugLog(`Sinal: Avg=${average.toFixed(1)}, Max=${max}`)
+                    if (average > 5) hasReportedSignal = true
                 }
-
-                if (!hasReportedSignal && silcenceCheckCount % 100 === 0) {
-                    // Log silence status every ~2 seconds
-                    console.log("Visualizer still silent...", average)
-                }
-                silcenceCheckCount++
 
                 setAudioLevel(average / 128)
                 animationFrameRef.current = requestAnimationFrame(updateLevel)
             }
             updateLevel()
-            addDebugLog("Visualizador iniciado")
+            addDebugLog("Visualizador ativo")
 
-            // Signal detection timeout
-            setTimeout(() => {
+            // Atomic silence detection
+            reportSilenceTimer = setTimeout(() => {
                 if (!hasReportedSignal && isListening) {
-                    addDebugLog("AVISO: Nenhum sinal de áudio detetado após 3s.")
-                    addDebugLog("DICA: Verifique se o microfone não está mutado no hardware.")
+                    addDebugLog("AVISO: Silêncio total detetado.")
+                    addDebugLog("DICA: Tente recarregar a página (F5).")
                 }
-            }, 3000)
+            }, 4000)
 
         } catch (err) {
             console.error("Mic error:", err)
