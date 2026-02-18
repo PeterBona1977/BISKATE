@@ -175,13 +175,17 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             updateLevel()
             addDebugLog("Visualizador ativo")
 
+            // IMPORTANT: Allow visualizer to stabilize before starting recognition
+            // This avoids hardware "busy" locks in some Android/Chrome versions
+            await new Promise(resolve => setTimeout(resolve, 500))
+
             // Atomic silence detection
             reportSilenceTimer = setTimeout(() => {
                 if (!hasReportedSignal && isListening) {
                     addDebugLog("AVISO: Silêncio total detetado.")
                     addDebugLog("DICA: Tente recarregar a página (F5).")
                 }
-            }, 4000)
+            }, 5000)
 
         } catch (err) {
             console.error("Mic error:", err)
@@ -221,7 +225,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         }
 
         recognition.onspeechstart = () => {
-            addDebugLog("Evento: onspeechstart")
+            addDebugLog("Evento: onspeechstart (Fala detetada!)")
         }
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -243,8 +247,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                     processInput(current)
                     stopListening()
                 } else {
-                    // Log interim for debugging only if it's significant
-                    console.log("Interim:", current)
+                    addDebugLog(`Parcial: ${current}`)
                 }
             }
         }
