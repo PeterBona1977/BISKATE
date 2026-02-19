@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { CategorySuggestionService } from "@/lib/ai/category-suggestion-service"
 import { generateGeminiContent } from "@/lib/ai/gemini-rest-client"
 
-export const runtime = "edge"
+// Standard Node.js runtime for better env stability
 export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {

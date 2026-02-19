@@ -21,38 +21,44 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
         process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     ].filter(Boolean) as string[]
 
-    const modelNames = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro"]
+    const modelNames = [
+        "gemini-1.5-flash-latest",
+        "gemini-1.5-flash",
+        "gemini-1.5-pro-latest",
+        "gemini-1.5-pro",
+        "gemini-pro",
+        "gemini-1.0-pro"
+    ]
     const apiVersions = ["v1beta", "v1"]
 
     let lastError = null
+    let foundAnyModels: string[] = []
 
     for (const apiKey of keys) {
-        // 1. Try to list models to find the real allowed names
+        // 1. Try to list models (The most reliable way)
         try {
-            for (const ver of ["v1beta", "v1"]) {
+            for (const ver of apiVersions) {
                 const listUrl = `https://generativelanguage.googleapis.com/${ver}/models?key=${apiKey}`
                 const listRes = await fetch(listUrl)
                 if (listRes.ok) {
                     const listData = await listRes.json()
                     const available = listData.models?.map((m: any) => m.name.replace("models/", "")) || []
+                    foundAnyModels = [...new Set([...foundAnyModels, ...available])]
 
-                    // Prioritize flash 1.5
-                    const bestModel = available.find((m: string) => m === "gemini-1.5-flash") ||
+                    const bestMatch = available.find((m: string) => m.includes("1.5-flash-latest")) ||
                         available.find((m: string) => m.includes("1.5-flash")) ||
-                        available.find((m: string) => m.includes("1.5-pro")) ||
+                        available.find((m: string) => m === "gemini-pro") ||
                         available[0]
 
-                    if (bestModel) {
-                        cachedConfig = { apiKey, model: bestModel, apiVersion: ver }
+                    if (bestMatch) {
+                        cachedConfig = { apiKey, model: bestMatch, apiVersion: ver }
                         return cachedConfig
                     }
                 }
             }
-        } catch (e) {
-            // ignore listing error
-        }
+        } catch (e) { /* continue */ }
 
-        // 2. Fallback to exhaustive trial
+        // 2. Fallback to brute force trials
         for (const ver of apiVersions) {
             for (const name of modelNames) {
                 try {
@@ -67,8 +73,8 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
                         cachedConfig = { apiKey, model: name, apiVersion: ver }
                         return cachedConfig
                     } else {
-                        const errorData = await res.json().catch(() => ({}))
-                        lastError = new Error(`Gemini API Error [${name}/${ver}]: ${res.status} - ${errorData.error?.message || "Not Found"}`)
+                        const errData = await res.json().catch(() => ({}))
+                        lastError = new Error(`Attempt [${name}/${ver}] failed: ${res.status} - ${errData.error?.message || "Unknown"}`)
                     }
                 } catch (err: any) {
                     lastError = err
@@ -77,7 +83,8 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
         }
     }
 
-    throw lastError || new Error("All Gemini connection attempts failed. Please check your API Key and Google AI Studio permissions.")
+    const debugInfo = foundAnyModels.length > 0 ? `Available in key: ${foundAnyModels.join(", ")}` : "No models found in ListModels."
+    throw lastError || new Error(`All Gemini connection attempts failed. ${debugInfo}`)
 }
 
 export async function generateGeminiContent(prompt: string, config?: GeminiConfig) {
@@ -97,17 +104,17 @@ export async function generateGeminiContent(prompt: string, config?: GeminiConfi
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
-                    temperature: 0.2,
-                    topP: 0.8,
-                    topK: 40,
+                    temperature: 0.1,
+                    topP: 0.95,
+                    maxOutputTokens: 1024
                 }
             })
         })
 
         if (!res.ok) {
             const errText = await res.text()
-            if (res.status === 404) cachedConfig = null // Invalidate cache on 404
-            throw new Error(`Gemini REST API Error (${res.status}): ${errText}`)
+            if (res.status === 404) cachedConfig = null // Trigger re-discovery
+            throw new Error(`Gemini Error (${res.status} at ${finalConfig.model}/${finalConfig.apiVersion}): ${errText}`)
         }
 
         const result = await res.json()
@@ -115,10 +122,13 @@ export async function generateGeminiContent(prompt: string, config?: GeminiConfi
             throw new Error("Gemini returned no candidates")
         }
 
-        return result.candidates[0].content.parts[0].text
+        const text = result.candidates[0].content.parts[0].text
+        if (!text) throw new Error("Gemini returned empty text")
+
+        return text
     } catch (err) {
         if (err instanceof Error && err.message.includes("404")) {
-            cachedConfig = null
+            cachedConfig = null // Invalidate cache
         }
         throw err
     }
