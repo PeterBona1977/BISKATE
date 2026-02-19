@@ -23,7 +23,21 @@ export async function GET(request: NextRequest) {
                 if (res.ok) {
                     const data = await res.json()
                     const models = data.models?.map((m: any) => m.name.replace("models/", "")) || []
-                    keyResult.endpoints.push({ ver, status: "OK", models })
+
+                    // Test the first model found
+                    let testStatus = "N/A"
+                    if (models.length > 0) {
+                        const testModel = models[0]
+                        const testUrl = `https://generativelanguage.googleapis.com/${ver}/models/${testModel}:generateContent?key=${key.value}`
+                        const testRes = await fetch(testUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contents: [{ parts: [{ text: "hi" }] }] })
+                        })
+                        testStatus = testRes.ok ? "WORKS" : `FAILS (${testRes.status})`
+                    }
+
+                    keyResult.endpoints.push({ ver, status: "OK", modelsCount: models.length, test: testStatus, models: models.slice(0, 5) })
                 } else {
                     const txt = await res.text()
                     keyResult.endpoints.push({ ver, status: res.status, error: txt })

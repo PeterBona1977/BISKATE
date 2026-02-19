@@ -98,48 +98,60 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
 }
 
 export async function generateGeminiContent(prompt: string, config?: GeminiConfig) {
-    let finalConfig: GeminiConfig
-    try {
-        finalConfig = config || await getWorkingGeminiConfig()
-    } catch (err) {
-        throw err
-    }
+    let attempts = 0
+    let lastErr: any = null
 
-    const url = `https://generativelanguage.googleapis.com/${finalConfig.apiVersion}/models/${finalConfig.model}:generateContent?key=${finalConfig.apiKey}`
+    while (attempts < 3) {
+        attempts++
+        let finalConfig: GeminiConfig
+        try {
+            finalConfig = config || await getWorkingGeminiConfig()
+        } catch (err) {
+            throw err
+        }
 
-    try {
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    temperature: 0.1,
-                    topP: 0.95,
-                    maxOutputTokens: 1024
-                }
+        const url = `https://generativelanguage.googleapis.com/${finalConfig.apiVersion}/models/${finalConfig.model}:generateContent?key=${finalConfig.apiKey}`
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: 0.1,
+                        topP: 0.95,
+                        maxOutputTokens: 1024
+                    }
+                })
             })
-        })
 
-        if (!res.ok) {
-            const errText = await res.text()
-            if (res.status === 404 || res.status === 403) cachedConfig = null // Trigger re-discovery
-            throw new Error(`Gemini Runtime Error (${res.status} at ${finalConfig.model}/${finalConfig.apiVersion}): ${errText}`)
+            if (!res.ok) {
+                const errText = await res.text()
+                // If it's a 404 (Not Found) or 403 (Forbidden), invalidate cache and try again
+                if (res.status === 404 || res.status === 403) {
+                    console.warn(`Gemini [${finalConfig.model}] failed with ${res.status}. Retrying discovery...`)
+                    cachedConfig = null
+                    lastErr = new Error(`Gemini Error (${res.status} at ${finalConfig.model}): ${errText}`)
+                    continue // Try next attempt with new discovery
+                }
+                throw new Error(`Gemini Runtime Error (${res.status} at ${finalConfig.model}): ${errText}`)
+            }
+
+            const result = await res.json()
+            const text = result.candidates?.[0]?.content?.parts?.[0]?.text
+            if (!text) throw new Error("Gemini returned empty or malformed data")
+
+            return text
+        } catch (err: any) {
+            if (err.message.includes("404") || err.message.includes("403")) {
+                cachedConfig = null
+                lastErr = err
+                continue
+            }
+            throw err
         }
-
-        const result = await res.json()
-        if (!result.candidates || result.candidates.length === 0) {
-            throw new Error("Gemini returned no candidates")
-        }
-
-        const text = result.candidates?.[0]?.content?.parts?.[0]?.text
-        if (!text) throw new Error("Gemini returned empty or malformed data")
-
-        return text
-    } catch (err) {
-        if (err instanceof Error && (err.message.includes("404") || err.message.includes("403"))) {
-            cachedConfig = null // Invalidate cache for next request
-        }
-        throw err
     }
+
+    throw lastErr || new Error("Failed to generate content after multiple model fallbacks.")
 }
