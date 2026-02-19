@@ -26,6 +26,7 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
         "gemini-1.5-flash-latest",
         "gemini-1.5-pro",
         "gemini-1.5-pro-latest",
+        "gemini-1.5-flash-8b",
         "gemini-pro",
         "gemini-1.0-pro"
     ]
@@ -36,7 +37,6 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
 
     for (const apiKey of keys) {
         // 1. Try to list models (The most reliable way)
-        // We try both v1 and v1beta for listing
         for (const listVer of ["v1", "v1beta"]) {
             try {
                 const listUrl = `https://generativelanguage.googleapis.com/${listVer}/models?key=${apiKey}`
@@ -47,11 +47,12 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
                     if (available.length > 0) {
                         foundAnyModels = [...new Set([...foundAnyModels, ...available])]
 
-                        // Prioritize based on our preferred list
                         const bestMatch = available.find((m: string) => m === "gemini-1.5-flash") ||
+                            available.find((m: string) => m === "gemini-1.5-pro") ||
                             available.find((m: string) => m.includes("1.5-flash-latest")) ||
                             available.find((m: string) => m.includes("1.5-flash")) ||
-                            available.find((m: string) => m === "gemini-pro") ||
+                            available.find((m: string) => m.includes("1.5-pro")) ||
+                            available.find((m: string) => m.includes("1.0-pro")) ||
                             available[0]
 
                         if (bestMatch) {
@@ -63,7 +64,7 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
             } catch (e) { /* continue */ }
         }
 
-        // 2. Fallback to brute force trials if listing didn't yield a 200 list
+        // 2. Fallback to brute force trials
         for (const ver of apiVersions) {
             for (const name of modelNames) {
                 try {
@@ -79,7 +80,8 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
                         return cachedConfig
                     } else {
                         const errData = await res.json().catch(() => ({}))
-                        lastError = new Error(`Attempt [${name}/${ver}] failed: ${res.status} - ${errData.error?.message || "Unknown"}`)
+                        const msg = errData.error?.message || "Not Found"
+                        lastError = new Error(`Gemini [${name}/${ver}] failed: ${res.status} - ${msg}`)
                     }
                 } catch (err: any) {
                     lastError = err
@@ -89,9 +91,10 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
     }
 
     const debugInfo = foundAnyModels.length > 0
-        ? `Found ${foundAnyModels.length} models: ${foundAnyModels.slice(0, 5).join(", ")}...`
-        : "No models found with this key."
-    throw lastError || new Error(`All Gemini connection attempts failed. ${debugInfo}`)
+        ? `Discovered ${foundAnyModels.length} models, but all failed to generate content. (${foundAnyModels.slice(0, 5).join(", ")}...)`
+        : "No models were discovered with any of your API keys. Please verify your GEMINI_API_KEY in the Cloudflare/Vercel dashboard."
+
+    throw lastError || new Error(`Universal Gemini Discovery Failed. ${debugInfo}`)
 }
 
 export async function generateGeminiContent(prompt: string, config?: GeminiConfig) {
@@ -120,8 +123,8 @@ export async function generateGeminiContent(prompt: string, config?: GeminiConfi
 
         if (!res.ok) {
             const errText = await res.text()
-            if (res.status === 404) cachedConfig = null // Trigger re-discovery
-            throw new Error(`Gemini Error (${res.status} at ${finalConfig.model}/${finalConfig.apiVersion}): ${errText}`)
+            if (res.status === 404 || res.status === 403) cachedConfig = null // Trigger re-discovery
+            throw new Error(`Gemini Runtime Error (${res.status} at ${finalConfig.model}/${finalConfig.apiVersion}): ${errText}`)
         }
 
         const result = await res.json()
@@ -129,13 +132,13 @@ export async function generateGeminiContent(prompt: string, config?: GeminiConfi
             throw new Error("Gemini returned no candidates")
         }
 
-        const text = result.candidates[0].content.parts[0].text
-        if (!text) throw new Error("Gemini returned empty text")
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text
+        if (!text) throw new Error("Gemini returned empty or malformed data")
 
         return text
     } catch (err) {
-        if (err instanceof Error && err.message.includes("404")) {
-            cachedConfig = null // Invalidate cache
+        if (err instanceof Error && (err.message.includes("404") || err.message.includes("403"))) {
+            cachedConfig = null // Invalidate cache for next request
         }
         throw err
     }
