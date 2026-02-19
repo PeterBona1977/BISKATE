@@ -36,6 +36,20 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
     let foundAnyModels: string[] = []
 
     for (const apiKey of keys) {
+        // 0. High-Priority Trial: v1 + gemini-1.5-flash (Most stable)
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] })
+            })
+            if (res.ok) {
+                cachedConfig = { apiKey, model: "gemini-1.5-flash", apiVersion: "v1" }
+                return cachedConfig
+            }
+        } catch (e) { /* continue */ }
+
         // 1. Try to list models (The most reliable way)
         for (const listVer of ["v1", "v1beta"]) {
             try {
@@ -128,9 +142,9 @@ export async function generateGeminiContent(prompt: string, config?: GeminiConfi
 
             if (!res.ok) {
                 const errText = await res.text()
-                // If it's a 404 (Not Found) or 403 (Forbidden), invalidate cache and try again
-                if (res.status === 404 || res.status === 403) {
-                    console.warn(`Gemini [${finalConfig.model}] failed with ${res.status}. Retrying discovery...`)
+                // If it's a 404/403/429, invalidate cache and try again with discovery
+                if (res.status === 404 || res.status === 403 || res.status === 429) {
+                    console.warn(`Gemini [${finalConfig.model}/${finalConfig.apiVersion}] failed (${res.status}). Retrying discovery...`)
                     cachedConfig = null
                     lastErr = new Error(`Gemini Error (${res.status} at ${finalConfig.model}): ${errText}`)
                     continue // Try next attempt with new discovery
@@ -144,7 +158,7 @@ export async function generateGeminiContent(prompt: string, config?: GeminiConfi
 
             return text
         } catch (err: any) {
-            if (err.message.includes("404") || err.message.includes("403")) {
+            if (err.message.includes("404") || err.message.includes("403") || err.message.includes("429")) {
                 cachedConfig = null
                 lastErr = err
                 continue

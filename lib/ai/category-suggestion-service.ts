@@ -145,14 +145,25 @@ Rules:
 
             try {
                 // Extract JSON from response (in case AI adds extra text)
-                const jsonMatch = text.match(/\[[\s\S]*\]/)
-                if (jsonMatch) {
-                    suggestions = JSON.parse(jsonMatch[0])
+                if (text && typeof text === 'string') {
+                    const jsonMatch = text.match(/\[[\s\S]*\]/)
+                    const cleanedJson = jsonMatch ? jsonMatch[0] : text
+
+                    try {
+                        const parsed = JSON.parse(cleanedJson)
+                        if (Array.isArray(parsed)) {
+                            suggestions = parsed;
+                        } else {
+                            console.warn("AI response parsed but not an array:", parsed);
+                        }
+                    } catch (e) {
+                        console.error("Failed to parse category suggestion JSON:", e)
+                    }
                 } else {
-                    suggestions = JSON.parse(text)
+                    console.warn("AI response was not a string or was empty:", text);
                 }
             } catch (parseError) {
-                console.error("Failed to parse AI response:", text)
+                console.error("Error processing AI response before JSON parse:", parseError)
                 return []
             }
 
