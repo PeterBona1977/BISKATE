@@ -21,10 +21,7 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
         process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     ].filter(Boolean) as string[]
 
-    const modelNames = [
-        "gemini-1.5-flash",
-        "gemini-1.5-pro"
-    ]
+    const modelNames = ["gemini-1.5-flash"]
     const apiVersions = ["v1beta"]
 
     let lastError = null
