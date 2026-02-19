@@ -27,35 +27,34 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
     let lastError = null
 
     for (const apiKey of keys) {
-        // Log basic info (visible in server dev logs)
-        console.log(`🔍 Attempting Gemini discovery with key starting ${apiKey.substring(0, 5)}...`)
-
         // 1. Try to list models to find the real allowed names
         try {
-            const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
-            const listRes = await fetch(listUrl)
-            if (listRes.ok) {
-                const listData = await listRes.json()
-                const available = listData.models?.map((m: any) => m.name.replace("models/", "")) || []
-                console.log(`✅ Models found: ${available.join(", ")}`)
+            for (const ver of ["v1beta", "v1"]) {
+                const listUrl = `https://generativelanguage.googleapis.com/${ver}/models?key=${apiKey}`
+                const listRes = await fetch(listUrl)
+                if (listRes.ok) {
+                    const listData = await listRes.json()
+                    const available = listData.models?.map((m: any) => m.name.replace("models/", "")) || []
 
-                // Prioritize flash 1.5
-                const bestModel = available.find((m: string) => m.includes("1.5-flash")) ||
-                    available.find((m: string) => m.includes("1.5-pro")) ||
-                    available[0]
+                    // Prioritize flash 1.5
+                    const bestModel = available.find((m: string) => m === "gemini-1.5-flash") ||
+                        available.find((m: string) => m.includes("1.5-flash")) ||
+                        available.find((m: string) => m.includes("1.5-pro")) ||
+                        available[0]
 
-                if (bestModel) {
-                    cachedConfig = { apiKey, model: bestModel, apiVersion: "v1beta" }
-                    return cachedConfig
+                    if (bestModel) {
+                        cachedConfig = { apiKey, model: bestModel, apiVersion: ver }
+                        return cachedConfig
+                    }
                 }
             }
         } catch (e) {
-            console.warn("ListModels failed, falling back to trial-and-error")
+            // ignore listing error
         }
 
         // 2. Fallback to exhaustive trial
-        for (const name of modelNames) {
-            for (const ver of apiVersions) {
+        for (const ver of apiVersions) {
+            for (const name of modelNames) {
                 try {
                     const url = `https://generativelanguage.googleapis.com/${ver}/models/${name}:generateContent?key=${apiKey}`
                     const res = await fetch(url, {
@@ -78,35 +77,49 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
         }
     }
 
-    throw lastError || new Error("All Gemini connection attempts failed. No working model found for your API key.")
+    throw lastError || new Error("All Gemini connection attempts failed. Please check your API Key and Google AI Studio permissions.")
 }
 
 export async function generateGeminiContent(prompt: string, config?: GeminiConfig) {
-    const finalConfig = config || await getWorkingGeminiConfig()
+    let finalConfig: GeminiConfig
+    try {
+        finalConfig = config || await getWorkingGeminiConfig()
+    } catch (err) {
+        throw err
+    }
+
     const url = `https://generativelanguage.googleapis.com/${finalConfig.apiVersion}/models/${finalConfig.model}:generateContent?key=${finalConfig.apiKey}`
 
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-                temperature: 0.2,
-                topP: 0.8,
-                topK: 40,
-            }
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 0.2,
+                    topP: 0.8,
+                    topK: 40,
+                }
+            })
         })
-    })
 
-    if (!res.ok) {
-        const errText = await res.text()
-        throw new Error(`Gemini REST API Error (${res.status}): ${errText}`)
+        if (!res.ok) {
+            const errText = await res.text()
+            if (res.status === 404) cachedConfig = null // Invalidate cache on 404
+            throw new Error(`Gemini REST API Error (${res.status}): ${errText}`)
+        }
+
+        const result = await res.json()
+        if (!result.candidates || result.candidates.length === 0) {
+            throw new Error("Gemini returned no candidates")
+        }
+
+        return result.candidates[0].content.parts[0].text
+    } catch (err) {
+        if (err instanceof Error && err.message.includes("404")) {
+            cachedConfig = null
+        }
+        throw err
     }
-
-    const result = await res.json()
-    if (!result.candidates || result.candidates.length === 0) {
-        throw new Error("Gemini returned no candidates")
-    }
-
-    return result.candidates[0].content.parts[0].text
 }
