@@ -22,43 +22,48 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
     ].filter(Boolean) as string[]
 
     const modelNames = [
-        "gemini-1.5-flash-latest",
         "gemini-1.5-flash",
-        "gemini-1.5-pro-latest",
+        "gemini-1.5-flash-latest",
         "gemini-1.5-pro",
+        "gemini-1.5-pro-latest",
         "gemini-pro",
         "gemini-1.0-pro"
     ]
-    const apiVersions = ["v1beta", "v1"]
+    const apiVersions = ["v1", "v1beta"]
 
     let lastError = null
     let foundAnyModels: string[] = []
 
     for (const apiKey of keys) {
         // 1. Try to list models (The most reliable way)
-        try {
-            for (const ver of apiVersions) {
-                const listUrl = `https://generativelanguage.googleapis.com/${ver}/models?key=${apiKey}`
+        // We try both v1 and v1beta for listing
+        for (const listVer of ["v1", "v1beta"]) {
+            try {
+                const listUrl = `https://generativelanguage.googleapis.com/${listVer}/models?key=${apiKey}`
                 const listRes = await fetch(listUrl)
                 if (listRes.ok) {
                     const listData = await listRes.json()
                     const available = listData.models?.map((m: any) => m.name.replace("models/", "")) || []
-                    foundAnyModels = [...new Set([...foundAnyModels, ...available])]
+                    if (available.length > 0) {
+                        foundAnyModels = [...new Set([...foundAnyModels, ...available])]
 
-                    const bestMatch = available.find((m: string) => m.includes("1.5-flash-latest")) ||
-                        available.find((m: string) => m.includes("1.5-flash")) ||
-                        available.find((m: string) => m === "gemini-pro") ||
-                        available[0]
+                        // Prioritize based on our preferred list
+                        const bestMatch = available.find((m: string) => m === "gemini-1.5-flash") ||
+                            available.find((m: string) => m.includes("1.5-flash-latest")) ||
+                            available.find((m: string) => m.includes("1.5-flash")) ||
+                            available.find((m: string) => m === "gemini-pro") ||
+                            available[0]
 
-                    if (bestMatch) {
-                        cachedConfig = { apiKey, model: bestMatch, apiVersion: ver }
-                        return cachedConfig
+                        if (bestMatch) {
+                            cachedConfig = { apiKey, model: bestMatch, apiVersion: listVer }
+                            return cachedConfig
+                        }
                     }
                 }
-            }
-        } catch (e) { /* continue */ }
+            } catch (e) { /* continue */ }
+        }
 
-        // 2. Fallback to brute force trials
+        // 2. Fallback to brute force trials if listing didn't yield a 200 list
         for (const ver of apiVersions) {
             for (const name of modelNames) {
                 try {
@@ -83,7 +88,9 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
         }
     }
 
-    const debugInfo = foundAnyModels.length > 0 ? `Available in key: ${foundAnyModels.join(", ")}` : "No models found in ListModels."
+    const debugInfo = foundAnyModels.length > 0
+        ? `Found ${foundAnyModels.length} models: ${foundAnyModels.slice(0, 5).join(", ")}...`
+        : "No models found with this key."
     throw lastError || new Error(`All Gemini connection attempts failed. ${debugInfo}`)
 }
 

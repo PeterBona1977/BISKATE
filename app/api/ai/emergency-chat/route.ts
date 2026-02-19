@@ -3,7 +3,8 @@ import { createClient } from "@/lib/supabase/server"
 import { CategorySuggestionService } from "@/lib/ai/category-suggestion-service"
 import { generateGeminiContent } from "@/lib/ai/gemini-rest-client"
 
-// Standard Node.js runtime for better env stability
+// Cloudflare Pages requires edge runtime for all dynamic API routes
+export const runtime = "edge"
 export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
