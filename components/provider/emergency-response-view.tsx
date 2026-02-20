@@ -397,28 +397,28 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                     </Card>
                 </div>
             </div>
-        </div>
 
-            {/* Chat Sheet */ }
-    <Sheet open={chatOpen} onOpenChange={setChatOpen}>
-        <SheetContent side="right" className="p-0 sm:max-w-[500px] w-full border-l-0">
-            <SheetHeader className="p-6 border-b">
-                <SheetTitle className="text-2xl font-black italic uppercase">Chat de Emergência</SheetTitle>
-            </SheetHeader>
-            {conversationId && request && (
-                <div className="h-[calc(100vh-100px)]">
-                    <RealtimeChat
-                        conversationId={conversationId}
-                        gigTitle={`Emergência: ${request.category}`}
-                        otherParticipant={{
-                            id: request.client_id,
-                            name: "Cliente" // In a real app we'd fetch the name
-                        }}
-                    />
-                </div>
-            )}
-        </SheetContent>
-    </Sheet>
+
+            {/* Chat Sheet */}
+            <Sheet open={chatOpen} onOpenChange={setChatOpen}>
+                <SheetContent side="right" className="p-0 sm:max-w-[500px] w-full border-l-0">
+                    <SheetHeader className="p-6 border-b">
+                        <SheetTitle className="text-2xl font-black italic uppercase">Chat de Emergência</SheetTitle>
+                    </SheetHeader>
+                    {conversationId && request && (
+                        <div className="h-[calc(100vh-100px)]">
+                            <RealtimeChat
+                                conversationId={conversationId}
+                                gigTitle={`Emergência: ${request.category}`}
+                                otherParticipant={{
+                                    id: request.client_id,
+                                    name: "Cliente" // In a real app we'd fetch the name
+                                }}
+                            />
+                        </div>
+                    )}
+                </SheetContent>
+            </Sheet>
         </div >
     )
 }
