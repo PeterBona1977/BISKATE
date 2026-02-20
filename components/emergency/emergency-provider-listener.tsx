@@ -15,8 +15,8 @@ export function EmergencyProviderListener() {
     const [open, setOpen] = useState(false)
 
     useEffect(() => {
-        // Only run for online providers
-        if (!user || profile?.role !== 'provider' || !profile?.is_online) return
+        // Run for any provider (even if 'is_online' is technically false, we want them to hear it if they are on the app)
+        if (!user || profile?.role !== 'provider') return
 
         console.log("📡 Emergency Listener Active for Provider:", user.id)
 

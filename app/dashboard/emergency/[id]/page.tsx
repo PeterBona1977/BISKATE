@@ -34,6 +34,7 @@ import { toast } from "@/hooks/use-toast"
 import { EmergencyMap } from "@/components/dashboard/emergency-map"
 import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase/client"
+import { EmergencyPaymentModal } from "@/components/emergency/emergency-payment-modal"
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
 
@@ -50,12 +51,18 @@ export default function EmergencyTrackingPage() {
     const [isCancelling, setIsCancelling] = useState(false)
     const [conversationId, setConversationId] = useState<string | null>(null)
     const [chatOpen, setChatOpen] = useState(false)
+    const [pendingPaymentProviderId, setPendingPaymentProviderId] = useState<string | null>(null)
 
     useEffect(() => {
         if (id) {
             loadInitialData()
 
-            // 5-minute periodic notification for pending search
+            // 5-minute periodic notification for pending search, AND quick polling for updates
+            const pollingInterval = setInterval(() => {
+                fetchResponses()
+                fetchRequest()
+            }, 10000)
+
             const pulseInterval = setInterval(() => {
                 if (request?.status === 'pending') {
                     toast({
@@ -87,6 +94,7 @@ export default function EmergencyTrackingPage() {
 
             return () => {
                 clearInterval(pulseInterval)
+                clearInterval(pollingInterval)
                 requestSub.unsubscribe()
                 responseSub.unsubscribe()
             }
@@ -131,6 +139,11 @@ export default function EmergencyTrackingPage() {
     }
 
     const handleAcceptProvider = async (providerId: string) => {
+        // Trigger Payment Modal instead of immediate acceptance
+        setPendingPaymentProviderId(providerId)
+    }
+
+    const handlePaymentSuccess = async (providerId: string) => {
         try {
             setIsSelecting(true)
             await EmergencyService.clientAcceptProvider(id, providerId)
@@ -140,17 +153,13 @@ export default function EmergencyTrackingPage() {
                 description: "O profissional foi confirmado e está a caminho.",
             })
             fetchRequest()
-
-            toast({
-                title: "Técnico Selecionado!",
-                description: "O profissional foi confirmado e está a caminho.",
-            })
-            fetchRequest()
+            setConversationId(null) // Reset chat context just in case
         } catch (err) {
             console.error(err)
             toast({ title: "Erro", description: "Falha ao selecionar técnico.", variant: "destructive" })
         } finally {
             setIsSelecting(false)
+            setPendingPaymentProviderId(null)
         }
     }
 
@@ -461,7 +470,22 @@ export default function EmergencyTrackingPage() {
                     )}
                 </SheetContent>
             </Sheet>
-        </div>
+
+            <EmergencyPaymentModal
+                isOpen={!!pendingPaymentProviderId}
+                onClose={() => setPendingPaymentProviderId(null)}
+                providerName={responses.find(r => r.provider_id === pendingPaymentProviderId)?.provider?.full_name || "Técnico"}
+                amount={(() => {
+                    const r = responses.find(resp => resp.provider_id === pendingPaymentProviderId);
+                    return r && r.quote_details ? (r.quote_details.price_per_hour * r.quote_details.min_hours) : 45;
+                })()}
+                onSuccess={async () => {
+                    if (pendingPaymentProviderId) {
+                        await handlePaymentSuccess(pendingPaymentProviderId)
+                    }
+                }}
+            />
+        </div >
     )
 }
 

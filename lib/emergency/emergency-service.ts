@@ -398,28 +398,43 @@ export class EmergencyService {
      * Get or create a conversation for an emergency
      */
     static async getOrCreateConversation(requestId: string, clientId: string, providerId: string) {
-        // Try to find existing conversation for this emergency context
+        // 1. Try to find existing conversation linked to emergency_id
         const { data: existing } = await supabase
             .from("conversations")
             .select("id")
-            .eq("gig_id", requestId) // Using gig_id as the emergency context
-            .eq("client_id", clientId)
-            .eq("provider_id", providerId)
-            .single()
+            .eq("emergency_id", requestId)
+            .maybeSingle()
 
         if (existing) return { data: existing, error: null }
 
-        // Create new
-        return supabase
+        // 2. Create new conversation
+        const { data: newConv, error: createError } = await supabase
             .from("conversations")
             .insert({
-                gig_id: requestId,
-                client_id: clientId,
-                provider_id: providerId,
+                emergency_id: requestId,
                 status: 'active'
             })
             .select("id")
             .single()
+
+        if (createError) {
+            console.error("Error creating conversation:", createError)
+            return { data: null, error: createError }
+        }
+
+        // 3. Add participants
+        const { error: partError } = await supabase
+            .from("conversation_participants")
+            .insert([
+                { conversation_id: newConv.id, user_id: clientId },
+                { conversation_id: newConv.id, user_id: providerId }
+            ])
+
+        if (partError) {
+            console.error("Error adding participants:", partError)
+        }
+
+        return { data: newConv, error: null }
     }
 
     /**

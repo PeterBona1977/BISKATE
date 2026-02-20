@@ -12,6 +12,8 @@ import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { EmergencyService } from "@/lib/emergency/emergency-service"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { RealtimeChat } from "@/components/chat/realtime-chat"
 
 interface EmergencyRequest {
     id: string
@@ -39,6 +41,8 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
         min_hours: 1,
         eta: "20 min"
     })
+    const [conversationId, setConversationId] = useState<string | null>(null)
+    const [chatOpen, setChatOpen] = useState(false)
 
     useEffect(() => {
         fetchRequest()
@@ -96,6 +100,23 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
             })
         } finally {
             setIsResponding(false)
+        }
+    }
+
+    const handleOpenChat = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user || !request) return
+
+            const { data, error } = await EmergencyService.getOrCreateConversation(requestId, request.client_id, user.id)
+            if (error) throw error
+            if (data) {
+                setConversationId(data.id)
+                setChatOpen(true)
+            }
+        } catch (err) {
+            console.error("Error opening chat:", err)
+            toast({ title: "Erro", description: "Não foi possível abrir o chat.", variant: "destructive" })
         }
     }
 
@@ -348,6 +369,7 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                     <Button
                                         variant="outline"
                                         className="w-full h-14 bg-transparent border-white/40 text-white hover:bg-white/10"
+                                        onClick={handleOpenChat}
                                     >
                                         <MessageSquare className="mr-2 h-5 w-5" />
                                         CHAT COM CLIENTE
@@ -376,5 +398,27 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                 </div>
             </div>
         </div>
+
+            {/* Chat Sheet */ }
+    <Sheet open={chatOpen} onOpenChange={setChatOpen}>
+        <SheetContent side="right" className="p-0 sm:max-w-[500px] w-full border-l-0">
+            <SheetHeader className="p-6 border-b">
+                <SheetTitle className="text-2xl font-black italic uppercase">Chat de Emergência</SheetTitle>
+            </SheetHeader>
+            {conversationId && request && (
+                <div className="h-[calc(100vh-100px)]">
+                    <RealtimeChat
+                        conversationId={conversationId}
+                        gigTitle={`Emergência: ${request.category}`}
+                        otherParticipant={{
+                            id: request.client_id,
+                            name: "Cliente" // In a real app we'd fetch the name
+                        }}
+                    />
+                </div>
+            )}
+        </SheetContent>
+    </Sheet>
+        </div >
     )
 }
