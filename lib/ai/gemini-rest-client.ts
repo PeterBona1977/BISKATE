@@ -21,6 +21,8 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
     ].filter(Boolean) as string[]
 
     const modelNames = [
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite",
         "gemini-1.5-flash",
         "gemini-1.5-flash-latest",
         "gemini-1.5-pro",
@@ -29,39 +31,40 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
         "gemini-pro",
         "gemini-1.0-pro"
     ]
-    const apiVersions = ["v1", "v1beta"]
+    const apiVersions = ["v1beta", "v1"]
 
     let lastError: Error | null = null
     let criticalError: Error | null = null
     let foundAnyModels: string[] = []
 
     for (const apiKey of keys) {
-        // 0. High-Priority Trial: v1 + gemini-1.5-flash (Most stable)
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] })
-            })
-            if (res.ok) {
-                cachedConfig = { apiKey, model: "gemini-1.5-flash", apiVersion: "v1" }
-                return cachedConfig
-            } else if (res.status === 403) {
-                const errData = await res.json().catch(() => ({}))
-                const msg = errData.error?.message || "Forbidden"
-                // If key is leaked or forbidden, don't try other models with this key, but maybe try next key
-                console.error(`Gemini Key Trial Failed: ${apiKey.substring(0, 10)}... Status: 403 - ${msg}`)
-                if (msg.includes("leaked") || msg.includes("API key not valid")) {
-                    criticalError = new Error(`Gemini API Key Error: ${msg}`)
-                    continue // Try next key
+        // 0. High-Priority Trial: v1beta + gemini-2.0-flash, then v1beta + gemini-1.5-flash
+        for (const [tryVer, tryModel] of [["v1beta", "gemini-2.0-flash"], ["v1beta", "gemini-1.5-flash"], ["v1", "gemini-1.5-flash"]]) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/${tryVer}/models/${tryModel}:generateContent?key=${apiKey}`
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] })
+                })
+                if (res.ok) {
+                    cachedConfig = { apiKey, model: tryModel, apiVersion: tryVer }
+                    return cachedConfig
+                } else if (res.status === 403) {
+                    const errData = await res.json().catch(() => ({}))
+                    const msg = errData.error?.message || "Forbidden"
+                    console.error(`Gemini Key Trial Failed: ${apiKey.substring(0, 10)}... Status: 403 - ${msg}`)
+                    if (msg.includes("leaked") || msg.includes("API key not valid")) {
+                        criticalError = new Error(`Gemini API Key Error: ${msg}`)
+                        break // Try next key
+                    }
                 }
-            }
-        } catch (e) { /* continue */ }
+            } catch (e) { /* continue */ }
+        }
 
         // 1. Try to list models (The most reliable way)
         let listSuccess = false
-        for (const listVer of ["v1", "v1beta"]) {
+        for (const listVer of ["v1beta", "v1"]) {
             try {
                 const listUrl = `https://generativelanguage.googleapis.com/${listVer}/models?key=${apiKey}`
                 const listRes = await fetch(listUrl)
