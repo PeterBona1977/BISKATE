@@ -37,13 +37,16 @@ export async function POST(request: NextRequest) {
 
         console.log(`🚨 Generating Emergency: ${category} at ${lat},${lng}`)
 
+        // Safely parse serviceId to prevent UUID caste errors and Foreign Key violations
+        const cleanServiceId = !serviceId || serviceId === "null" || serviceId.length !== 36 ? null : serviceId;
+
         // 1. Create Request in DB (using ADMIN client to bypass RLS)
         const { data: emergencyRequest, error: createError } = await supabaseAdmin
             .from("emergency_requests")
             .insert({
                 client_id: user.id,
                 category,
-                service_id: serviceId,
+                service_id: cleanServiceId, // Use cleaned ID
                 description,
                 lat,
                 lng,
@@ -92,7 +95,7 @@ export async function POST(request: NextRequest) {
             const features = plan?.features
             const hasEmergencyFeature = features && features.emergency_calls === true
 
-            const hasMatchingSkill = !serviceId || serviceId === "null" || (p.skills && Array.isArray(p.skills) && p.skills.includes(serviceId))
+            const hasMatchingSkill = !cleanServiceId || (p.skills && Array.isArray(p.skills) && p.skills.includes(cleanServiceId))
 
             const distance = calculateDistance(lat, lng, p.last_lat, p.last_lng)
             const inRadius = distance <= (p.provider_service_radius || 20)
