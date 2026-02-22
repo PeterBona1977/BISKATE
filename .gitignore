@@ -36,3 +36,8 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# test scripts
+test-key.cjs
+test-*.cjs
+test-*.js
