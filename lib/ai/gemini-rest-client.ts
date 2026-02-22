@@ -17,8 +17,7 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
 
     const keys = [
         process.env.GEMINI_API_KEY,
-        process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-        process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+        process.env.GOOGLE_GENERATIVE_AI_API_KEY
     ].filter(Boolean) as string[]
 
     const modelNames = [
