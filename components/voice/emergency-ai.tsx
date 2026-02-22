@@ -440,7 +440,16 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                     })
                 })
 
-                if (!response.ok) throw new Error("Broadcast failed")
+                if (!response.ok) {
+                    let errorDetails = "Unknown Server Error";
+                    try {
+                        const errData = await response.json();
+                        errorDetails = errData.details || errData.error || response.statusText;
+                    } catch (e) {
+                        errorDetails = response.statusText;
+                    }
+                    throw new Error(`Broadcast failed: ${errorDetails}`);
+                }
                 const result = await response.json()
 
                 if (result.data) {
@@ -452,12 +461,12 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             } else {
                 throw new Error("Missing location or user")
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error("Broadcast failed", err)
             setStep("chat")
-            const errorMsg = "Falha ao criar o pedido. Por favor tente novamente."
+            const errorMsg = `Falha ao criar o pedido. Detalhe técnico: ${err.message || 'Erro Desconhecido'}. Por favor tente novamente.`
             addMessage("assistant", errorMsg)
-            speak(errorMsg)
+            speak("Falha ao criar o pedido. Por favor tente novamente.")
         }
     }
 
