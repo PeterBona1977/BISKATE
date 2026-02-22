@@ -20,6 +20,10 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
         process.env.GOOGLE_GENERATIVE_AI_API_KEY
     ].filter(Boolean) as string[]
 
+    if (!keys || keys.length === 0) {
+        throw new Error("GEMINI_API_KEY is completely missing from process.env. If you are developing locally, you MUST restart your terminal (ctrl+c and 'npm run dev') for .env.local changes to apply. If you are in production (Cloudflare/Vercel), you must add GEMINI_API_KEY to the project settings dashboard.")
+    }
+
     const modelNames = [
         "gemini-2.0-flash",
         "gemini-2.0-flash-lite",
