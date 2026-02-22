@@ -57,8 +57,18 @@ export async function POST(request: NextRequest) {
             .single()
 
         if (createError) {
-            console.error("Error creating emergency request:", createError)
-            return NextResponse.json({ error: "Failed to create request", details: createError }, { status: 500 })
+            console.error("🚨 DATABASE ERROR creating emergency request:")
+            console.error("Error Message:", createError.message)
+            console.error("Error Details:", createError.details)
+            console.error("Error Hint:", createError.hint)
+            console.error("Error Code:", createError.code)
+            console.error("Full Error Object:", JSON.stringify(createError, null, 2))
+
+            return NextResponse.json({
+                error: "Failed to create request",
+                details: createError.message,
+                code: createError.code
+            }, { status: 500 })
         }
 
         // 2. Find Providers (using ADMIN client to bypass RLS)
