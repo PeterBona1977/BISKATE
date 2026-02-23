@@ -469,6 +469,13 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
                 if (result.data) {
                     setIsBroadcastSuccess(true)
+
+                    // Mostra ao cliente quantos foram notificados antes de ir para live tracking
+                    toast({
+                        title: "Pedido Enviado",
+                        description: `Notificámos ${result.broadcastCount || 0} prestadores especializados próximos de si.`,
+                    })
+
                     // Redirecionamento imediato conforme solicitado
                     onSuccess(result.data.id)
                 }

@@ -112,28 +112,29 @@ export async function POST(request: NextRequest) {
         }
 
         const debugLog: any[] = []
-
         console.log(`🔍 Broadcast: Found ${nearbyProviders?.length || 0} online providers with location.`)
 
         const eligibleProviders = nearbyProviders?.filter((p: any) => {
-            const plan = p.plan_limits as any
-            const features = plan?.features
-            const hasEmergencyFeature = features && features.emergency_calls === true
-
             const hasMatchingSkill = !cleanServiceId || (p.skills && Array.isArray(p.skills) && p.skills.includes(cleanServiceId))
-
             const distance = calculateDistance(lat, lng, p.last_lat, p.last_lng)
-            const inRadius = distance <= (p.provider_service_radius || 20)
+            const inRadius = distance <= (p.provider_service_radius || 30)
 
-            console.log(`   - Provider ${p.email}: Skill=${hasMatchingSkill}, Dist=${distance.toFixed(1)}km, Radius=${p.provider_service_radius}km. Match=${hasMatchingSkill && inRadius}`)
+            const isEligible = hasMatchingSkill && inRadius
 
-            debugLog.push({
+            // Log detailed reason for this provider
+            const logEntry = {
                 email: p.email,
-                eligible: hasMatchingSkill && inRadius,
-                details: { hasMatchingSkill, distance, inRadius }
-            })
+                name: p.full_name,
+                hasMatchingSkill,
+                distance: `${distance.toFixed(2)}km`,
+                radius: `${p.provider_service_radius || 30}km`,
+                inRadius,
+                isEligible
+            }
+            debugLog.push(logEntry)
+            console.log(`   - Provider ${p.email}: ${isEligible ? "✅ ELIGIBLE" : "❌ REJECTED"} (${hasMatchingSkill ? "Skill OK" : "Wrong Skill"}, ${distance.toFixed(1)}km)`)
 
-            return hasMatchingSkill && inRadius
+            return isEligible
         }) || []
 
         console.log(`✅ ${eligibleProviders.length} providers passed filtering.`)
@@ -141,10 +142,10 @@ export async function POST(request: NextRequest) {
         // 3. Send Notifications via Admin Client
         const notifications = eligibleProviders.map(provider => ({
             user_id: provider.id,
-            user_type: "provider", // CRITICAL: Filtered by frontend
+            user_type: "provider",
             title: "🚨 URGENTE: Novo Pedido de Emergência!",
             message: `Serviço de ${category} próximo de si. Responda imediatamente!`,
-            type: "emergency", // Use 'emergency' type for specialized UI
+            type: "emergency",
             data: {
                 action_url: `/dashboard/provider/emergency`,
                 emergency_id: emergencyRequest.id

@@ -28,7 +28,8 @@ export function useEmergencyHeartbeat() {
 
     useEffect(() => {
         // Only run for providers who are online
-        if (profile?.role === 'provider' && profile?.is_online) {
+        const isProvider = profile?.role === 'provider' || profile?.is_provider === true
+        if (isProvider && profile?.is_online) {
             // Immediate update
             updateLocation()
 
