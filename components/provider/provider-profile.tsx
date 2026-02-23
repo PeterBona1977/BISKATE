@@ -101,6 +101,7 @@ export function ProviderProfile() {
   const [lng, setLng] = useState<number | null>(profile?.last_lng || null)
   const [postalCode, setPostalCode] = useState(profile?.postal_code || "")
   const [providerType, setProviderType] = useState(profile?.provider_type || "individual")
+  const [providerEmergencyCalls, setProviderEmergencyCalls] = useState(profile?.provider_emergency_calls || false)
 
   useEffect(() => {
     if (profile) {
@@ -114,6 +115,7 @@ export function ProviderProfile() {
       setHourlyRate(profile.provider_hourly_rate || 0)
       setAvailability(profile.provider_availability || "available")
       setProviderType(profile.provider_type || "individual")
+      setProviderEmergencyCalls(profile.provider_emergency_calls || false)
       setCompanyName(profile.company_name || "")
       setServiceRadius(profile.provider_service_radius || 20)
       setLat(profile.last_lat || null)
@@ -226,6 +228,7 @@ export function ProviderProfile() {
         provider_type: providerType,
         company_name: companyName,
         provider_service_radius: serviceRadius,
+        provider_emergency_calls: providerEmergencyCalls,
         last_lat: finalLat,
         last_lng: finalLng,
         hourly_rate: hourlyRate,
@@ -599,6 +602,22 @@ export function ProviderProfile() {
                       value={website}
                       onChange={(e) => setWebsite(e.target.value)}
                       placeholder="https://seusite.com"
+                    />
+                  </div>
+                  <div className="md:col-span-2 bg-red-50/50 p-4 rounded-xl border border-red-100 flex items-center justify-between">
+                    <div>
+                      <Label className="text-sm font-bold text-red-900 flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-red-600" />
+                        Disponibilidade para Emergências 24/7
+                      </Label>
+                      <p className="text-xs text-red-700/80 mt-1">
+                        Se ativado, receberá alertas sonoros em tempo real de clientes com emergências urgentes na sua área.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={providerEmergencyCalls}
+                      onCheckedChange={setProviderEmergencyCalls}
+                      className="data-[state=checked]:bg-red-600"
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
