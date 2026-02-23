@@ -95,19 +95,21 @@ export async function POST(request: NextRequest) {
                 email, 
                 full_name,
                 skills,
+                emergency_skills,
                 last_lat,
                 last_lng,
                 provider_service_radius,
+                provider_emergency_calls,
                 plan_limits:plan (features)
             `)
             .eq("is_online", true)
             .eq("is_provider", true)
+            .eq("provider_emergency_calls", true)
             .not("last_lat", "is", null)
             .not("last_lng", "is", null)
 
         if (providerError) {
             console.error("Error fetching providers:", providerError)
-            // Even if broadcast fails, return the request so UI can show "Created"
             return NextResponse.json({ data: emergencyRequest, warning: "Failed to fetch providers" })
         }
 
@@ -115,24 +117,30 @@ export async function POST(request: NextRequest) {
         console.log(`🔍 Broadcast: Found ${nearbyProviders?.length || 0} online providers with location.`)
 
         const eligibleProviders = nearbyProviders?.filter((p: any) => {
-            const hasMatchingSkill = !cleanServiceId || (p.skills && Array.isArray(p.skills) && p.skills.includes(cleanServiceId))
+            // Check if provider has THIS specific service marked as EMERGENCY
+            const hasEmergencySkill = !cleanServiceId || (
+                p.emergency_skills &&
+                Array.isArray(p.emergency_skills) &&
+                p.emergency_skills.includes(cleanServiceId)
+            )
+
             const distance = calculateDistance(lat, lng, p.last_lat, p.last_lng)
             const inRadius = distance <= (p.provider_service_radius || 30)
 
-            const isEligible = hasMatchingSkill && inRadius
+            const isEligible = hasEmergencySkill && inRadius
 
             // Log detailed reason for this provider
             const logEntry = {
                 email: p.email,
                 name: p.full_name,
-                hasMatchingSkill,
+                hasEmergencySkill,
                 distance: `${distance.toFixed(2)}km`,
                 radius: `${p.provider_service_radius || 30}km`,
                 inRadius,
                 isEligible
             }
             debugLog.push(logEntry)
-            console.log(`   - Provider ${p.email}: ${isEligible ? "✅ ELIGIBLE" : "❌ REJECTED"} (${hasMatchingSkill ? "Skill OK" : "Wrong Skill"}, ${distance.toFixed(1)}km)`)
+            console.log(`   - Provider ${p.email}: ${isEligible ? "✅ ELIGIBLE" : "❌ REJECTED"} (${hasEmergencySkill ? "Emergency Skill OK" : "Emergency Not Enabled"}, ${distance.toFixed(1)}km)`)
 
             return isEligible
         }) || []

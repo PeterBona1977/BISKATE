@@ -13,7 +13,9 @@ import { supabase } from "@/lib/supabase/client"
 interface ServiceSelectorProps {
     userId: string
     selectedServices: string[] // IDs of selected services
+    emergencyServices?: string[] // IDs of services with emergency enabled
     onServicesChange: (services: string[]) => void
+    onEmergencyToggle?: (serviceId: string) => void
 }
 
 interface Category {
@@ -35,7 +37,13 @@ interface Service {
     description?: string
 }
 
-export function ServiceSelector({ userId, selectedServices, onServicesChange }: ServiceSelectorProps) {
+export function ServiceSelector({
+    userId,
+    selectedServices,
+    emergencyServices = [],
+    onServicesChange,
+    onEmergencyToggle
+}: ServiceSelectorProps) {
     const [categories, setCategories] = useState<Category[]>([])
     const [subcategories, setSubcategories] = useState<Subcategory[]>([])
     const [services, setServices] = useState<Service[]>([])
@@ -123,7 +131,8 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
         }
     }
 
-    const getServiceName = (id: string) => services.find((s) => s.id === id)?.name || id
+    const getServiceName = (id: string) => services.find((s) => s.id === id)?.name ||
+        subcategories.find((s) => s.id === id)?.name || id
 
     if (loading) {
         return (
@@ -147,6 +156,12 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                                     services.some(s => s.parent_id === sub.id && selectedServices.includes(s.id))
                                 ));
 
+                            const hasEmergency = services.some(s => s.parent_id === cat.id && emergencyServices.includes(s.id)) ||
+                                subcategories.some(sub => sub.parent_id === cat.id && (
+                                    emergencyServices.includes(sub.id) ||
+                                    services.some(s => s.parent_id === sub.id && emergencyServices.includes(s.id))
+                                ));
+
                             return (
                                 <Button
                                     key={cat.id}
@@ -162,7 +177,12 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                                     }}
                                 >
                                     <div className="flex items-center gap-2 truncate">
-                                        {hasSelection && <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />}
+                                        {hasSelection && (
+                                            <div className={cn(
+                                                "w-1.5 h-1.5 rounded-full shrink-0",
+                                                hasEmergency ? "bg-red-500 animate-pulse" : "bg-primary"
+                                            )} />
+                                        )}
                                         <span className="truncate">{cat.name}</span>
                                     </div>
                                     <ChevronRight className="h-4 w-4 text-muted-foreground opacity-50" />
@@ -181,7 +201,9 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                         <div className="p-2 space-y-1">
                             {filteredSubcategories.map((sub) => {
                                 const isSubSelected = selectedServices.includes(sub.id);
+                                const isEmergency = emergencyServices.includes(sub.id);
                                 const hasChildrenSelected = services.some(s => s.parent_id === sub.id && selectedServices.includes(s.id));
+                                const hasChildrenEmergency = services.some(s => s.parent_id === sub.id && emergencyServices.includes(s.id));
 
                                 return (
                                     <Button
@@ -198,7 +220,10 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                                     >
                                         <div className="flex items-center gap-2 truncate">
                                             {(isSubSelected || hasChildrenSelected) && (
-                                                <Check className={cn("h-3.5 w-3.5", isSubSelected ? "text-primary" : "text-muted-foreground")} />
+                                                <Check className={cn(
+                                                    "h-3.5 w-3.5",
+                                                    (isEmergency || hasChildrenEmergency) ? "text-red-500" : "text-primary"
+                                                )} />
                                             )}
                                             <span className="truncate">{sub.name}</span>
                                         </div>
@@ -237,7 +262,9 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                                         key={service.id}
                                         service={service}
                                         isSelected={selectedServices.includes(service.id)}
+                                        isEmergency={emergencyServices.includes(service.id)}
                                         onToggle={() => toggleService(service.id)}
+                                        onEmergencyToggle={onEmergencyToggle}
                                     />
                                 ))
                             ) : (
@@ -260,7 +287,9 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                                     description: "Selecione esta opção para oferecer todos os serviços básicos desta categoria."
                                 }}
                                 isSelected={selectedServices.includes(activeSubcategory)}
+                                isEmergency={emergencyServices.includes(activeSubcategory)}
                                 onToggle={() => toggleService(activeSubcategory)}
+                                onEmergencyToggle={onEmergencyToggle}
                             />
 
                             {filteredServices.length > 0 && <div className="h-px bg-muted my-4" />}
@@ -270,7 +299,9 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                                     key={service.id}
                                     service={service}
                                     isSelected={selectedServices.includes(service.id)}
+                                    isEmergency={emergencyServices.includes(service.id)}
                                     onToggle={() => toggleService(service.id)}
+                                    onEmergencyToggle={onEmergencyToggle}
                                 />
                             ))}
                         </div>
@@ -289,22 +320,32 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                                 Nenhum serviço selecionado.
                             </span>
                         )}
-                        {selectedServices.map(id => (
-                            <Badge key={id} variant="secondary" className="pr-1">
-                                {getServiceName(id)}
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-4 w-4 ml-1 p-0 hover:bg-transparent text-muted-foreground hover:text-foreground rounded-full"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        toggleService(id)
-                                    }}
+                        {selectedServices.map(id => {
+                            const isEmergency = emergencyServices.includes(id);
+                            return (
+                                <Badge
+                                    key={id}
+                                    variant={isEmergency ? "destructive" : "secondary"}
+                                    className={cn("pr-1", isEmergency && "bg-red-500 hover:bg-red-600")}
                                 >
-                                    &times;
-                                </Button>
-                            </Badge>
-                        ))}
+                                    <span className="flex items-center gap-1">
+                                        {isEmergency && <Activity className="h-3 w-3" />}
+                                        {getServiceName(id)}
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-4 w-4 ml-1 p-0 hover:bg-transparent text-white/70 hover:text-white rounded-full"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            toggleService(id)
+                                        }}
+                                    >
+                                        &times;
+                                    </Button>
+                                </Badge>
+                            )
+                        })}
                     </div>
                 </div>
             </div>
@@ -312,27 +353,64 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
     )
 }
 
-function ServiceItem({ service, isSelected, onToggle }: { service: Service; isSelected: boolean; onToggle: () => void }) {
+import { Activity } from "lucide-react"
+
+function ServiceItem({
+    service,
+    isSelected,
+    isEmergency,
+    onToggle,
+    onEmergencyToggle
+}: {
+    service: Service;
+    isSelected: boolean;
+    isEmergency: boolean;
+    onToggle: () => void;
+    onEmergencyToggle?: (id: string) => void;
+}) {
     return (
         <div
-            onClick={onToggle}
             className={cn(
-                "flex items-start p-3 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50",
-                isSelected && "border-primary bg-primary/5 ring-1 ring-primary"
+                "flex items-center p-3 rounded-lg border cursor-pointer transition-all group",
+                isSelected
+                    ? "border-primary bg-primary/5 ring-1 ring-primary"
+                    : "hover:bg-muted/50"
             )}
+            onClick={onToggle}
         >
             <div className={cn(
-                "h-5 w-5 rounded border border-primary mr-3 flex items-center justify-center flex-shrink-0 mt-0.5",
+                "h-5 w-5 rounded border border-primary mr-3 flex items-center justify-center flex-shrink-0",
                 isSelected ? "bg-primary text-primary-foreground" : "bg-transparent"
             )}>
-                {isSelected && <Check className="h-3 w-3" />}
+                {isSelected && <Check className="h-3.5 w-3.5" />}
             </div>
-            <div>
-                <p className="text-sm font-medium leading-none">{service.name}</p>
+
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{service.name}</p>
                 {service.description && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{service.description}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{service.description}</p>
                 )}
             </div>
+
+            {isSelected && onEmergencyToggle && (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                        "h-8 w-8 ml-2 rounded-full transition-colors",
+                        isEmergency
+                            ? "bg-red-500 text-white hover:bg-red-600 shadow-sm"
+                            : "text-muted-foreground hover:bg-red-100 hover:text-red-500"
+                    )}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onEmergencyToggle(service.id);
+                    }}
+                    title={isEmergency ? "Desativar Emergência" : "Ativar Emergência para este serviço"}
+                >
+                    <Activity className={cn("h-4 w-4", isEmergency && "animate-pulse")} />
+                </Button>
+            )}
         </div>
     )
 }

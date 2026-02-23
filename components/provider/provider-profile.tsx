@@ -790,25 +790,91 @@ export function ProviderProfile() {
           </TabsContent>
 
           <TabsContent value="services" className="space-y-6">
+            <Card className="border-primary/20 bg-primary/5">
+              <CardHeader className="pb-3 text-center">
+                <CardTitle className="text-lg flex items-center justify-center gap-2">
+                  <Activity className="h-5 w-5 text-primary" />
+                  Atendimento de Emergência
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4 bg-background/50 p-4 rounded-lg border">
+                  <div className="bg-primary/10 p-3 rounded-full hidden sm:block">
+                    <Activity className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm text-primary">Disponibilidade 24/7</p>
+                    <p className="text-xs text-muted-foreground">
+                      Ao ativar, ficará elegível para receber pedidos de ajuda imediata baseados na sua localização e especialidades.
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5 ml-2">
+                    <Switch
+                      checked={profile.provider_emergency_calls || false}
+                      onCheckedChange={async (checked) => {
+                        setLoading(true)
+                        try {
+                          const { error } = await updateProfile({ provider_emergency_calls: checked })
+                          if (error) throw error
+                          toast({
+                            title: checked ? "Emergências Ativadas" : "Emergências Desativadas",
+                            description: checked ? "Agora receberá alertas de emergência." : "Não será notificado para pedidos de emergência."
+                          })
+                        } catch (err) {
+                          toast({ title: "Erro", description: "Falha ao atualizar preferência", variant: "destructive" })
+                        } finally {
+                          setLoading(false)
+                        }
+                      }}
+                    />
+                    <Badge variant={profile.provider_emergency_calls ? "default" : "secondary"} className="text-[10px] px-1.5 h-4">
+                      {profile.provider_emergency_calls ? "ATIVO" : "INATIVO"}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
-                <CardTitle>{t("tabs.services")}</CardTitle>
-                <CardDescription>Selecione os serviços que você oferece para receber gigs relevantes.</CardDescription>
+                <CardTitle>Especialidades e Serviços</CardTitle>
+                <CardDescription>
+                  Selecione os serviços que presta. Clique no ícone de <strong>Atividade <Activity className="inline h-3 w-3" /></strong> ao lado do serviço selecionado para ativar as emergências apenas para esse item.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <ServiceSelector
                   userId={profile.id}
                   selectedServices={profile.skills || []}
+                  emergencyServices={profile.emergency_skills || []}
                   onServicesChange={async (newServices) => {
-                    // Direct save for better UX or create local state? 
-                    // Direct save might be slow. Let's optimize if needed, but for now direct save ensures data consistency.
-                    // Actually, let's use the updateProfile context method.
                     setLoading(true)
                     try {
                       const { error } = await updateProfile({ skills: newServices })
                       if (error) throw error
                     } catch (err) {
                       toast({ title: "Erro", description: "Falha ao salvar serviços", variant: "destructive" })
+                    } finally {
+                      setLoading(false)
+                    }
+                  }}
+                  onEmergencyToggle={async (serviceId) => {
+                    const currentEmergency = profile.emergency_skills || [];
+                    const isEnabled = currentEmergency.includes(serviceId);
+                    const newEmergency = isEnabled
+                      ? currentEmergency.filter(id => id !== serviceId)
+                      : [...currentEmergency, serviceId];
+
+                    setLoading(true)
+                    try {
+                      const { error } = await updateProfile({ emergency_skills: newEmergency })
+                      if (error) throw error
+                      toast({
+                        title: !isEnabled ? "Emergência Ativada" : "Emergência Desativadas",
+                        description: !isEnabled ? "Receberá alertas para este serviço." : "Não receberá mais alertas para este serviço."
+                      })
+                    } catch (err) {
+                      toast({ title: "Erro", description: "Falha ao atualizar emergência", variant: "destructive" })
                     } finally {
                       setLoading(false)
                     }
@@ -874,7 +940,7 @@ export function ProviderProfile() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </div >
     </>
   )
 }
