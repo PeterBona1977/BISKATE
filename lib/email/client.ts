@@ -1,42 +1,6 @@
-import { Resend } from "resend";
+// Removed Node.js specific Resend package to ensure 100% Cloudflare Edge compatibility.
+// We will use standard Fetch API to talk to Resend.
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
-
-// Lazy-load Resend client to prevent client-side instantiation
-let resendClient: Resend | null = null;
-
-
-function getResendClient(): Resend {
-    // Ensure we're running on the server
-    if (typeof window !== 'undefined') {
-        throw new Error('Email client can only be used on the server side');
-    }
-
-    if (!resendClient) {
-        const apiKey = process.env.RESEND_API_KEY;
-        console.log(`[EMAIL_DEBUG] 🚀 Initializing Resend client. Key present: ${!!apiKey}`);
-
-        if (!apiKey) {
-            console.warn("⚠️ [EMAIL_DEBUG] Warning: RESEND_API_KEY is not configured. Email services will be inactive.");
-            // Return a silent proxy instead of throwing
-            const silentProxy = new Proxy({} as any, {
-                get: (target, prop) => {
-                    if (prop === 'emails') return silentProxy;
-                    if (prop === 'send') return () => {
-                        console.log("[EMAIL_DEBUG] 🔇 Silent proxy 'send' called");
-                        return Promise.resolve({ data: { id: "mock-id" }, error: null });
-                    };
-                    return () => Promise.resolve({ data: null, error: null });
-                }
-            });
-            return silentProxy as unknown as Resend;
-        }
-
-        resendClient = new Resend(apiKey);
-        console.log("[EMAIL_DEBUG] ✅ Resend client initialized successfully");
-    }
-
-    return resendClient;
-}
 
 interface SendEmailParams {
     to: string;
@@ -256,19 +220,34 @@ export async function sendEmail({ to, templateName, variables }: SendEmailParams
         const finalHtml = wrapEmail(html, subject);
 
         // 4. Send email
-        // 4. Send email
-        const { data, error } = await resend.emails.send({
-            from: "Biskate <noreply@biskate.eu>",
-            to: [to],
-            subject: subject,
-            html: finalHtml,
-        });
-
-        if (error) {
-            console.error("❌ [EMAIL_DEBUG] Resend API Error:", JSON.stringify(error, null, 2));
-            return { success: false, error };
+        // 4. Send email via Fetch API (Cloudflare safe)
+        const apiKey = process.env.RESEND_API_KEY;
+        if (!apiKey) {
+            console.warn("⚠️ [EMAIL_DEBUG] Warning: RESEND_API_KEY is not configured. Email services will be inactive.");
+            return { success: true, data: { id: "mock-id" } }
         }
 
+        const res = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                from: "Biskate <noreply@biskate.eu>",
+                to: [to],
+                subject: subject,
+                html: finalHtml,
+            })
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error("❌ [EMAIL_DEBUG] Resend API Error:", errorText);
+            return { success: false, error: new Error(errorText) };
+        }
+
+        const data = await res.json();
         console.log("✅ [EMAIL_DEBUG] Resend API Success:", data?.id);
         return { success: true, data };
     } catch (error) {
@@ -282,24 +261,33 @@ export async function sendEmail({ to, templateName, variables }: SendEmailParams
  */
 async function sendEmailWithContent({ to, subject, html }: { to: string, subject: string, html: string }) {
     try {
-        const resend = getResendClient();
-
-        // Wrap with template
         const finalHtml = wrapEmail(html, subject);
 
-        const { data, error } = await resend.emails.send({
-            from: "Biskate <noreply@biskate.eu>",
-            to: [to],
-            subject: subject,
-            html: finalHtml,
+        const apiKey = process.env.RESEND_API_KEY;
+        if (!apiKey) return { success: true, data: { id: "mock-id" } }
+
+        const res = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                from: "Biskate <noreply@biskate.eu>",
+                to: [to],
+                subject: subject,
+                html: finalHtml,
+            })
         });
 
-        if (error) {
-            console.error("❌ Resend API Error (raw):", error);
-            return { success: false, error };
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error("❌ Resend API Error (raw):", errorText);
+            return { success: false, error: new Error(errorText) };
         }
 
-        console.log("✅ Resend API Success (raw):", data);
+        const data = await res.json();
+        console.log("✅ Resend API Success (raw):", data?.id);
         return { success: true, data };
     } catch (error) {
         console.error("Failed to send raw email:", error);
