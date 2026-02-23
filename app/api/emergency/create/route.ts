@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Find Providers (using ADMIN client to bypass RLS)
-        // We look for online providers with a location set
+        // We look for online providers. Relaxed DB query to allow better debugging and fallback for missing locations.
         const { data: nearbyProviders, error: providerError } = await supabaseAdmin
             .from("profiles")
             .select(`
@@ -100,13 +100,12 @@ export async function POST(request: NextRequest) {
                 last_lng,
                 provider_service_radius,
                 provider_emergency_calls,
-                plan_limits:plan (features)
+                is_provider,
+                role
             `)
             .eq("is_online", true)
-            .eq("is_provider", true)
-            .eq("provider_emergency_calls", true)
-            .not("last_lat", "is", null)
-            .not("last_lng", "is", null)
+            // Allow if is_provider is true OR role is 'provider'
+            .or("is_provider.eq.true,role.eq.provider")
 
         if (providerError) {
             console.error("Error fetching providers:", providerError)
@@ -114,33 +113,44 @@ export async function POST(request: NextRequest) {
         }
 
         const debugLog: any[] = []
-        console.log(`🔍 Broadcast: Found ${nearbyProviders?.length || 0} online providers with location.`)
+        console.log(`🔍 Broadcast: Found ${nearbyProviders?.length || 0} online providers.`)
 
         const eligibleProviders = nearbyProviders?.filter((p: any) => {
-            // Check if provider has THIS specific service marked as EMERGENCY
+            // Must have emergency calls enabled
+            const isEmergencyEnabled = p.provider_emergency_calls === true
+
+            // Check if provider has THIS specific service marked as EMERGENCY or just generally in skills
             const hasEmergencySkill = !cleanServiceId || (
-                p.emergency_skills &&
-                Array.isArray(p.emergency_skills) &&
-                p.emergency_skills.includes(cleanServiceId)
+                (p.emergency_skills && Array.isArray(p.emergency_skills) && p.emergency_skills.includes(cleanServiceId)) ||
+                (p.skills && Array.isArray(p.skills) && p.skills.includes(cleanServiceId))
             )
 
-            const distance = calculateDistance(lat, lng, p.last_lat, p.last_lng)
-            const inRadius = distance <= (p.provider_service_radius || 30)
+            // Handle missing location (typical on desktop tests where user denied location)
+            let distance = 0;
+            let inRadius = true;
+            if (p.last_lat && p.last_lng && lat && lng) {
+                distance = calculateDistance(lat, lng, p.last_lat, p.last_lng)
+                inRadius = distance <= (p.provider_service_radius || 50) // Default 50km if missing
+            } else {
+                debugLog.push(`Warning: Missing coordinates for provider ${p.email} or client. Bypassing distance check.`)
+            }
 
-            const isEligible = hasEmergencySkill && inRadius
+            const isEligible = isEmergencyEnabled && hasEmergencySkill && inRadius;
 
             // Log detailed reason for this provider
             const logEntry = {
                 email: p.email,
                 name: p.full_name,
+                isEmergencyEnabled,
                 hasEmergencySkill,
                 distance: `${distance.toFixed(2)}km`,
-                radius: `${p.provider_service_radius || 30}km`,
+                radius: `${p.provider_service_radius || 50}km`,
                 inRadius,
-                isEligible
+                isEligible,
+                note: (!p.last_lat ? 'No GPS ' : '') + (!isEmergencyEnabled ? 'Emergency OFF ' : '') + (!hasEmergencySkill ? 'Skill Mismatch ' : '')
             }
             debugLog.push(logEntry)
-            console.log(`   - Provider ${p.email}: ${isEligible ? "✅ ELIGIBLE" : "❌ REJECTED"} (${hasEmergencySkill ? "Emergency Skill OK" : "Emergency Not Enabled"}, ${distance.toFixed(1)}km)`)
+            console.log(`   - Provider ${p.email}: ${isEligible ? "✅ ELIGIBLE" : "❌ REJECTED"} | EmerEnabled: ${isEmergencyEnabled} | SkillOK: ${hasEmergencySkill} | Dist: ${distance.toFixed(1)}km | Radius: ${inRadius}`)
 
             return isEligible
         }) || []
