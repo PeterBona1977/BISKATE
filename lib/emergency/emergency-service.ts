@@ -244,77 +244,18 @@ export class EmergencyService {
             .eq("emergency_id", requestId)
     }
 
-    /**
-     * Client accepts a specific provider (Stage 2 of the new flow)
-     */
     static async clientAcceptProvider(requestId: string, providerId: string) {
-        // 1. Get the quote first to know amount
-        const { data: response } = await supabase
-            .from("emergency_responses")
-            .select("quote_details, emergency:emergency_requests(client_id, category)")
-            .eq("emergency_id", requestId)
-            .eq("provider_id", providerId)
-            .single()
-
-        if (!response) throw new Error("Response not found")
-        const request = response.emergency as any
-
-        // PLACEHOLDER: Debit Logic
-        // In a real app, this would call Stripe/Payment Provider to capture funds
-        // Amount = response.quote_details.price_per_hour * response.quote_details.min_hours
         console.log(`💰 DEBITING CLIENT: Quote accepted for ${requestId}. Provider: ${providerId}`)
 
-        // 2. Update the request with the chosen provider
-        const { error: requestError } = await supabase
-            .from("emergency_requests")
-            .update({
-                provider_id: providerId,
-                status: "accepted",
-                accepted_at: new Date().toISOString(),
-            })
-            .eq("id", requestId)
-            .neq("status", "accepted")
+        const response = await fetch('/api/emergency/accept', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ requestId, providerId })
+        });
 
-        if (requestError) throw requestError
-
-        // 3. Update the chosen response status
-        await supabase
-            .from("emergency_responses")
-            .update({ status: 'accepted' })
-            .eq("emergency_id", requestId)
-            .eq("provider_id", providerId)
-
-        // 4. Reject other responses
-        const { data: otherResponses } = await supabase
-            .from("emergency_responses")
-            .update({ status: 'rejected' })
-            .eq("emergency_id", requestId)
-            .neq("provider_id", providerId)
-            .select("provider_id")
-
-        // 5. Notifications
-        // Notify accepted provider
-        await notificationService.createNotification({
-            user_id: providerId,
-            title: "✅ Proposta Aceite!",
-            message: `O cliente aceitou a sua proposta para a emergência de ${request.category}.`,
-            type: "success",
-            user_type: "provider",
-            action_url: `/dashboard/provider/emergency/${requestId}`
-        })
-
-        // Notify rejected providers
-        if (otherResponses && otherResponses.length > 0) {
-            await Promise.all(otherResponses.map(r =>
-                notificationService.createNotification({
-                    user_id: r.provider_id,
-                    title: "❌ Proposta Recusada",
-                    message: `O cliente escolheu outro prestador para a emergência de ${request.category}.`,
-                    type: "warning",
-                    user_type: "provider",
-                    action_url: `/dashboard/provider/emergency`
-                })
-            ))
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Failed to accept provider on server');
         }
 
         return { success: true }

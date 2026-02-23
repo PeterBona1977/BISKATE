@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic"
 import { createClient } from "@/lib/supabase/server"
 import { supabaseAdmin } from "@/lib/supabase/admin"
 import { notificationService } from "@/lib/notifications/notification-service"
+import { sendEmailByTrigger } from "@/lib/email/client"
 
 // Helper for Haversine distance
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -162,6 +163,25 @@ export async function POST(request: NextRequest) {
                 console.error("Error sending notifications:", notifyError)
                 debugLog.push(`Notify Error: ${notifyError.message}`)
             }
+
+            // 4. Send Emails via Resend (Server Side Action)
+            // Trigger parallel email dispatch to all matching providers
+            const emailPromises = eligibleProviders.map((provider: any) =>
+                sendEmailByTrigger({
+                    to: provider.email,
+                    trigger: "emergency_request_new",
+                    variables: {
+                        user_name: provider.full_name,
+                        category: category,
+                        address: address || "Localização atual partilhada no Mapa",
+                        action_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/provider/emergency`
+                    }
+                })
+            )
+
+            // Execute emails rapidly in the background without waiting 
+            // for all of them to finish to keep response times low
+            Promise.allSettled(emailPromises).catch(console.error)
         }
 
         return NextResponse.json({
