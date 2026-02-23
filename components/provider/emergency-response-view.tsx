@@ -191,7 +191,28 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
         }
     }
 
-    const handleStartJourney = () => updateEmergencyStatus('in_progress', 'O cliente foi informado que já está a caminho.')
+    const handleStartJourney = () => {
+        updateEmergencyStatus('in_progress', 'Trajeto Iniciado!')
+
+        if (request?.lat && request?.lng) {
+            // Open Google Maps Directions in a new tab / Maps App
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+            const isAndroid = /android/i.test(navigator.userAgent)
+
+            let mapUrl = `https://www.google.com/maps/dir/?api=1&destination=${request.lat},${request.lng}`
+
+            if (isIOS) {
+                // Apple Maps fallback just in case, but Google Maps Web usually handles it better
+                mapUrl = `maps://?daddr=${request.lat},${request.lng}`
+            } else if (isAndroid) {
+                // Try strictly to open the native app on android
+                mapUrl = `google.navigation:q=${request.lat},${request.lng}`
+            }
+
+            // We use standard web maps intent as the safest universal fallback which OS intercepts
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${request.lat},${request.lng}`, '_blank')
+        }
+    }
     const handleArrived = () => updateEmergencyStatus('arrived', 'O cliente foi informado que chegou ao local.')
 
     const handleComplete = () => updateEmergencyStatus('completed', 'O cliente foi notificado da conclusão do serviço.')

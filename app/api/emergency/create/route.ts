@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
             message: `Serviço de ${category} próximo de si. Responda imediatamente!`,
             type: "emergency",
             data: {
-                action_url: `/dashboard/provider/emergency`,
+                action_url: `/dashboard/provider/emergency/${emergencyRequest.id}`,
                 emergency_id: emergencyRequest.id
             },
             read: false,

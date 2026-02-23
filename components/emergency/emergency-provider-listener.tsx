@@ -172,7 +172,10 @@ export function EmergencyProviderListener() {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="border-red-500 border-4 shadow-[0_0_50px_rgba(239,68,68,0.5)] sm:max-w-[425px] bg-white">
+            <DialogContent
+                className="border-red-500 border-4 shadow-[0_0_50px_rgba(239,68,68,0.5)] sm:max-w-[425px] bg-white !z-[99999]"
+                style={{ zIndex: 99999 }}
+            >
                 <DialogHeader>
                     <div className="flex items-center gap-4 mb-2">
                         <div className="bg-red-100 p-3 rounded-full animate-pulse">
