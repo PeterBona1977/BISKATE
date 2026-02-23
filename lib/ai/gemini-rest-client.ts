@@ -192,8 +192,16 @@ export async function generateGeminiContent(prompt: string, config?: GeminiConfi
 
             if (!res.ok) {
                 const errText = await res.text()
-                // If it's a 404/403/429, invalidate cache and try again with discovery
-                if (res.status === 404 || res.status === 403 || res.status === 429) {
+                // If 429 (Rate Limit), DO NOT invalidate cache, just sleep and retry
+                if (res.status === 429) {
+                    console.warn(`Gemini Rate Limit (429) reached for ${finalConfig.model}. Waiting 4 seconds...`)
+                    await new Promise(resolve => setTimeout(resolve, 4000))
+                    lastErr = new Error(`Gemini Error (429 Rate Limit): ${errText}`)
+                    continue // Try again with same config
+                }
+
+                // If it's a 404/403 (Not Found / Forbidden), invalidate cache and try again with discovery
+                if (res.status === 404 || res.status === 403) {
                     console.warn(`Gemini [${finalConfig.model}/${finalConfig.apiVersion}] failed (${res.status}). Retrying discovery...`)
                     cachedConfig = null
                     lastErr = new Error(`Gemini Error (${res.status} at ${finalConfig.model}): ${errText}`)
@@ -208,7 +216,14 @@ export async function generateGeminiContent(prompt: string, config?: GeminiConfi
 
             return text
         } catch (err: any) {
-            if (err.message.includes("404") || err.message.includes("403") || err.message.includes("429")) {
+            // Also handle fetch exceptions that might contain 429
+            if (err.message.includes("429")) {
+                console.warn("Gemini Rate Limit (429) caught in outer catch. Waiting 4 seconds...")
+                await new Promise(resolve => setTimeout(resolve, 4000))
+                lastErr = err
+                continue
+            }
+            if (err.message.includes("404") || err.message.includes("403")) {
                 cachedConfig = null
                 lastErr = err
                 continue

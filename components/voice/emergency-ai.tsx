@@ -424,10 +424,16 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
             console.error("Chat Error:", err)
             // Show actual error to help debugging
             const errorMessage = err.message || "Unknown Error"
-            const userFriendlyError = `Erro de Conexão (${errorMessage}). Por favor tente novamente.`
 
-            addMessage("assistant", userFriendlyError)
-            speak("Ocorreu um erro técnico. Por favor verifique a sua conexão.")
+            if (errorMessage.includes("429") || errorMessage.includes("Quota")) {
+                const userFriendlyError = `Muitos pedidos ao assistente neste momento (Limite da API). Por favor aguarde 15 segundos e volte a tentar a sua mensagem.`
+                addMessage("assistant", userFriendlyError)
+                speak("Estou sobrecarregado com muitos pedidos neste momento. Por favor, aguarde quinze segundos e volte a tentar.")
+            } else {
+                const userFriendlyError = `Erro de Conexão (${errorMessage}). Por favor tente novamente.`
+                addMessage("assistant", userFriendlyError)
+                speak("Ocorreu um erro técnico. Por favor verifique a sua conexão ou tente recarregar a página.")
+            }
         } finally {
             setIsProcessing(false)
         }
