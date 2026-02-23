@@ -459,14 +459,8 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
                 if (result.data) {
                     setIsBroadcastSuccess(true)
-                    addMessage("assistant", "Pedido despachado! Redirecionando para acompanhamento em tempo real...")
-                    speak("Especialistas localizados. Acompanhe agora em tempo real.")
-
-                    setTimeout(() => {
-                        onSuccess(result.data.id)
-                        // Don't call onClose() here to avoid flickering the background page 
-                        // before the router.push from onSuccess takes effect.
-                    }, 1500) // Slightly shorter wait for snappier feel
+                    // Redirecionamento imediato conforme solicitado
+                    onSuccess(result.data.id)
                 }
             } else {
                 throw new Error("Missing location or user")
