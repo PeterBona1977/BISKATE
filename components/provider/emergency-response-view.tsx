@@ -228,14 +228,14 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
         <div className="container mx-auto px-4 py-8 max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="lg:col-span-2 space-y-4 sm:space-y-6">
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
-                            <Badge variant="destructive" className="animate-pulse bg-red-600">EMERGÊNCIA ATIVA</Badge>
-                            <span className="text-xs text-muted-foreground">{new Date(request.created_at).toLocaleString()}</span>
+                            <Badge variant="destructive" className="animate-pulse bg-red-600 px-2 py-0.5 text-[10px] sm:text-xs">EMERGÊNCIA ATIVA</Badge>
+                            <span className="text-[10px] sm:text-xs text-muted-foreground">{new Date(request.created_at).toLocaleString()}</span>
                         </div>
-                        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">{request.category}</h1>
-                        <p className="text-lg text-muted-foreground leading-relaxed">{request.description}</p>
+                        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-900 leading-tight">{request.category}</h1>
+                        <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed line-clamp-3 sm:line-clamp-none">{request.description}</p>
                     </div>
 
                     <Card className="border-none shadow-xl bg-white/40 backdrop-blur-md overflow-hidden outline outline-1 outline-white/20">
@@ -246,13 +246,13 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <div className="aspect-[16/9] bg-gray-100 relative group cursor-pointer overflow-hidden border-b border-red-50">
+                            <div className="aspect-video sm:aspect-[16/9] bg-gray-100 relative group cursor-pointer overflow-hidden border-b border-red-50">
                                 {/* Map Placeholder or actual map script could be here */}
                                 <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-                                    <div className="text-center group-hover:scale-105 transition-transform duration-300">
-                                        <MapPin className="h-12 w-12 text-red-600 mx-auto mb-2 drop-shadow-md" />
-                                        <p className="font-bold text-gray-800">{request.address}</p>
-                                        <p className="text-xs text-muted-foreground uppercase tracking-widest mt-1">Gps: {request.lat.toFixed(6)}, {request.lng.toFixed(6)}</p>
+                                    <div className="text-center px-4 group-hover:scale-105 transition-transform duration-300">
+                                        <MapPin className="h-8 w-8 sm:h-12 sm:w-12 text-red-600 mx-auto mb-2 drop-shadow-md" />
+                                        <p className="font-bold text-sm sm:text-base text-gray-800 break-words max-w-[250px] mx-auto">{request.address}</p>
+                                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Gps: {request.lat.toFixed(6)}, {request.lng.toFixed(6)}</p>
                                     </div>
                                 </div>
                                 <div className="absolute bottom-4 right-4 animate-in fade-in zoom-in duration-700 delay-300">
@@ -267,19 +267,19 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                     </Button>
                                 </div>
                             </div>
-                            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50/50 border border-gray-100">
-                                    <Clock className="h-6 w-6 text-orange-500 mt-1" />
+                            <div className="p-4 sm:p-6 grid grid-cols-2 gap-3 sm:gap-6">
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl bg-gray-50/50 border border-gray-100 text-center sm:text-left">
+                                    <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 mt-0.5" />
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-900 uppercase tracking-tighter">Tempo de Resposta</p>
-                                        <p className="text-2xl font-black text-orange-600">IMEDIATO</p>
+                                        <p className="text-[10px] sm:text-sm font-semibold text-gray-900 uppercase tracking-tighter">Resposta</p>
+                                        <p className="text-sm sm:text-2xl font-black text-orange-600">IMEDIATO</p>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50/50 border border-gray-100">
-                                    <DollarSign className="h-6 w-6 text-green-600 mt-1" />
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl bg-gray-50/50 border border-gray-100 text-center sm:text-left">
+                                    <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 mt-0.5" />
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-900 uppercase tracking-tighter">Tarifário</p>
-                                        <p className="text-2xl font-black text-green-700">Multiplicador {request.price_multiplier}x</p>
+                                        <p className="text-[10px] sm:text-sm font-semibold text-gray-900 uppercase tracking-tighter">Tarifário</p>
+                                        <p className="text-sm sm:text-2xl font-black text-green-700">{request.price_multiplier}x</p>
                                     </div>
                                 </div>
                             </div>
@@ -295,10 +295,10 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                     )}>
                         <CardHeader>
                             <CardTitle className={cn(
-                                "text-2xl font-black italic uppercase tracking-widest",
+                                "text-lg sm:text-2xl font-black italic uppercase tracking-widest",
                                 showProposalForm ? "text-red-600" : "text-white"
                             )}>
-                                {showProposalForm ? "Proposta de Serviço" : "Interesse Enviado"}
+                                {showProposalForm ? "Proposta" : "Serviço Ativo"}
                             </CardTitle>
                             <CardDescription className={showProposalForm ? "text-gray-500" : "text-white/80"}>
                                 {showProposalForm
@@ -335,7 +335,7 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                         </div>
                                     </div>
                                     <Button
-                                        className="w-full h-16 text-xl font-bold bg-red-600 text-white hover:bg-red-700 shadow-xl hover:scale-[1.02] transition-all active:scale-95 mt-4"
+                                        className="w-full h-14 sm:h-16 text-lg sm:text-xl font-bold bg-red-600 text-white hover:bg-red-700 shadow-xl hover:scale-[1.02] transition-all active:scale-95 mt-2 sm:mt-4"
                                         onClick={handleRespond}
                                         disabled={isResponding}
                                     >

@@ -40,6 +40,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     const [isLocating, setIsLocating] = useState(false)
     const [detectedCategory, setDetectedCategory] = useState<{ id: string; name: string; confidence?: number } | null>(null)
     const [step, setStep] = useState<Step>("chat")
+    const [hasInitialized, setHasInitialized] = useState(false)
 
     const [debugLogs, setDebugLogs] = useState<string[]>([])
 
@@ -220,8 +221,9 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     */
     // Start sequence when opened
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && !hasInitialized) {
             resetState()
+            setHasInitialized(true)
             const welcomeMsg = "Sou o seu assistente de emergência. Diga-me, qual é a situação?"
             addMessage("assistant", welcomeMsg)
 
@@ -230,10 +232,11 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
             // Speak welcome with new Neural Voice
             setTimeout(() => speak(welcomeMsg), 500)
-        } else {
+        } else if (!isOpen) {
+            setHasInitialized(false)
             stopAllAudio()
         }
-    }, [isOpen])
+    }, [isOpen, hasInitialized])
 
     const resetState = () => {
         setMessages([])
@@ -453,10 +456,13 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                 const result = await response.json()
 
                 if (result.data) {
+                    addMessage("assistant", "Localizamos especialistas! Redirecionando para acompanhamento...")
+                    speak("Especialistas localizados. Acompanhe agora em tempo real.")
+
                     setTimeout(() => {
                         onSuccess(result.data.id)
                         onClose()
-                    }, 4000) // Wait a bit for audio to finish
+                    }, 2500) // Shorter wait, better feedback
                 }
             } else {
                 throw new Error("Missing location or user")
@@ -503,8 +509,8 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) stopAllAudio(); onClose(); }}>
-            <DialogContent className="sm:max-w-md border-red-200 bg-red-50/30 backdrop-blur-sm">
+        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { stopAllAudio(); setHasInitialized(false); onClose(); } }}>
+            <DialogContent className="sm:max-w-md w-[95vw] max-h-[95vh] rounded-2xl border-red-200 bg-red-50/30 backdrop-blur-sm p-4 overflow-hidden flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-red-600">
                         <AlertTriangle className="h-6 w-6 animate-pulse" />
@@ -515,7 +521,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex flex-col gap-4 py-4 h-[500px]">
+                <div className="flex flex-col gap-3 py-2 flex-1 min-h-0 overflow-hidden">
                     {/* Chat Area */}
                     <div className="flex-1 flex flex-col gap-3 min-h-0">
                         <div
@@ -548,12 +554,12 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
                             {/* Confirmation Card */}
                             {step === "confirmation" && detectedCategory && (
-                                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl animate-in zoom-in-95 duration-300">
+                                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl animate-in zoom-in-95 duration-300 shadow-sm">
                                     <h4 className="font-semibold text-red-900 mb-1">Confirmar Categoria?</h4>
                                     <p className="text-sm text-red-700 mb-3">Identificámos isto como uma emergência de <strong>{detectedCategory.name}</strong>.</p>
                                     <div className="flex gap-2">
                                         <Button
-                                            className="flex-1 bg-red-600 hover:bg-red-700 text-white shadow-md transition-all hover:scale-105"
+                                            className="flex-1 bg-red-600 hover:bg-red-700 text-white shadow-md transition-all hover:scale-105 active:scale-95"
                                             onClick={handleConfirmCategory}
                                         >
                                             Sim, Chamar Ajuda
@@ -570,6 +576,18 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                                         >
                                             Não
                                         </Button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {step === "broadcasting" && (
+                                <div className="mt-4 p-8 bg-white border border-red-200 rounded-2xl animate-in zoom-in-95 duration-500 flex flex-col items-center text-center gap-4 shadow-xl ring-4 ring-red-50">
+                                    <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center animate-pulse">
+                                        <Loader2 className="h-10 w-10 text-red-600 animate-spin" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-black text-red-900 text-xl uppercase italic tracking-tighter">A Contactar Ajuda</h4>
+                                        <p className="text-sm text-red-700 font-medium">Enviando pedido para técnicos de {detectedCategory?.name} próximos de si...</p>
                                     </div>
                                 </div>
                             )}
@@ -619,7 +637,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                             <Button
                                 size="lg"
                                 className={cn(
-                                    "h-16 rounded-2xl text-lg font-bold transition-all duration-300 shadow-lg relative overflow-hidden",
+                                    "h-14 sm:h-16 rounded-2xl text-base sm:text-lg font-bold transition-all duration-300 shadow-lg relative overflow-hidden",
                                     isListening ? "bg-red-500 animate-pulse scale-95 ring-4 ring-red-200" :
                                         isSpeaking ? "bg-amber-500 hover:bg-amber-600" : "bg-red-600 hover:bg-red-700 shadow-red-200"
                                 )}
@@ -632,20 +650,20 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                             >
                                 {isListening ? (
                                     <>
-                                        <MicOff className="mr-2 h-6 w-6" /> A OUVIR...
+                                        <MicOff className="mr-2 h-5 w-5 sm:h-6 sm:w-6" /> A OUVIR...
                                     </>
                                 ) : isSpeaking ? (
                                     <>
-                                        <StopCircle className="mr-2 h-6 w-6" /> PARAR ÁUDIO
+                                        <StopCircle className="mr-2 h-5 w-5 sm:h-6 sm:w-6" /> PARAR ÁUDIO
                                     </>
                                 ) : (
                                     <>
-                                        <Mic className="mr-2 h-6 w-6" /> FALAR AGORA
+                                        <Mic className="mr-2 h-5 w-5 sm:h-6 sm:w-6" /> FALAR AGORA
                                     </>
                                 )}
                             </Button>
 
-                            <div className="flex gap-2 p-4 border-t border-red-100 bg-white/50">
+                            <div className="flex gap-2 p-3 sm:p-4 border-t border-red-100 bg-white/50 rounded-b-2xl">
                                 <Input
                                     value={textInput}
                                     onChange={(e) => setTextInput(e.target.value)}
@@ -690,8 +708,8 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                         </div>
                     )}
                 </div>
-            </DialogContent>
-        </Dialog>
+            </DialogContent >
+        </Dialog >
     )
 }
 

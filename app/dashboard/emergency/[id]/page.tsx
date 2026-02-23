@@ -237,28 +237,30 @@ export default function EmergencyTrackingPage() {
     return (
         <div className="max-w-7xl mx-auto pb-20 px-4 md:px-8">
             <div className="flex items-center justify-between py-6">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard')} className="rounded-full">
+                <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
+                    <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard')} className="rounded-full shrink-0">
                         <ChevronLeft className="h-5 w-5" />
                     </Button>
-                    <div>
-                        <h1 className="text-3xl font-black tracking-tighter flex items-center gap-2">
+                    <div className="min-w-0">
+                        <h1 className="text-xl sm:text-3xl font-black tracking-tighter flex items-center gap-2 truncate">
                             TRACKING <span className="text-red-600">LIVE</span>
-                            <Badge variant="destructive" className="ml-2 animate-pulse bg-red-600">ATIVO</Badge>
+                            <Badge variant="destructive" className="ml-1 sm:ml-2 animate-pulse bg-red-600 text-[10px] sm:text-xs">ATIVO</Badge>
                         </h1>
-                        <p className="text-sm text-muted-foreground uppercase font-bold tracking-widest">{request.category}</p>
+                        <p className="text-[10px] sm:text-sm text-muted-foreground uppercase font-bold tracking-widest truncate">{request.category}</p>
                     </div>
                 </div>
 
                 {!isAccepted && request.status !== 'cancelled' && (
                     <Button
                         variant="outline"
-                        className="border-red-200 text-red-600 hover:bg-red-50 font-bold"
+                        size="sm"
+                        className="border-red-200 text-red-600 hover:bg-red-50 font-bold shrink-0 text-[10px] sm:text-sm"
                         onClick={handleCancelEmergency}
                         disabled={isCancelling}
                     >
-                        {isCancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <XCircle className="h-4 w-4 mr-2" />}
-                        CANCELAR EMERGÊNCIA
+                        {isCancelling ? <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin mr-1 sm:mr-2" /> : <XCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />}
+                        <span className="hidden xs:inline">CANCELAR</span>
+                        <span className="inline xs:hidden">CANCELAR</span>
                     </Button>
                 )}
             </div>
@@ -266,7 +268,7 @@ export default function EmergencyTrackingPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[600px]">
                 {/* Map View */}
                 <div className="lg:col-span-8 space-y-4">
-                    <Card className="h-[500px] border-none shadow-2xl overflow-hidden rounded-3xl relative">
+                    <Card className="h-[300px] sm:h-[500px] border-none shadow-2xl overflow-hidden rounded-2xl sm:rounded-3xl relative">
                         <EmergencyMap
                             clientLat={request.lat}
                             clientLng={request.lng}
@@ -275,15 +277,15 @@ export default function EmergencyTrackingPage() {
                         />
 
                         {/* Overlay Status */}
-                        <div className="absolute top-4 left-4 right-4 flex justify-between pointer-events-none">
-                            <Badge className="bg-white/90 backdrop-blur text-gray-900 border-none px-4 py-2 shadow-lg text-sm font-bold flex gap-2 items-center">
-                                <MapPin className="h-4 w-4 text-red-600" />
-                                {request.address}
+                        <div className="absolute top-2 left-2 right-2 flex justify-between pointer-events-none gap-2">
+                            <Badge className="bg-white/90 backdrop-blur text-gray-900 border-none px-2 sm:px-4 py-1 sm:py-2 shadow-lg text-[10px] sm:text-sm font-bold flex gap-1 sm:gap-2 items-center truncate max-w-[60%]">
+                                <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-red-600 shrink-0" />
+                                <span className="truncate">{request.address}</span>
                             </Badge>
 
-                            <Badge className="bg-black/80 backdrop-blur text-white border-none px-4 py-2 shadow-lg text-sm font-bold flex gap-2 items-center">
-                                <Users className="h-4 w-4 text-green-400" />
-                                {onlineProviders.length} técnicos online
+                            <Badge className="bg-black/80 backdrop-blur text-white border-none px-2 sm:px-4 py-1 sm:py-2 shadow-lg text-[10px] sm:text-sm font-bold flex gap-1 sm:gap-2 items-center shrink-0">
+                                <Users className="h-3 w-3 sm:h-4 sm:w-4 text-green-400" />
+                                {onlineProviders.length} <span className="hidden sm:inline">técnicos</span> online
                             </Badge>
                         </div>
                     </Card>
@@ -299,9 +301,9 @@ export default function EmergencyTrackingPage() {
 
                 {/* Responders List */}
                 <div className="lg:col-span-4 flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mt-4 lg:mt-0">
                         <h3 className="text-xl font-black italic tracking-tight uppercase">Respostas ({responses.length})</h3>
-                        {responses.length > 0 && <Badge className="bg-green-500">{responses.length} Disponíveis</Badge>}
+                        {responses.length > 0 && <Badge className="bg-green-500 scale-90 sm:scale-100">{responses.length} Disponíveis</Badge>}
                     </div>
 
                     <div className="flex-1 space-y-4 overflow-y-auto pr-2 max-h-[700px]">
@@ -398,30 +400,30 @@ export default function EmergencyTrackingPage() {
             {isAccepted && (
                 <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 p-6 z-50 animate-in slide-in-from-bottom-full duration-500 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
                     <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-6">
-                            <div className="h-20 w-20 rounded-2xl bg-green-50 flex items-center justify-center border-2 border-green-100 animate-pulse">
-                                <CheckCircle2 className="h-10 w-10 text-green-600" />
+                        <div className="flex items-center gap-3 sm:gap-6">
+                            <div className="h-12 w-12 sm:h-20 sm:w-20 rounded-xl sm:rounded-2xl bg-green-50 flex items-center justify-center border-2 border-green-100 animate-pulse shrink-0">
+                                <CheckCircle2 className="h-6 w-6 sm:h-10 sm:w-10 text-green-600" />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-black italic tracking-tight uppercase">Profissional Confirmado!</h3>
-                                <p className="text-gray-600 font-medium">O técnico iniciou a jornada e está a caminho.</p>
+                                <h3 className="text-lg sm:text-2xl font-black italic tracking-tight uppercase leading-tight">Profissional Confirmado!</h3>
+                                <p className="text-xs sm:text-gray-600 font-medium">O técnico está a caminho.</p>
                             </div>
                         </div>
-                        <div className="flex gap-4 w-full md:w-auto">
+                        <div className="flex gap-2 sm:gap-4 w-full md:w-auto mt-4 md:mt-0">
                             <Button
                                 disabled={!request.provider_id}
-                                className="flex-1 md:flex-none h-14 px-8 bg-green-600 hover:bg-green-700 text-white font-black rounded-2xl shadow-xl shadow-green-100"
+                                className="flex-1 md:flex-none h-12 sm:h-14 px-4 sm:px-8 bg-green-600 hover:bg-green-700 text-white font-black rounded-xl sm:rounded-2xl shadow-xl shadow-green-100 text-sm sm:text-base"
                                 onClick={handleCallProvider}
                             >
-                                <Phone className="mr-2 h-5 w-5" />
-                                LIGAR AGORA
+                                <Phone className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                                LIGAR
                             </Button>
                             <Button
                                 variant="outline"
-                                className="flex-1 md:flex-none h-14 px-8 border-2 border-gray-100 font-black rounded-2xl"
+                                className="flex-1 md:flex-none h-12 sm:h-14 px-4 sm:px-8 border-2 border-gray-100 font-black rounded-xl sm:rounded-2xl text-sm sm:text-base"
                                 onClick={() => request.provider_id && handleOpenChat(request.provider_id)}
                             >
-                                <MessageSquare className="mr-2 h-5 w-5" />
+                                <MessageSquare className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                                 CHAT
                             </Button>
                         </div>

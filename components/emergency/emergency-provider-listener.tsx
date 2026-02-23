@@ -10,15 +10,26 @@ import { AlertTriangle, MapPin, Loader2 } from "lucide-react"
 
 export function EmergencyProviderListener() {
     const { user, profile } = useAuth()
-    const router = useRouter()
     const [alert, setAlert] = useState<any | null>(null)
     const [open, setOpen] = useState(false)
+    const router = useRouter()
 
     useEffect(() => {
-        // Run for any provider (even if 'is_online' is technically false, we want them to hear it if they are on the app)
         if (!user || profile?.role !== 'provider') return
 
-        console.log("📡 Emergency Listener Active for Provider:", user.id)
+        let alarmInterval: NodeJS.Timeout | null = null;
+
+        const playAlarm = () => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel()
+                const utterance = new SpeechSynthesisUtterance("Attention! Urgent Emergency Request! Please check your dashboard!")
+                utterance.rate = 1.0
+                utterance.pitch = 1.0
+                utterance.volume = 1.0
+                utterance.lang = "en-US"
+                window.speechSynthesis.speak(utterance)
+            }
+        }
 
         const channel = supabase
             .channel(`emergency-alerts-${user.id}`)
@@ -32,22 +43,21 @@ export function EmergencyProviderListener() {
                 },
                 (payload) => {
                     const notif = payload.new
-                    if (notif.title?.includes("EMERGENCY") || notif.type === 'error') {
-                        // It's an emergency!
+                    const isEmergency =
+                        notif.type === 'emergency' ||
+                        notif.title?.toUpperCase().includes("EMERGENCY") ||
+                        notif.title?.toUpperCase().includes("EMERGÊNCIA") ||
+                        notif.title?.toUpperCase().includes("URGENTE") ||
+                        notif.type === 'error'
+
+                    if (isEmergency) {
                         console.log("🚨 EMERGENCY ALERT RECEIVED:", notif)
-
-                        // Play Sound (Speech)
-                        if ('speechSynthesis' in window) {
-                            const utterance = new SpeechSynthesisUtterance("Attention! New Emergency Request Nearby!")
-                            utterance.rate = 1.1
-                            utterance.pitch = 1.2
-                            utterance.volume = 1.0
-                            window.speechSynthesis.speak(utterance)
-                        }
-
-                        // Show Popup
                         setAlert(notif)
                         setOpen(true)
+
+                        playAlarm()
+                        if (alarmInterval) clearInterval(alarmInterval)
+                        alarmInterval = setInterval(playAlarm, 12000)
                     }
                 }
             )
@@ -55,8 +65,16 @@ export function EmergencyProviderListener() {
 
         return () => {
             supabase.removeChannel(channel)
+            if (alarmInterval) clearInterval(alarmInterval)
+            window.speechSynthesis.cancel()
         }
-    }, [user, profile?.role, profile?.is_online])
+    }, [user, profile?.role])
+
+    useEffect(() => {
+        if (!open) {
+            window.speechSynthesis.cancel()
+        }
+    }, [open])
 
     const handleView = () => {
         if (alert?.action_url) {
