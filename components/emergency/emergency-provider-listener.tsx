@@ -51,7 +51,7 @@ export function EmergencyProviderListener() {
         }
 
         const channel = supabase
-            .channel(`emergency-alerts-${user.id}`)
+            .channel(`emergency-listener-${user.id}-${Date.now()}`)
             .on(
                 "postgres_changes",
                 {
@@ -61,6 +61,7 @@ export function EmergencyProviderListener() {
                     filter: `user_id=eq.${user.id}`,
                 },
                 (payload) => {
+                    console.log("🚨 [EmergencyProviderListener] Raw payload received:", payload)
                     const notif = payload.new
                     const isEmergency =
                         notif.type === 'emergency' ||
@@ -69,7 +70,7 @@ export function EmergencyProviderListener() {
                         notif.title?.toUpperCase().includes("URGENTE")
 
                     if (isEmergency) {
-                        console.log("🚨 EMERGENCY ALERT RECEIVED IN REALTIME:", notif)
+                        console.log("🚨 [EmergencyProviderListener] EMERGENCY ALERT RECEIVED:", notif)
 
                         // Set state to show modal
                         setAlert(notif)
@@ -89,12 +90,41 @@ export function EmergencyProviderListener() {
                     }
                 }
             )
-            .subscribe((status) => {
-                console.log(`🔌 Emergency Listener Status:`, status)
+            .subscribe((status, err) => {
+                console.log(`🔌 [EmergencyProviderListener] Status:`, status, err || "")
             })
+
+        // Polling fallback just in case Realtime is failing
+        const pollInterval = setInterval(async () => {
+            const { data, error } = await supabase
+                .from("notifications")
+                .select("*")
+                .eq("user_id", user.id)
+                .eq("read", false)
+                .in("type", ["emergency"])
+                .order("created_at", { ascending: false })
+                .limit(1)
+
+            if (!error && data && data.length > 0) {
+                const notif = data[0]
+                // Only trigger if we haven't seen this alert
+                setAlert(currentAlert => {
+                    if (!currentAlert || currentAlert.id !== notif.id) {
+                        console.log("🚨 [EmergencyProviderListener] Fallback Polling detected emergency:", notif)
+                        setOpen(true)
+                        playAlarm()
+                        if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current)
+                        alarmIntervalRef.current = setInterval(playAlarm, 4000)
+                        return notif
+                    }
+                    return currentAlert
+                })
+            }
+        }, 10000) // Poll every 10 seconds
 
         return () => {
             supabase.removeChannel(channel)
+            clearInterval(pollInterval)
             if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current)
             if (alarmAudioRef.current) {
                 alarmAudioRef.current.pause()
@@ -117,11 +147,25 @@ export function EmergencyProviderListener() {
         }
     }, [open])
 
+    const markAlertAsRead = async (notifId: string) => {
+        try {
+            await supabase.from("notifications").update({ read: true }).eq("id", notifId)
+        } catch (e) {
+            console.error("Failed to mark alert as read", e)
+        }
+    }
+
     const handleView = () => {
         // Notification action_url is stored in the JSONB 'data' column
         const targetUrl = alert?.data?.action_url || alert?.action_url || "/dashboard/provider/emergency"
+        if (alert?.id) markAlertAsRead(alert.id)
         setOpen(false)
         router.push(targetUrl)
+    }
+
+    const handleIgnore = () => {
+        if (alert?.id) markAlertAsRead(alert.id)
+        setOpen(false)
     }
 
     if (!alert) return null
@@ -153,7 +197,7 @@ export function EmergencyProviderListener() {
                 </div>
 
                 <DialogFooter className="gap-2 sm:gap-0">
-                    <Button variant="outline" onClick={() => setOpen(false)} className="h-12 font-bold">
+                    <Button variant="outline" onClick={handleIgnore} className="h-12 font-bold">
                         IGNORE
                     </Button>
                     <Button

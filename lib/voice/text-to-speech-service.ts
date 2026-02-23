@@ -14,6 +14,7 @@ export class TextToSpeechService {
   private voices: SpeechSynthesisVoice[] = []
   private isInitialized = false
   private currentAudio: HTMLAudioElement | null = null
+  private currentSpeechId: number = 0
 
   constructor() {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -97,6 +98,9 @@ export class TextToSpeechService {
   }
 
   async speak(text: string, options: TTSOptions = {}): Promise<void> {
+    this.currentSpeechId++
+    const speechId = this.currentSpeechId
+
     // 1. Try Google Cloud Neural TTS first (unless forced otherwise)
     if (!options.forceBrowser) {
       try {
@@ -115,6 +119,7 @@ export class TextToSpeechService {
         const data = await response.json()
 
         if (data.audioContent) {
+          if (this.currentSpeechId !== speechId) return; // Prevent late playback
           await this.playCloudAudio(data.audioContent)
           return // Success, exit
         }
@@ -185,6 +190,7 @@ export class TextToSpeechService {
   }
 
   stop(): void {
+    this.currentSpeechId++ // Cancel any pending fetches
     // Stop Cloud Audio
     if (this.currentAudio) {
       this.currentAudio.pause()
