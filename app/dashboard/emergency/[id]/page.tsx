@@ -163,6 +163,16 @@ export default function EmergencyTrackingPage() {
         }
     }
 
+    const handleCallProvider = () => {
+        const acceptedResponse = responses.find(r => r.provider_id === request?.provider_id)
+        const phone = acceptedResponse?.provider?.phone
+        if (phone) {
+            window.location.href = `tel:${phone}`
+        } else {
+            toast({ title: "Erro", description: "Número de telefone não disponível.", variant: "destructive" })
+        }
+    }
+
     const handleCancelEmergency = async () => {
         if (!confirm("Tem certeza que deseja cancelar este pedido de emergência?")) return
 
@@ -401,6 +411,7 @@ export default function EmergencyTrackingPage() {
                             <Button
                                 disabled={!request.provider_id}
                                 className="flex-1 md:flex-none h-14 px-8 bg-green-600 hover:bg-green-700 text-white font-black rounded-2xl shadow-xl shadow-green-100"
+                                onClick={handleCallProvider}
                             >
                                 <Phone className="mr-2 h-5 w-5" />
                                 LIGAR AGORA

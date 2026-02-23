@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
             user_id: providerId,
             title: "✅ Proposta Aceite!",
             message: `O cliente aceitou a sua proposta para a emergência de ${requestData.category}. Desloque-se ao local!`,
-            type: "success",
+            type: "emergency_accepted",
             user_type: "provider",
             data: {
                 action_url: `/dashboard/provider/emergency/${requestId}`

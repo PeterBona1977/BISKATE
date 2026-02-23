@@ -125,15 +125,15 @@ export async function POST(request: NextRequest) {
             const distance = calculateDistance(lat, lng, p.last_lat, p.last_lng)
             const inRadius = distance <= (p.provider_service_radius || 20)
 
-            console.log(`   - Provider ${p.email}: Feature=${hasEmergencyFeature}, Skill=${hasMatchingSkill}, Dist=${distance.toFixed(1)}km, Radius=${p.provider_service_radius}km. Match=${hasEmergencyFeature && hasMatchingSkill && inRadius}`)
+            console.log(`   - Provider ${p.email}: Skill=${hasMatchingSkill}, Dist=${distance.toFixed(1)}km, Radius=${p.provider_service_radius}km. Match=${hasMatchingSkill && inRadius}`)
 
             debugLog.push({
                 email: p.email,
-                eligible: hasEmergencyFeature && hasMatchingSkill && inRadius,
-                details: { hasEmergencyFeature, hasMatchingSkill, distance, inRadius }
+                eligible: hasMatchingSkill && inRadius,
+                details: { hasMatchingSkill, distance, inRadius }
             })
 
-            return hasEmergencyFeature && hasMatchingSkill && inRadius
+            return hasMatchingSkill && inRadius
         }) || []
 
         console.log(`✅ ${eligibleProviders.length} providers passed filtering.`)
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
             user_type: "provider", // CRITICAL: Filtered by frontend
             title: "🚨 URGENTE: Novo Pedido de Emergência!",
             message: `Serviço de ${category} próximo de si. Responda imediatamente!`,
-            type: "error", // Use 'error' style for red emergency look
+            type: "emergency", // Use 'emergency' type for specialized UI
             data: {
                 action_url: `/dashboard/provider/emergency`,
                 emergency_id: emergencyRequest.id

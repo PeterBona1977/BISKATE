@@ -43,6 +43,7 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
     })
     const [conversationId, setConversationId] = useState<string | null>(null)
     const [chatOpen, setChatOpen] = useState(false)
+    const [hasResponded, setHasResponded] = useState(false)
 
     useEffect(() => {
         fetchRequest()
@@ -63,6 +64,16 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
 
             if (error) throw error
             setRequest(data)
+
+            // Check if provider has already responded
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user && data) {
+                const { data: myResponse } = await supabase.from("emergency_responses")
+                    .select("id").eq("emergency_id", requestId).eq("provider_id", user.id).single()
+                if (myResponse) {
+                    setHasResponded(true)
+                }
+            }
         } catch (err: any) {
             console.error("Error fetching emergency:", err)
             setError("Não foi possível carregar os detalhes da emergência.")
@@ -90,7 +101,8 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                 description: "O cliente foi notificado da sua disponibilidade. Aguarde a confirmação.",
             })
 
-            fetchRequest()
+            // Redirect back to list
+            router.push('/dashboard/provider/emergency')
         } catch (err: any) {
             console.error("Error responding to emergency:", err)
             toast({
@@ -150,42 +162,39 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
         }
     }, [requestId])
 
-    const handleStartJourney = async () => {
+    const updateEmergencyStatus = async (status: string, successMessage: string) => {
         try {
             setIsResponding(true)
-            const { error } = await supabase
-                .from("emergency_requests")
-                .update({ status: 'in_progress' })
-                .eq("id", requestId)
+            const response = await fetch('/api/emergency/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId, status })
+            })
 
-            if (error) throw error
+            if (!response.ok) {
+                const err = await response.json()
+                throw new Error(err.error || 'Failed to update status')
+            }
 
-            toast({ title: "Boa viagem!", description: "O cliente foi informado que já está a caminho." })
-            fetchRequest()
+            toast({ title: "Sucesso!", description: successMessage })
+
+            if (status === 'completed') {
+                router.push('/dashboard/provider/emergency')
+            } else {
+                fetchRequest()
+            }
         } catch (err: any) {
-            console.error("Error starting journey:", err)
-            toast({ title: "Erro", description: "Falha ao iniciar trajeto.", variant: "destructive" })
+            console.error("Error updating status:", err)
+            toast({ title: "Erro", description: "Falha ao atualizar o trajeto.", variant: "destructive" })
         } finally {
             setIsResponding(false)
         }
     }
 
-    const handleComplete = async () => {
-        try {
-            setIsResponding(true)
-            const { error } = await EmergencyService.completeEmergency(requestId)
+    const handleStartJourney = () => updateEmergencyStatus('in_progress', 'O cliente foi informado que já está a caminho.')
+    const handleArrived = () => updateEmergencyStatus('arrived', 'O cliente foi informado que chegou ao local.')
 
-            if (error) throw error
-
-            toast({ title: "Serviço Concluído!", description: "O cliente foi notificado da conclusão do serviço." })
-            fetchRequest()
-        } catch (err: any) {
-            console.error("Error completing emergency:", err)
-            toast({ title: "Erro", description: "Falha ao concluir serviço.", variant: "destructive" })
-        } finally {
-            setIsResponding(false)
-        }
-    }
+    const handleComplete = () => updateEmergencyStatus('completed', 'O cliente foi notificado da conclusão do serviço.')
 
     if (loading) {
         return (
@@ -210,7 +219,10 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
     const isPending = request.status === "pending"
     const isAccepted = request.status === "accepted"
     const isInProgress = request.status === "in_progress"
+    const isArrived = request.status === "arrived"
     const isCompleted = request.status === "completed"
+
+    const showProposalForm = isPending && !hasResponded
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -279,23 +291,23 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                 <div className="space-y-6">
                     <Card className={cn(
                         "border-none shadow-2xl transition-all duration-500",
-                        isPending ? "bg-white text-gray-900 border border-gray-100" : "bg-green-600 text-white"
+                        showProposalForm ? "bg-white text-gray-900 border border-gray-100" : "bg-green-600 text-white"
                     )}>
                         <CardHeader>
                             <CardTitle className={cn(
                                 "text-2xl font-black italic uppercase tracking-widest",
-                                isPending ? "text-red-600" : "text-white"
+                                showProposalForm ? "text-red-600" : "text-white"
                             )}>
-                                {isPending ? "Proposta de Serviço" : "Interesse Enviado"}
+                                {showProposalForm ? "Proposta de Serviço" : "Interesse Enviado"}
                             </CardTitle>
-                            <CardDescription className={isPending ? "text-gray-500" : "text-white/80"}>
-                                {isPending
+                            <CardDescription className={showProposalForm ? "text-gray-500" : "text-white/80"}>
+                                {showProposalForm
                                     ? "Preencha os seus dados para este serviço de urgência."
                                     : "A aguardar seleção do cliente. Pode contactar via chat."}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {isPending ? (
+                            {showProposalForm ? (
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold uppercase text-gray-400">Preço / Hora (€)</label>
@@ -351,6 +363,19 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                         <div className="space-y-4">
                                             <Badge className="w-full py-3 bg-white/20 text-white text-lg font-bold border-none uppercase">
                                                 EM TRAJETO...
+                                            </Badge>
+                                            <Button
+                                                className="w-full h-16 text-xl font-bold bg-white text-orange-600 hover:bg-gray-100 shadow-xl"
+                                                onClick={handleArrived}
+                                                disabled={isResponding}
+                                            >
+                                                CHEGUEI AO CLIENTE
+                                            </Button>
+                                        </div>
+                                    ) : isArrived ? (
+                                        <div className="space-y-4">
+                                            <Badge className="w-full py-3 bg-white/20 text-white text-lg font-bold border-none uppercase">
+                                                NO LOCAL
                                             </Badge>
                                             <Button
                                                 className="w-full h-16 text-xl font-bold bg-white text-blue-600 hover:bg-gray-100 shadow-xl"

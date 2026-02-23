@@ -92,16 +92,17 @@ export function EmergencyRequestsListView() {
     }
 
     // NEW FILTER LOGIC:
-    // 1- "Novos Pedidos" - to show new active solicitations (pending)
-    const newRequests = requests.filter(r => r.status === 'pending')
+    // 1- "Novos Pedidos" - to show new active solicitations (pending) that I haven't responded to yet
+    const newRequests = requests.filter((r: any) => r.status === 'pending' && !r.my_response_status)
 
-    // 2- "Ativas" - Accepted active emergencies (assigned to me)
-    const activeRequests = requests.filter(r =>
-        (r.status === 'accepted' || r.status === 'in_progress') && r.provider_id === profile?.id
+    // 2- "Ativas" - Accepted active emergencies (assigned to me) OR pending ones I already responded to
+    const activeRequests = requests.filter((r: any) =>
+        ((r.status === 'accepted' || r.status === 'in_progress' || r.status === 'arrived') && r.provider_id === profile?.id) ||
+        (r.status === 'pending' && r.my_response_status)
     )
 
     // 3- "Recusadas" - solicitations not accepted by provider (my response was rejected OR client accepted someone else)
-    const refusedRequests = requests.filter(r =>
+    const refusedRequests = requests.filter((r: any) =>
         // I responded but was rejected
         (r.my_response_status === 'rejected') ||
         // It's no longer pending, not my job, and I HAD a response there
@@ -111,7 +112,7 @@ export function EmergencyRequestsListView() {
     )
 
     // 4- "Concluidas" - Solicitations already Concluded by Provider
-    const concludedRequests = requests.filter(r => r.status === 'completed' && r.provider_id === profile?.id)
+    const concludedRequests = requests.filter((r: any) => r.status === 'completed' && r.provider_id === profile?.id)
 
     const RequestCard = ({ req, isInactive }: { req: EmergencyRequest, isInactive?: boolean }) => (
         <Card

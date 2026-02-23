@@ -293,7 +293,7 @@ export class EmergencyService {
                     user_id: r.provider_id,
                     title: "🚫 Emergência Cancelada",
                     message: `O cliente cancelou o pedido de emergência (${req?.category}).`,
-                    type: "warning",
+                    type: "emergency_cancelled",
                     user_type: "provider"
                 })
             ))
@@ -339,11 +339,12 @@ export class EmergencyService {
      * Get or create a conversation for an emergency
      */
     static async getOrCreateConversation(requestId: string, clientId: string, providerId: string) {
-        // 1. Try to find existing conversation linked to emergency_id
+        // 1. Try to find existing conversation linked to emergency_id and this provider
         const { data: existing } = await supabase
             .from("conversations")
             .select("id")
             .eq("emergency_id", requestId)
+            .eq("provider_id", providerId)
             .maybeSingle()
 
         if (existing) return { data: existing, error: null }
@@ -353,6 +354,8 @@ export class EmergencyService {
             .from("conversations")
             .insert({
                 emergency_id: requestId,
+                client_id: clientId,
+                provider_id: providerId,
                 status: 'active'
             })
             .select("id")

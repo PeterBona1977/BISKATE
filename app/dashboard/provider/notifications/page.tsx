@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Bell, BellRing, CheckCheck, MessageSquare, FileText, User, AlertTriangle, Clock } from "lucide-react"
+import { Bell, BellRing, CheckCheck, MessageSquare, FileText, User, AlertTriangle, Clock, Trash2 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { notificationService } from "@/lib/notifications/notification-service"
 import { useRouter } from "next/navigation"
@@ -18,7 +18,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
-import { ExternalLink, Calendar as CalendarIcon } from "lucide-react"
+import { ExternalLink, Calendar as CalendarIcon, MapPin } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export default function ProviderNotificationsPage() {
     const t = useTranslations("Dashboard.Notifications")
@@ -80,6 +81,10 @@ export default function ProviderNotificationsPage() {
             case "wallet_topup":
             case "withdrawal_requested":
                 return <FileText className="h-4 w-4" />
+            case "emergency":
+            case "emergency_accepted":
+            case "emergency_cancelled":
+                return <AlertTriangle className="h-4 w-4 text-red-600 animate-pulse" />
             default:
                 return <Bell className="h-4 w-4" />
         }
@@ -93,9 +98,25 @@ export default function ProviderNotificationsPage() {
                 return "text-green-600"
             case "response_rejected":
             case "provider_rejected":
+            case "emergency":
+            case "emergency_accepted":
+            case "emergency_cancelled":
                 return "text-red-600"
             default:
                 return "text-gray-600"
+        }
+    }
+
+    const getPriorityColor = (priority: string) => {
+        switch (priority) {
+            case "high":
+                return "bg-red-100 text-red-800"
+            case "medium":
+                return "bg-yellow-100 text-yellow-800"
+            case "low":
+                return "bg-gray-100 text-gray-800"
+            default:
+                return "bg-gray-100 text-gray-800"
         }
     }
 
@@ -135,6 +156,23 @@ export default function ProviderNotificationsPage() {
                     <Button variant="outline" size="sm" onClick={markAllAsRead} disabled={unreadNotifications.length === 0}>
                         <CheckCheck className="h-4 w-4 mr-2" />
                         {t("markAllRead")}
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={async () => {
+                            if (user && confirm("Tem certeza que deseja apagar todas as notificações de prestador?")) {
+                                const success = await notificationService.deleteAllNotifications(user.id, "provider");
+                                if (success) {
+                                    setNotifications([]);
+                                }
+                            }
+                        }}
+                        disabled={notifications.length === 0}
+                    >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Limpar Tudo
                     </Button>
                 </div>
             </div>
@@ -179,7 +217,18 @@ export default function ProviderNotificationsPage() {
                                                     </h3>
                                                     <p className="text-sm text-muted-foreground">{notification.message}</p>
                                                 </div>
-                                                {!notification.read && <div className="w-2 h-2 bg-primary rounded-full"></div>}
+                                                <div className="flex items-center space-x-2">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className={cn(
+                                                            "text-[10px] uppercase font-bold px-1.5 py-0.5",
+                                                            getPriorityColor(notification.data?.priority || "medium")
+                                                        )}
+                                                    >
+                                                        {notification.data?.priority || "medium"}
+                                                    </Badge>
+                                                    {!notification.read && <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>}
+                                                </div>
                                             </div>
                                             <div className="flex items-center justify-between mt-2">
                                                 <span className="text-xs text-muted-foreground">{formatTimeAgo(notification.created_at)}</span>
