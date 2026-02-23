@@ -239,6 +239,13 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         }
     }, [isOpen, hasInitialized])
 
+    // Cleanup on unmount (Critical for navigation)
+    useEffect(() => {
+        return () => {
+            stopAllAudio()
+        }
+    }, [])
+
     const resetState = () => {
         setMessages([])
         setTranscript("")
@@ -251,6 +258,9 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
     const stopAllAudio = () => {
         ttsService.stop()
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel()
+        }
         stopListening()
     }
 
