@@ -140,24 +140,35 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                 <div className="p-4 font-semibold border-b">Categorias</div>
                 <ScrollArea className="flex-1">
                     <div className="p-2 space-y-1">
-                        {categories.map((cat) => (
-                            <Button
-                                key={cat.id}
-                                variant={activeCategory === cat.id ? "secondary" : "ghost"}
-                                className={cn(
-                                    "w-full justify-between text-sm font-normal",
-                                    activeCategory === cat.id && "bg-white shadow-sm font-medium"
-                                )}
-                                onClick={() => {
-                                    setActiveCategory(cat.id)
-                                    setActiveSubcategory(null)
-                                    setSearchQuery("")
-                                }}
-                            >
-                                <span className="truncate">{cat.name}</span>
-                                <ChevronRight className="h-4 w-4 text-muted-foreground opacity-50" />
-                            </Button>
-                        ))}
+                        {categories.map((cat) => {
+                            const hasSelection = services.some(s => s.parent_id === cat.id && selectedServices.includes(s.id)) ||
+                                subcategories.some(sub => sub.parent_id === cat.id && (
+                                    selectedServices.includes(sub.id) ||
+                                    services.some(s => s.parent_id === sub.id && selectedServices.includes(s.id))
+                                ));
+
+                            return (
+                                <Button
+                                    key={cat.id}
+                                    variant={activeCategory === cat.id ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-between text-sm font-normal",
+                                        activeCategory === cat.id && "bg-white shadow-sm font-medium"
+                                    )}
+                                    onClick={() => {
+                                        setActiveCategory(cat.id)
+                                        setActiveSubcategory(null)
+                                        setSearchQuery("")
+                                    }}
+                                >
+                                    <div className="flex items-center gap-2 truncate">
+                                        {hasSelection && <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />}
+                                        <span className="truncate">{cat.name}</span>
+                                    </div>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground opacity-50" />
+                                </Button>
+                            );
+                        })}
                     </div>
                 </ScrollArea>
             </div>
@@ -168,8 +179,11 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                 <ScrollArea className="flex-1">
                     {activeCategory ? (
                         <div className="p-2 space-y-1">
-                            {filteredSubcategories.length > 0 ? (
-                                filteredSubcategories.map((sub) => (
+                            {filteredSubcategories.map((sub) => {
+                                const isSubSelected = selectedServices.includes(sub.id);
+                                const hasChildrenSelected = services.some(s => s.parent_id === sub.id && selectedServices.includes(s.id));
+
+                                return (
                                     <Button
                                         key={sub.id}
                                         variant={activeSubcategory === sub.id ? "secondary" : "ghost"}
@@ -182,15 +196,16 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                                             setSearchQuery("")
                                         }}
                                     >
-                                        <span className="truncate">{sub.name}</span>
+                                        <div className="flex items-center gap-2 truncate">
+                                            {(isSubSelected || hasChildrenSelected) && (
+                                                <Check className={cn("h-3.5 w-3.5", isSubSelected ? "text-primary" : "text-muted-foreground")} />
+                                            )}
+                                            <span className="truncate">{sub.name}</span>
+                                        </div>
                                         <ChevronRight className="h-4 w-4 text-muted-foreground opacity-50" />
                                     </Button>
-                                ))
-                            ) : (
-                                <div className="p-4 text-center text-sm text-muted-foreground">
-                                    Sem subcategorias disponíveis.
-                                </div>
-                            )}
+                                );
+                            })}
                         </div>
                     ) : (
                         <div className="flex items-center justify-center h-full text-sm text-muted-foreground p-4 text-center">
@@ -234,18 +249,30 @@ export function ServiceSelector({ userId, selectedServices, onServicesChange }: 
                             <h3 className="text-sm font-medium mb-2">
                                 {subcategories.find(s => s.id === activeSubcategory)?.name}
                             </h3>
-                            {filteredServices.length > 0 ? (
-                                filteredServices.map((service) => (
-                                    <ServiceItem
-                                        key={service.id}
-                                        service={service}
-                                        isSelected={selectedServices.includes(service.id)}
-                                        onToggle={() => toggleService(service.id)}
-                                    />
-                                ))
-                            ) : (
-                                <p className="text-sm text-muted-foreground">Nenhum serviço disponível nesta subcategoria.</p>
-                            )}
+
+                            {/* Option to select the subcategory itself as a general service */}
+                            <ServiceItem
+                                key={`general-${activeSubcategory}`}
+                                service={{
+                                    id: activeSubcategory,
+                                    name: `Serviço Geral de ${subcategories.find(s => s.id === activeSubcategory)?.name}`,
+                                    subcategory_id: activeSubcategory,
+                                    description: "Selecione esta opção para oferecer todos os serviços básicos desta categoria."
+                                }}
+                                isSelected={selectedServices.includes(activeSubcategory)}
+                                onToggle={() => toggleService(activeSubcategory)}
+                            />
+
+                            {filteredServices.length > 0 && <div className="h-px bg-muted my-4" />}
+
+                            {filteredServices.map((service) => (
+                                <ServiceItem
+                                    key={service.id}
+                                    service={service}
+                                    isSelected={selectedServices.includes(service.id)}
+                                    onToggle={() => toggleService(service.id)}
+                                />
+                            ))}
                         </div>
                     ) : (
                         <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
