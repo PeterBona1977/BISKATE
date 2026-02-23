@@ -134,8 +134,6 @@ function wrapEmail(body: string, subject: string): string {
 
 export async function sendEmail({ to, templateName, variables }: SendEmailParams) {
     try {
-        const resend = getResendClient();
-
         // 1. Fetch template from database
         // We use the admin client or a privileged operation if we were in a secure context,
         // but since this likely runs on server actions, we need to ensure we can access the templates.

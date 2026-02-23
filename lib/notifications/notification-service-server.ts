@@ -102,10 +102,7 @@ export class NotificationServiceServer {
                 title = "Pedido de Levantamento 💸"
                 message = `O seu pedido de levantamento de ${new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(data.amount)} foi recebido.`
                 break
-            case "withdrawal_requested":
-                title = "Pedido de Levantamento 💸"
-                message = `O seu pedido de levantamento de ${new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(data.amount)} foi recebido.`
-                break
+
             case "admin_requested_changes":
                 title = "Ação Necessária: Alterações Solicitadas ⚠️"
                 message = `A sua candidatura precisa de alterações. Motivo: ${data.rejectionReason}`
