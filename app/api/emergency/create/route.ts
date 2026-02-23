@@ -41,20 +41,34 @@ export async function POST(request: NextRequest) {
         const cleanServiceId = !serviceId || serviceId === "null" || serviceId.length !== 36 ? null : serviceId;
 
         // 1. Create Request in DB (using ADMIN client to bypass RLS)
-        const { data: emergencyRequest, error: createError } = await supabaseAdmin
-            .from("emergency_requests")
-            .insert({
-                client_id: user.id,
-                category,
-                service_id: cleanServiceId, // Use cleaned ID
-                description,
-                lat,
-                lng,
-                address,
-                status: 'pending'
-            })
-            .select()
-            .single()
+        let emergencyRequest;
+        let createError;
+
+        const payload = {
+            client_id: user.id,
+            category,
+            service_id: cleanServiceId, // Use cleaned ID
+            description,
+            lat,
+            lng,
+            address: address || "Local",
+            status: 'pending'
+        };
+
+        const res1 = await supabaseAdmin.from("emergency_requests").insert(payload).select().single();
+
+        // 23503 = foreign_key_violation (often happens if AI sends an ID that doesn't exist in categories table)
+        // 22P02 = invalid_text_representation (invalid UUID format)
+        if (res1.error && (res1.error.code === '23503' || res1.error.code === '22P02')) {
+            console.log("⚠️ DB Constraint Failed (Foreign Key or UUID format) for service_id. Retrying with NULL service_id.");
+            payload.service_id = null; // Strip the ID
+            const res2 = await supabaseAdmin.from("emergency_requests").insert(payload).select().single();
+            emergencyRequest = res2.data;
+            createError = res2.error;
+        } else {
+            emergencyRequest = res1.data;
+            createError = res1.error;
+        }
 
         if (createError) {
             console.error("🚨 DATABASE ERROR creating emergency request:")
