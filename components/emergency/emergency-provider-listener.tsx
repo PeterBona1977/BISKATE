@@ -26,17 +26,29 @@ export function EmergencyProviderListener() {
         // Add a small toast to confirm listener is active (optional, but good for debugging)
         // toast({ title: "Ligação de Emergência Ativa", description: "O seu dispositivo está pronto para receber alertas urgentes." })
 
-        let alarmInterval: NodeJS.Timeout | null = null;
+        let alarmAudio: HTMLAudioElement | null = null;
 
         const playAlarm = () => {
+            // High-intensity siren sound for reliability
+            if (!alarmAudio) {
+                alarmAudio = new Audio("https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3")
+                alarmAudio.loop = false
+            }
+            alarmAudio.play().catch(e => console.error("Audio play failed:", e))
+
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel()
-                const utterance = new SpeechSynthesisUtterance("Attention! Urgent Emergency Request! Please check your dashboard!")
-                utterance.rate = 1.0
-                utterance.pitch = 1.1
+                const utterance = new SpeechSynthesisUtterance("🚨 ATENÇÃO! NOVO PEDIDO DE EMERGÊNCIA! VERIFIQUE O SEU ECRÃ IMEDIATAMENTE! 🚨")
+                utterance.rate = 1.1
+                utterance.pitch = 1.0
                 utterance.volume = 1.0
-                utterance.lang = "en-US"
+                utterance.lang = "pt-PT"
                 window.speechSynthesis.speak(utterance)
+            }
+
+            // Vibration if supported
+            if ('vibrate' in navigator) {
+                navigator.vibrate([1000, 500, 1000, 500, 1000])
             }
         }
 
@@ -56,45 +68,40 @@ export function EmergencyProviderListener() {
                         notif.type === 'emergency' ||
                         notif.title?.toUpperCase().includes("EMERGENCY") ||
                         notif.title?.toUpperCase().includes("EMERGÊNCIA") ||
-                        notif.title?.toUpperCase().includes("URGENTE") ||
-                        notif.type === 'error'
+                        notif.title?.toUpperCase().includes("URGENTE")
 
                     if (isEmergency) {
-                        console.log("🚨 EMERGENCY ALERT RECEIVED:", notif)
-
-                        toast({
-                            title: "🚨 EMERGÊNCIA DETECTADA!",
-                            description: notif.message,
-                            variant: "destructive",
-                            duration: 10000,
-                        })
+                        console.log("🚨 EMERGENCY ALERT RECEIVED IN REALTIME:", notif)
 
                         // Set state to show modal
                         setAlert(notif)
                         setOpen(true)
 
-                        // Start recurring alarm
+                        // Start alarm
                         playAlarm()
                         if (alarmInterval) clearInterval(alarmInterval)
-                        alarmInterval = setInterval(playAlarm, 8000) // Slightly faster repeat for urgency
+                        alarmInterval = setInterval(playAlarm, 4000) // Repeated siren for urgency
 
-                        // Vibration if supported
-                        if ('vibrate' in navigator) {
-                            navigator.vibrate([500, 200, 500, 200, 500])
-                        }
+                        toast({
+                            title: "🚨 EMERGÊNCIA!",
+                            description: notif.message,
+                            variant: "destructive",
+                            duration: 10000,
+                        })
                     }
                 }
             )
             .subscribe((status) => {
-                console.log(`🔌 Emergency Channel Status for ${user.id}:`, status)
-                if (status === 'SUBSCRIBED') {
-                    console.log("✅ Emergency Realtime Subscribed & Listening")
-                }
+                console.log(`🔌 Emergency Listener Status:`, status)
             })
 
         return () => {
             supabase.removeChannel(channel)
             if (alarmInterval) clearInterval(alarmInterval)
+            if (alarmAudio) {
+                alarmAudio.pause()
+                alarmAudio = null
+            }
             window.speechSynthesis.cancel()
         }
     }, [user?.id, profile?.is_provider, profile?.role])
@@ -106,10 +113,10 @@ export function EmergencyProviderListener() {
     }, [open])
 
     const handleView = () => {
-        if (alert?.action_url) {
-            setOpen(false)
-            router.push(alert.action_url)
-        }
+        // Notification action_url is stored in the JSONB 'data' column
+        const targetUrl = alert?.data?.action_url || alert?.action_url || "/dashboard/provider/emergency"
+        setOpen(false)
+        router.push(targetUrl)
     }
 
     if (!alert) return null

@@ -470,13 +470,21 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                 if (result.data) {
                     setIsBroadcastSuccess(true)
 
+                    // STOP ALL VOICE IMMEDIATELY
+                    window.speechSynthesis.cancel()
+                    if (audioRef.current) {
+                        audioRef.current.pause()
+                        audioRef.current.src = ""
+                    }
+                    setIsListening(false)
+
                     // Mostra ao cliente quantos foram notificados antes de ir para live tracking
                     toast({
                         title: "Pedido Enviado",
                         description: `Notificámos ${result.broadcastCount || 0} prestadores especializados próximos de si.`,
                     })
 
-                    // Redirecionamento imediato conforme solicitado
+                    // Redirecionamento imediato - cleanup robusto
                     onSuccess(result.data.id)
                 }
             } else {
