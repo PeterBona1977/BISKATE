@@ -11,6 +11,7 @@ export interface GeminiConfig {
 }
 
 let cachedConfig: GeminiConfig | null = null
+const bannedConfigs = new Set<string>()
 
 export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
     if (cachedConfig) return cachedConfig
@@ -44,6 +45,8 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
     for (const apiKey of keys) {
         // 0. High-Priority Trial: v1beta + gemini-2.0-flash, then v1beta + gemini-1.5-flash
         for (const [tryVer, tryModel] of [["v1beta", "gemini-2.0-flash"], ["v1beta", "gemini-1.5-flash"], ["v1", "gemini-1.5-flash"]]) {
+            if (bannedConfigs.has(`${apiKey}:${tryModel}`)) continue; // Skip exhausted combos
+
             try {
                 const url = `https://generativelanguage.googleapis.com/${tryVer}/models/${tryModel}:generateContent?key=${apiKey}`
                 const res = await fetch(url, {
@@ -79,13 +82,15 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
                         listSuccess = true
                         foundAnyModels = [...new Set([...foundAnyModels, ...available])]
 
-                        const bestMatch = available.find((m: string) => m === "gemini-1.5-flash") ||
-                            available.find((m: string) => m === "gemini-1.5-pro") ||
-                            available.find((m: string) => m.includes("1.5-flash-latest")) ||
-                            available.find((m: string) => m.includes("1.5-flash")) ||
-                            available.find((m: string) => m.includes("1.5-pro")) ||
-                            available.find((m: string) => m.includes("1.0-pro")) ||
-                            available[0]
+                        const availableNotBanned = available.filter((m: string) => !bannedConfigs.has(`${apiKey}:${m}`))
+
+                        const bestMatch = availableNotBanned.find((m: string) => m === "gemini-1.5-flash") ||
+                            availableNotBanned.find((m: string) => m === "gemini-1.5-pro") ||
+                            availableNotBanned.find((m: string) => m.includes("1.5-flash-latest")) ||
+                            availableNotBanned.find((m: string) => m.includes("1.5-flash")) ||
+                            availableNotBanned.find((m: string) => m.includes("1.5-pro")) ||
+                            availableNotBanned.find((m: string) => m.includes("1.0-pro")) ||
+                            availableNotBanned[0]
 
                         if (bestMatch) {
                             cachedConfig = { apiKey, model: bestMatch, apiVersion: listVer }
@@ -112,6 +117,8 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
         if (!listSuccess && !criticalError) {
             for (const ver of apiVersions) {
                 for (const name of modelNames) {
+                    if (bannedConfigs.has(`${apiKey}:${name}`)) continue;
+
                     try {
                         const url = `https://generativelanguage.googleapis.com/${ver}/models/${name}:generateContent?key=${apiKey}`
                         const res = await fetch(url, {
@@ -164,8 +171,13 @@ export async function getWorkingGeminiConfig(): Promise<GeminiConfig> {
 export async function generateGeminiContent(prompt: string, config?: GeminiConfig) {
     let attempts = 0
     let lastErr: any = null
+    const maxAttempts = keys().length > 0 ? 5 : 3; // Allow more attempts to cycle through fallbacks
 
-    while (attempts < 3) {
+    function keys() {
+        return [process.env.GEMINI_API_KEY, process.env.GOOGLE_GENERATIVE_AI_API_KEY].filter(Boolean)
+    }
+
+    while (attempts < maxAttempts) {
         attempts++
         let finalConfig: GeminiConfig
         try {
@@ -192,12 +204,13 @@ export async function generateGeminiContent(prompt: string, config?: GeminiConfi
 
             if (!res.ok) {
                 const errText = await res.text()
-                // If 429 (Rate Limit), DO NOT invalidate cache, just sleep and retry
+                // If 429 (Rate Limit), ban this specific key/model combo and immediately try to discover a new one
                 if (res.status === 429) {
-                    console.warn(`Gemini Rate Limit (429) reached for ${finalConfig.model}. Waiting 4 seconds...`)
-                    await new Promise(resolve => setTimeout(resolve, 4000))
+                    console.warn(`Gemini Rate Limit (429) reached for ${finalConfig.model}. Switching to fallback...`)
+                    bannedConfigs.add(`${finalConfig.apiKey}:${finalConfig.model}`)
+                    cachedConfig = null // Force new discovery
                     lastErr = new Error(`Gemini Error (429 Rate Limit): ${errText}`)
-                    continue // Try again with same config
+                    continue // Try again immediately, discovery will pick a non-banned combo
                 }
 
                 // If it's a 404/403 (Not Found / Forbidden), invalidate cache and try again with discovery
@@ -218,8 +231,9 @@ export async function generateGeminiContent(prompt: string, config?: GeminiConfi
         } catch (err: any) {
             // Also handle fetch exceptions that might contain 429
             if (err.message.includes("429")) {
-                console.warn("Gemini Rate Limit (429) caught in outer catch. Waiting 4 seconds...")
-                await new Promise(resolve => setTimeout(resolve, 4000))
+                console.warn(`Gemini Rate Limit (429) caught in outer catch for ${finalConfig.model}. Switching to fallback...`)
+                bannedConfigs.add(`${finalConfig.apiKey}:${finalConfig.model}`)
+                cachedConfig = null
                 lastErr = err
                 continue
             }
