@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { supabase } from "@/lib/supabase/client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
@@ -15,6 +15,9 @@ export function EmergencyProviderListener() {
     const [open, setOpen] = useState(false)
     const router = useRouter()
 
+    const alarmIntervalRef = useRef<NodeJS.Timeout | null>(null)
+    const alarmAudioRef = useRef<HTMLAudioElement | null>(null)
+
     useEffect(() => {
         // Providers often have role='user' but is_provider=true
         const isProvider = profile?.role === 'provider' || profile?.is_provider === true
@@ -23,18 +26,13 @@ export function EmergencyProviderListener() {
 
         console.log("📡 Emergency Listener Active for Provider:", user.id)
 
-        // Add a small toast to confirm listener is active (optional, but good for debugging)
-        // toast({ title: "Ligação de Emergência Ativa", description: "O seu dispositivo está pronto para receber alertas urgentes." })
-
-        let alarmAudio: HTMLAudioElement | null = null;
-
         const playAlarm = () => {
             // High-intensity siren sound for reliability
-            if (!alarmAudio) {
-                alarmAudio = new Audio("https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3")
-                alarmAudio.loop = false
+            if (!alarmAudioRef.current) {
+                alarmAudioRef.current = new Audio("https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3")
+                alarmAudioRef.current.loop = false
             }
-            alarmAudio.play().catch(e => console.error("Audio play failed:", e))
+            alarmAudioRef.current.play().catch(e => console.error("Audio play failed:", e))
 
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel()
@@ -79,8 +77,8 @@ export function EmergencyProviderListener() {
 
                         // Start alarm
                         playAlarm()
-                        if (alarmInterval) clearInterval(alarmInterval)
-                        alarmInterval = setInterval(playAlarm, 4000) // Repeated siren for urgency
+                        if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current)
+                        alarmIntervalRef.current = setInterval(playAlarm, 4000) // Repeated siren for urgency
 
                         toast({
                             title: "🚨 EMERGÊNCIA!",
@@ -97,10 +95,10 @@ export function EmergencyProviderListener() {
 
         return () => {
             supabase.removeChannel(channel)
-            if (alarmInterval) clearInterval(alarmInterval)
-            if (alarmAudio) {
-                alarmAudio.pause()
-                alarmAudio = null
+            if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current)
+            if (alarmAudioRef.current) {
+                alarmAudioRef.current.pause()
+                alarmAudioRef.current = null
             }
             window.speechSynthesis.cancel()
         }
@@ -109,6 +107,13 @@ export function EmergencyProviderListener() {
     useEffect(() => {
         if (!open) {
             window.speechSynthesis.cancel()
+            if (alarmIntervalRef.current) {
+                clearInterval(alarmIntervalRef.current)
+                alarmIntervalRef.current = null
+            }
+            if (alarmAudioRef.current) {
+                alarmAudioRef.current.pause()
+            }
         }
     }, [open])
 

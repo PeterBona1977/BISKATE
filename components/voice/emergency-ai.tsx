@@ -471,12 +471,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                     setIsBroadcastSuccess(true)
 
                     // STOP ALL VOICE IMMEDIATELY
-                    window.speechSynthesis.cancel()
-                    if (audioRef.current) {
-                        audioRef.current.pause()
-                        audioRef.current.src = ""
-                    }
-                    setIsListening(false)
+                    stopAllAudio()
 
                     // Mostra ao cliente quantos foram notificados antes de ir para live tracking
                     toast({
