@@ -101,7 +101,7 @@ export function EmergencyProviderListener() {
                 .select("*")
                 .eq("user_id", user.id)
                 .eq("read", false)
-                .in("type", ["emergency"])
+                .or("type.ilike.%emergency%,title.ilike.%emergência%,title.ilike.%emergency%")
                 .order("created_at", { ascending: false })
                 .limit(1)
 
