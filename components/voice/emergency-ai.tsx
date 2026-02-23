@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Mic, MicOff, AlertTriangle, Loader2, MapPin, Send, Crosshair, Search, StopCircle } from "lucide-react"
+import { Mic, MicOff, AlertTriangle, Loader2, MapPin, Send, Crosshair, Search, StopCircle, CheckCircle2 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { toast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
@@ -41,6 +41,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
     const [detectedCategory, setDetectedCategory] = useState<{ id: string; name: string; confidence?: number } | null>(null)
     const [step, setStep] = useState<Step>("chat")
     const [hasInitialized, setHasInitialized] = useState(false)
+    const [isBroadcastSuccess, setIsBroadcastSuccess] = useState(false)
 
     const [debugLogs, setDebugLogs] = useState<string[]>([])
 
@@ -244,6 +245,7 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
         setTextInput("")
         setStep("chat")
         setDetectedCategory(null)
+        setIsBroadcastSuccess(false)
         stopAllAudio()
     }
 
@@ -456,13 +458,15 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
                 const result = await response.json()
 
                 if (result.data) {
-                    addMessage("assistant", "Localizamos especialistas! Redirecionando para acompanhamento...")
+                    setIsBroadcastSuccess(true)
+                    addMessage("assistant", "Pedido despachado! Redirecionando para acompanhamento em tempo real...")
                     speak("Especialistas localizados. Acompanhe agora em tempo real.")
 
                     setTimeout(() => {
                         onSuccess(result.data.id)
-                        onClose()
-                    }, 2500) // Shorter wait, better feedback
+                        // Don't call onClose() here to avoid flickering the background page 
+                        // before the router.push from onSuccess takes effect.
+                    }, 1500) // Slightly shorter wait for snappier feel
                 }
             } else {
                 throw new Error("Missing location or user")
@@ -582,12 +586,28 @@ export function EmergencyAI({ isOpen, onClose, onSuccess }: EmergencyAIProps) {
 
                             {step === "broadcasting" && (
                                 <div className="mt-4 p-8 bg-white border border-red-200 rounded-2xl animate-in zoom-in-95 duration-500 flex flex-col items-center text-center gap-4 shadow-xl ring-4 ring-red-50">
-                                    <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center animate-pulse">
-                                        <Loader2 className="h-10 w-10 text-red-600 animate-spin" />
+                                    <div className={cn(
+                                        "h-16 w-16 rounded-full flex items-center justify-center transition-all duration-500",
+                                        isBroadcastSuccess ? "bg-green-100 scale-110" : "bg-red-100 animate-pulse"
+                                    )}>
+                                        {isBroadcastSuccess ? (
+                                            <CheckCircle2 className="h-10 w-10 text-green-600 animate-in zoom-in duration-300" />
+                                        ) : (
+                                            <Loader2 className="h-10 w-10 text-red-600 animate-spin" />
+                                        )}
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-red-900 text-xl uppercase italic tracking-tighter">A Contactar Ajuda</h4>
-                                        <p className="text-sm text-red-700 font-medium">Enviando pedido para técnicos de {detectedCategory?.name} próximos de si...</p>
+                                        <h4 className={cn(
+                                            "font-black text-xl uppercase italic tracking-tighter transition-colors",
+                                            isBroadcastSuccess ? "text-green-700" : "text-red-900"
+                                        )}>
+                                            {isBroadcastSuccess ? "Pedido Despachado!" : "A Contactar Ajuda"}
+                                        </h4>
+                                        <p className="text-sm text-gray-600 font-medium">
+                                            {isBroadcastSuccess
+                                                ? "Técnicos notificados. A abrir centro de comando..."
+                                                : `Enviando pedido para especialistas de ${detectedCategory?.name}...`}
+                                        </p>
                                     </div>
                                 </div>
                             )}

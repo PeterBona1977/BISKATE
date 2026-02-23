@@ -6,7 +6,8 @@ import { supabase } from "@/lib/supabase/client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { AlertTriangle, MapPin, Loader2 } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
+import { AlertTriangle, MapPin, Loader2, BellRing } from "lucide-react"
 
 export function EmergencyProviderListener() {
     const { user, profile } = useAuth()
@@ -15,7 +16,15 @@ export function EmergencyProviderListener() {
     const router = useRouter()
 
     useEffect(() => {
-        if (!user || profile?.role !== 'provider') return
+        // Providers often have role='user' but is_provider=true
+        const isProvider = profile?.role === 'provider' || profile?.is_provider === true
+
+        if (!user || !isProvider) return
+
+        console.log("📡 Emergency Listener Active for Provider:", user.id)
+
+        // Add a small toast to confirm listener is active (optional, but good for debugging)
+        // toast({ title: "Ligação de Emergência Ativa", description: "O seu dispositivo está pronto para receber alertas urgentes." })
 
         let alarmInterval: NodeJS.Timeout | null = null;
 
@@ -24,7 +33,7 @@ export function EmergencyProviderListener() {
                 window.speechSynthesis.cancel()
                 const utterance = new SpeechSynthesisUtterance("Attention! Urgent Emergency Request! Please check your dashboard!")
                 utterance.rate = 1.0
-                utterance.pitch = 1.0
+                utterance.pitch = 1.1
                 utterance.volume = 1.0
                 utterance.lang = "en-US"
                 window.speechSynthesis.speak(utterance)
@@ -52,23 +61,43 @@ export function EmergencyProviderListener() {
 
                     if (isEmergency) {
                         console.log("🚨 EMERGENCY ALERT RECEIVED:", notif)
+
+                        toast({
+                            title: "🚨 EMERGÊNCIA DETECTADA!",
+                            description: notif.message,
+                            variant: "destructive",
+                            duration: 10000,
+                        })
+
+                        // Set state to show modal
                         setAlert(notif)
                         setOpen(true)
 
+                        // Start recurring alarm
                         playAlarm()
                         if (alarmInterval) clearInterval(alarmInterval)
-                        alarmInterval = setInterval(playAlarm, 12000)
+                        alarmInterval = setInterval(playAlarm, 8000) // Slightly faster repeat for urgency
+
+                        // Vibration if supported
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate([500, 200, 500, 200, 500])
+                        }
                     }
                 }
             )
-            .subscribe()
+            .subscribe((status) => {
+                console.log(`🔌 Emergency Channel Status for ${user.id}:`, status)
+                if (status === 'SUBSCRIBED') {
+                    console.log("✅ Emergency Realtime Subscribed & Listening")
+                }
+            })
 
         return () => {
             supabase.removeChannel(channel)
             if (alarmInterval) clearInterval(alarmInterval)
             window.speechSynthesis.cancel()
         }
-    }, [user, profile?.role])
+    }, [user?.id, profile?.is_provider, profile?.role])
 
     useEffect(() => {
         if (!open) {
