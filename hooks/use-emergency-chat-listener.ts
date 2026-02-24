@@ -23,9 +23,14 @@ function playBeep() {
 
 /**
  * useEmergencyChatListener
- * Subscribe to `chat_started` broadcast on the given emergency request channel.
- * When the OTHER participant opens the chat, this hook activates the floating button
- * on this side with a beep.
+ *
+ * Watches the `conversations` table for INSERT events filtered by emergency_id.
+ * When a conversation is created for this emergency AND the current user is a
+ * participant (client_id or provider_id), it activates the floating chat button
+ * and plays a beep — BUT only if the current user did NOT initiate the chat
+ * (i.e. they don't already have the floating button open).
+ *
+ * Uses postgres_changes which is reliable and RLS-aware (unlike admin broadcasts).
  */
 export function useEmergencyChatListener(
     requestId: string | null | undefined,
@@ -35,40 +40,52 @@ export function useEmergencyChatListener(
     const { user } = useAuth()
     const { openChat, activeConversationId } = useEmergencyChat()
     const supabase = createClient()
-    const openedRef = useRef(false)
+    const activatedRef = useRef(false)
 
     useEffect(() => {
         if (!requestId || !user) return
 
         const channel = supabase
-            .channel(`emergency_${requestId}`)
+            .channel(`conv_watch_${requestId}`)
             .on(
-                "broadcast",
-                { event: "chat_started" },
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "conversations",
+                    filter: `emergency_id=eq.${requestId}`
+                },
                 (payload) => {
-                    const { conversationId, initiatorId } = payload.payload as {
-                        conversationId: string
-                        initiatorId: string
-                        clientId: string
-                        providerId: string
+                    const conv = payload.new as {
+                        id: string
+                        client_id: string
+                        provider_id: string
+                        emergency_id: string
                     }
 
-                    // Only react if WE are NOT the one who started the chat
-                    if (initiatorId === user.id) return
+                    // Only react if this user is a participant
+                    const isParticipant = conv.client_id === user.id || conv.provider_id === user.id
+                    if (!isParticipant) return
 
-                    // Don't re-open if we already have this conversation active
-                    if (activeConversationId === conversationId && openedRef.current) return
-                    openedRef.current = true
+                    // Don't re-trigger if they already opened the chat themselves
+                    if (activeConversationId === conv.id) return
+                    if (activatedRef.current) return
+                    activatedRef.current = true
 
-                    // Activate the floating button on our side
-                    openChat(conversationId, chatTitle, otherName)
+                    // Activate floating chat button on THIS side
+                    openChat(conv.id, chatTitle, otherName)
 
-                    // Play alert beep
+                    // Sound alert
                     playBeep()
                 }
             )
             .subscribe()
 
         return () => { supabase.removeChannel(channel) }
-    }, [requestId, user])
+    }, [requestId, user?.id]) // user.id is stable
+
+    // Reset activatedRef if conversationId changes (new emergency)
+    useEffect(() => {
+        activatedRef.current = false
+    }, [requestId])
 }
