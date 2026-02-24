@@ -6,6 +6,34 @@ export const runtime = "edge"
 export const dynamic = "force-dynamic"
 
 /**
+ * GET /api/emergency/conversation?requestId=xxx
+ * Find an existing conversation for this emergency where the caller is a participant.
+ */
+export async function GET(req: NextRequest) {
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+        const requestId = req.nextUrl.searchParams.get("requestId")
+        if (!requestId) return NextResponse.json({ error: "Missing requestId" }, { status: 400 })
+
+        const { data, error } = await supabaseAdmin
+            .from("conversations")
+            .select("id, client_id, provider_id, emergency_id")
+            .eq("emergency_id", requestId)
+            .or(`client_id.eq.${user.id},provider_id.eq.${user.id}`)
+            .maybeSingle()
+
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+        return NextResponse.json({ conversation: data || null })
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 })
+    }
+}
+
+/**
  * POST /api/emergency/conversation
  * Get or create a chat conversation for an emergency, using admin client to bypass RLS.
  * Body: { requestId, clientId, providerId }

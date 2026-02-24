@@ -447,14 +447,26 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                         </Badge>
                                     ) : null}
 
-                                    <Button
-                                        variant="outline"
-                                        className="w-full h-14 bg-transparent border-white/40 text-white hover:bg-white/10"
-                                        onClick={handleOpenChat}
-                                    >
-                                        <MessageSquare className="mr-2 h-5 w-5" />
-                                        CHAT COM CLIENTE
-                                    </Button>
+                                    {/* Chat only available after client payment */}
+                                    {(isAccepted || isInProgress || isArrived) ? (
+                                        <Button
+                                            variant="outline"
+                                            className="w-full h-14 bg-transparent border-white/40 text-white hover:bg-white/10"
+                                            onClick={handleOpenChat}
+                                        >
+                                            <MessageSquare className="mr-2 h-5 w-5" />
+                                            CHAT COM CLIENTE
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            variant="outline"
+                                            className="w-full h-14 bg-transparent border-white/20 text-white/40 cursor-not-allowed"
+                                            disabled
+                                        >
+                                            <MessageSquare className="mr-2 h-5 w-5 opacity-40" />
+                                            Chat disponível após pagamento
+                                        </Button>
+                                    )}
                                     <div className="flex items-center justify-center gap-2 py-2">
                                         <CheckCircle2 className="h-5 w-5" />
                                         <span className="font-semibold italic">A aguardar chegada</span>

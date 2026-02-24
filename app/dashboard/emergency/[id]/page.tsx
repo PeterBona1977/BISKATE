@@ -403,16 +403,19 @@ export default function EmergencyTrackingPage() {
                                             >
                                                 VER INFO
                                             </Button>
-                                            <Button
-                                                variant="outline"
-                                                className="h-10 w-10 p-0 border-gray-200"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleOpenChat(resp.provider_id)
-                                                }}
-                                            >
-                                                <MessageSquare className="h-4 w-4" />
-                                            </Button>
+                                            {/* Chat only available after payment (isAccepted) and only for selected provider */}
+                                            {isAccepted && resp.provider_id === (request?.provider_id || selectedProviderId) && (
+                                                <Button
+                                                    variant="outline"
+                                                    className="h-10 w-10 p-0 border-gray-200"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handleOpenChat(resp.provider_id)
+                                                    }}
+                                                >
+                                                    <MessageSquare className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                         </div>
 
                                         <Button
