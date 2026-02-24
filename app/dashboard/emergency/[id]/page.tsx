@@ -30,6 +30,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { EmergencyChat } from "@/components/emergency/emergency-chat"
 import { useEmergencyChat } from "@/contexts/emergency-chat-context"
+import { useEmergencyChatListener } from "@/hooks/use-emergency-chat-listener"
 import { EmergencyService, EmergencyRequest, EmergencyResponse } from "@/lib/emergency/emergency-service"
 import { toast } from "@/hooks/use-toast"
 import { EmergencyMap } from "@/components/dashboard/emergency-map"
@@ -51,6 +52,13 @@ export default function EmergencyTrackingPage() {
     const [isSelecting, setIsSelecting] = useState(false)
     const [isCancelling, setIsCancelling] = useState(false)
     const { openChat: openFloatingChat } = useEmergencyChat()
+
+    // Listen for chat_started broadcast from the provider side
+    useEmergencyChatListener(
+        id,
+        `Emergência: ${request?.category || ""}`,
+        responses.find(r => r.provider_id === request?.provider_id)?.provider?.full_name || "Técnico"
+    )
     const [conversationId, setConversationId] = useState<string | null>(null)
     const [chatOpen, setChatOpen] = useState(false)
     const [pendingPaymentProviderId, setPendingPaymentProviderId] = useState<string | null>(null)

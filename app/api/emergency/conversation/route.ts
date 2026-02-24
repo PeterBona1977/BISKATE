@@ -38,6 +38,19 @@ export async function POST(req: NextRequest) {
         }
 
         if (existing) {
+            // Re-broadcast chat_started so the other side activates the floating button
+            try {
+                await supabaseAdmin.channel(`emergency_${requestId}`).send({
+                    type: "broadcast",
+                    event: "chat_started",
+                    payload: {
+                        conversationId: existing.id,
+                        initiatorId: user.id,
+                        clientId,
+                        providerId
+                    }
+                })
+            } catch { }
             return NextResponse.json({ conversationId: existing.id })
         }
 
@@ -65,6 +78,20 @@ export async function POST(req: NextRequest) {
                 { conversation_id: newConv.id, user_id: clientId },
                 { conversation_id: newConv.id, user_id: providerId }
             ])
+
+        // 4. Broadcast chat_started so the OTHER side shows the floating button + sound
+        try {
+            await supabaseAdmin.channel(`emergency_${requestId}`).send({
+                type: "broadcast",
+                event: "chat_started",
+                payload: {
+                    conversationId: newConv.id,
+                    initiatorId: user.id,
+                    clientId,
+                    providerId
+                }
+            })
+        } catch { }
 
         return NextResponse.json({ conversationId: newConv.id })
 

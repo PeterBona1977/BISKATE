@@ -15,6 +15,7 @@ import { EmergencyService } from "@/lib/emergency/emergency-service"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { EmergencyChat } from "@/components/emergency/emergency-chat"
 import { useEmergencyChat } from "@/contexts/emergency-chat-context"
+import { useEmergencyChatListener } from "@/hooks/use-emergency-chat-listener"
 
 interface EmergencyRequest {
     id: string
@@ -46,6 +47,13 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
     const [chatOpen, setChatOpen] = useState(false)
     const [hasResponded, setHasResponded] = useState(false)
     const { openChat: openFloatingChat } = useEmergencyChat()
+
+    // Listen for chat_started broadcast from the client side
+    useEmergencyChatListener(
+        requestId,
+        `Emergência: ${request?.category || ""}`,
+        "Cliente"
+    )
 
     useEffect(() => {
         fetchRequest()
