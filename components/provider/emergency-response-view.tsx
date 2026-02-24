@@ -13,7 +13,8 @@ import { toast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { EmergencyService } from "@/lib/emergency/emergency-service"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { RealtimeChat } from "@/components/chat/realtime-chat"
+import { EmergencyChat } from "@/components/emergency/emergency-chat"
+import { useEmergencyChat } from "@/contexts/emergency-chat-context"
 
 interface EmergencyRequest {
     id: string
@@ -44,6 +45,7 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
     const [conversationId, setConversationId] = useState<string | null>(null)
     const [chatOpen, setChatOpen] = useState(false)
     const [hasResponded, setHasResponded] = useState(false)
+    const { openChat: openFloatingChat } = useEmergencyChat()
 
     useEffect(() => {
         fetchRequest()
@@ -120,15 +122,36 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user || !request) return
 
-            const { data, error } = await EmergencyService.getOrCreateConversation(requestId, request.client_id, user.id)
-            if (error) throw error
-            if (data) {
-                setConversationId(data.id)
-                setChatOpen(true)
+            // Use server-side API route (with admin client) to bypass RLS constraints
+            const res = await fetch("/api/emergency/conversation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    requestId,
+                    clientId: request.client_id,
+                    providerId: user.id
+                })
+            })
+
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error || "API error")
             }
-        } catch (err) {
+
+            const { conversationId: convId } = await res.json()
+            if (convId) {
+                setConversationId(convId)
+                setChatOpen(true)
+                // Also activate persistent floating chat widget
+                openFloatingChat(convId, `Emergência: ${request?.category || ""}`, "Cliente")
+            }
+        } catch (err: any) {
             console.error("Error opening chat:", err)
-            toast({ title: "Erro", description: "Não foi possível abrir o chat.", variant: "destructive" })
+            toast({
+                title: "Erro no Chat",
+                description: err.message || "Não foi possível abrir o chat.",
+                variant: "destructive"
+            })
         }
     }
 
@@ -314,17 +337,19 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                         "border-none shadow-2xl transition-all duration-500",
                         showProposalForm ? "bg-white text-gray-900 border border-gray-100" : "bg-green-600 text-white"
                     )}>
-                        <CardHeader>
+                        <CardHeader className="border-b border-white/20">
                             <CardTitle className={cn(
-                                "text-lg sm:text-2xl font-black italic uppercase tracking-widest",
-                                showProposalForm ? "text-red-600" : "text-white"
+                                "text-2xl sm:text-3xl font-black italic tracking-tighter uppercase",
+                                showProposalForm ? "text-gray-900" : "text-white"
                             )}>
-                                {showProposalForm ? "Proposta" : "Serviço Ativo"}
+                                {showProposalForm ? "Nova Emergência" : (isPending ? "Aguardando Resposta" : "Serviço Ativo")}
                             </CardTitle>
                             <CardDescription className={showProposalForm ? "text-gray-500" : "text-white/80"}>
                                 {showProposalForm
                                     ? "Preencha os seus dados para este serviço de urgência."
-                                    : "A aguardar seleção do cliente. Pode contactar via chat."}
+                                    : isPending
+                                        ? "A aguardar seleção e aceitação por parte do cliente."
+                                        : "Acompanhe e gira o serviço."}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -367,9 +392,11 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                 <div className="space-y-4 text-center">
                                     <div className="flex flex-col items-center justify-center py-4">
                                         <div className="h-16 w-16 bg-white/20 rounded-full flex items-center justify-center mb-2 animate-pulse">
-                                            <CheckCircle2 className="h-10 w-10 text-white" />
+                                            {isPending ? <Clock className="h-10 w-10 text-white" /> : <CheckCircle2 className="h-10 w-10 text-white" />}
                                         </div>
-                                        <p className="text-xl font-black uppercase italic">Serviço Confirmado!</p>
+                                        <p className="text-xl font-black uppercase italic">
+                                            {isPending ? "Proposta Enviada!" : "Serviço Confirmado!"}
+                                        </p>
                                     </div>
 
                                     {isAccepted ? (
@@ -453,13 +480,10 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                     </SheetHeader>
                     {conversationId && request && (
                         <div className="h-[calc(100vh-100px)]">
-                            <RealtimeChat
+                            <EmergencyChat
                                 conversationId={conversationId}
-                                gigTitle={`Emergência: ${request.category}`}
-                                otherParticipant={{
-                                    id: request.client_id,
-                                    name: "Cliente" // In a real app we'd fetch the name
-                                }}
+                                title={`Emergência: ${request.category}`}
+                                otherParticipantName="Cliente"
                             />
                         </div>
                     )}

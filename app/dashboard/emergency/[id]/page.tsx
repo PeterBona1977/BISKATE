@@ -28,7 +28,8 @@ import {
     Info
 } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { RealtimeChat } from "@/components/chat/realtime-chat"
+import { EmergencyChat } from "@/components/emergency/emergency-chat"
+import { useEmergencyChat } from "@/contexts/emergency-chat-context"
 import { EmergencyService, EmergencyRequest, EmergencyResponse } from "@/lib/emergency/emergency-service"
 import { toast } from "@/hooks/use-toast"
 import { EmergencyMap } from "@/components/dashboard/emergency-map"
@@ -49,6 +50,7 @@ export default function EmergencyTrackingPage() {
     const [loading, setLoading] = useState(true)
     const [isSelecting, setIsSelecting] = useState(false)
     const [isCancelling, setIsCancelling] = useState(false)
+    const { openChat: openFloatingChat } = useEmergencyChat()
     const [conversationId, setConversationId] = useState<string | null>(null)
     const [chatOpen, setChatOpen] = useState(false)
     const [pendingPaymentProviderId, setPendingPaymentProviderId] = useState<string | null>(null)
@@ -193,15 +195,31 @@ export default function EmergencyTrackingPage() {
 
     const handleOpenChat = async (providerId: string) => {
         try {
-            const { data, error } = await EmergencyService.getOrCreateConversation(id, request!.client_id, providerId)
-            if (error) throw error
-            if (data) {
-                setConversationId(data.id)
-                setChatOpen(true)
+            // Use server-side API route (admin client) to bypass RLS infinite recursion
+            const res = await fetch("/api/emergency/conversation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    requestId: id,
+                    clientId: request!.client_id,
+                    providerId
+                })
+            })
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error || "API error")
             }
-        } catch (err) {
+            const { conversationId: convId } = await res.json()
+            if (convId) {
+                setConversationId(convId)
+                setChatOpen(true)
+                // Also activate persistent floating chat widget
+                const provName = responses.find(r => r.provider_id === providerId)?.provider?.full_name || "Técnico"
+                openFloatingChat(convId, `Emergência: ${request?.category || ""}`, provName)
+            }
+        } catch (err: any) {
             console.error("Error opening chat:", err)
-            toast({ title: "Erro", description: "Não foi possível abrir o chat.", variant: "destructive" })
+            toast({ title: "Erro", description: err.message || "Não foi possível abrir o chat.", variant: "destructive" })
         }
     }
 
@@ -231,7 +249,7 @@ export default function EmergencyTrackingPage() {
         }))
     ].filter(m => m.lat && m.lng)
 
-    const isAccepted = request.status === 'accepted' || request.status === 'in_progress'
+    const isAccepted = request.status === 'accepted' || request.status === 'in_progress' || request.status === 'arrived'
     const isCompleted = request.status === 'completed'
 
     return (
@@ -264,6 +282,17 @@ export default function EmergencyTrackingPage() {
                     </Button>
                 )}
             </div>
+
+            {/* Arrived Banner */}
+            {request.status === 'arrived' && (
+                <div className="mb-4 flex items-center gap-3 rounded-2xl bg-green-50 border border-green-200 px-5 py-4">
+                    <span className="text-2xl">📍</span>
+                    <div>
+                        <p className="font-black text-green-800 text-sm">O técnico chegou ao local!</p>
+                        <p className="text-xs text-green-700">O profissional está no endereço indicado. Abra a porta ou dirija-se ao local.</p>
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[600px]">
                 {/* Map View */}
@@ -471,13 +500,10 @@ export default function EmergencyTrackingPage() {
                     </SheetHeader>
                     {conversationId && request && (
                         <div className="h-[calc(100vh-100px)]">
-                            <RealtimeChat
+                            <EmergencyChat
                                 conversationId={conversationId}
-                                gigTitle={`Emergência: ${request.category}`}
-                                otherParticipant={{
-                                    id: selectedProviderId || request.provider_id || "",
-                                    name: responses.find(r => r.provider_id === (selectedProviderId || request.provider_id))?.provider?.full_name || "Técnico"
-                                }}
+                                title={`Emergência: ${request.category}`}
+                                otherParticipantName={responses.find(r => r.provider_id === (selectedProviderId || request.provider_id))?.provider?.full_name || "Técnico"}
                             />
                         </div>
                     )}

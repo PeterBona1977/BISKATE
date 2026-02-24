@@ -9,6 +9,8 @@ import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { useEmergencyHeartbeat } from "@/hooks/use-emergency-heartbeat"
 import { EmergencyProviderListener } from "@/components/emergency/emergency-provider-listener"
+import { EmergencyChatProvider } from "@/contexts/emergency-chat-context"
+import { FloatingEmergencyChat } from "@/components/emergency/floating-emergency-chat"
 import { useTranslations } from "next-intl"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -52,20 +54,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <EmergencyProviderListener />
-      <DashboardHeader />
-      <div className="flex h-screen overflow-hidden pt-16">
-        {/* Sidebar - hidden on mobile in this standard layout, but let's keep it and adjust */}
-        <DashboardSidebar />
+    <EmergencyChatProvider>
+      <div className="min-h-screen bg-gray-50">
+        <EmergencyProviderListener />
+        <FloatingEmergencyChat />
+        <DashboardHeader />
+        <div className="flex h-screen overflow-hidden pt-16">
+          {/* Sidebar - hidden on mobile in this standard layout, but let's keep it and adjust */}
+          <DashboardSidebar />
 
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            {children}
-          </div>
-        </main>
+          {/* Main content */}
+          <main className="flex-1 overflow-y-auto overflow-x-hidden">
+            <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </EmergencyChatProvider>
   )
 }

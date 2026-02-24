@@ -35,6 +35,23 @@ export async function GET() {
 
         debugData.onlineProviders = providers || err3
 
+        const { data: convs, error: e4 } = await supabaseAdmin
+            .from("conversations")
+            .select("*")
+            .limit(1)
+
+        debugData.conversationsTest = convs || e4
+
+        const { data: cols, error: e5 } = await supabaseAdmin
+            .rpc('get_table_columns_debug', { table_name_input: 'conversations' })
+            .catch(async () => {
+                // if rpc doesn't exist just try selecting from raw postgrest if we can
+                const { data: fallback_cols } = await supabaseAdmin.from('conversations').select('*').limit(0)
+                return { data: fallback_cols, error: null }
+            })
+
+        debugData.chatColumns = cols || e5
+
         return NextResponse.json(debugData)
 
     } catch (e: any) {
