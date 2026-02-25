@@ -78,8 +78,8 @@ export function ClientEmergencyListView() {
     // 1- "Pendentes" - pending requests waiting for provider responses
     const pendingRequests = requests.filter(r => r.status === 'pending')
 
-    // 2- "Ativas" - accepted and in-progress emergencies
-    const activeRequests = requests.filter(r => ['accepted', 'in_progress'].includes(r.status))
+    // 2- "Ativas" - accepted and in-progress, arrived, assessment, etc.
+    const activeRequests = requests.filter(r => ['accepted', 'in_progress', 'arrived', 'assessment_pending', 'service_accepted'].includes(r.status))
 
     // 3- "Recusadas" - cancelled requests
     const rejectedRequests = requests.filter(r => r.status === 'cancelled')
@@ -100,13 +100,17 @@ export function ClientEmergencyListView() {
                         className={cn(
                             req.status === 'pending' && "bg-red-600 animate-pulse",
                             req.status === 'in_progress' && "bg-green-600",
-                            req.status === 'accepted' && "bg-blue-600"
+                            req.status === 'accepted' && "bg-blue-600",
+                            ['arrived', 'assessment_pending', 'service_accepted'].includes(req.status) && "bg-orange-500"
                         )}
                     >
                         {req.status === 'pending' ? "À PROCURA..." :
                             req.status === 'in_progress' ? "EM CURSO" :
                                 req.status === 'accepted' ? "PROFISSIONAL A CAMINHO" :
-                                    req.status.toUpperCase()}
+                                    req.status === 'arrived' ? "NO LOCAL" :
+                                        req.status === 'assessment_pending' ? "A AVALIAR" :
+                                            req.status === 'service_accepted' ? "A REPARAR" :
+                                                req.status.toUpperCase()}
                     </Badge>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Clock className="h-3 w-3" />
@@ -125,10 +129,10 @@ export function ClientEmergencyListView() {
                 <Button
                     className={cn(
                         "w-full font-bold",
-                        ['pending', 'accepted', 'in_progress'].includes(req.status) ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                        ['pending', 'accepted', 'in_progress', 'arrived', 'assessment_pending', 'service_accepted'].includes(req.status) ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-gray-100 text-gray-900 hover:bg-gray-200"
                     )}
                 >
-                    {['pending', 'accepted', 'in_progress'].includes(req.status) ? "ACOMPANHAR EM TEMPO REAL" : "VER DETALHES"}
+                    {['pending', 'accepted', 'in_progress', 'arrived', 'assessment_pending', 'service_accepted'].includes(req.status) ? "ACOMPANHAR EM TEMPO REAL" : "VER DETALHES"}
                     <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
             </CardContent>

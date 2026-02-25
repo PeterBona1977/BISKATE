@@ -97,7 +97,7 @@ export function EmergencyRequestsListView() {
 
     // 2- "Ativas" - Accepted active emergencies (assigned to me) OR pending ones I already responded to
     const activeRequests = requests.filter((r: any) =>
-        ((r.status === 'accepted' || r.status === 'in_progress' || r.status === 'arrived') && r.provider_id === profile?.id) ||
+        ((['accepted', 'in_progress', 'arrived', 'assessment_pending', 'service_accepted'].includes(r.status)) && r.provider_id === profile?.id) ||
         (r.status === 'pending' && r.my_response_status)
     )
 
@@ -126,7 +126,7 @@ export function EmergencyRequestsListView() {
             <CardHeader className={cn("bg-red-50/50 pb-3", isInactive && "bg-gray-100")}>
                 <div className="flex justify-between items-start">
                     <Badge variant={isInactive ? "secondary" : "destructive"} className={cn(!isInactive && "bg-red-600 font-bold")}>
-                        {isInactive ? "INATIVA" : (req.status === 'in_progress' ? "EM CURSO" : "URGENTE")}
+                        {isInactive ? "INATIVA" : (['in_progress', 'arrived', 'assessment_pending', 'service_accepted'].includes(req.status) ? "EM CURSO" : "URGENTE")}
                     </Badge>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Clock className="h-3 w-3" />
@@ -151,14 +151,14 @@ export function EmergencyRequestsListView() {
                     <Button
                         className={cn(
                             "w-full font-bold",
-                            req.status === 'in_progress' ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+                            ['in_progress', 'arrived', 'assessment_pending', 'service_accepted'].includes(req.status) ? "bg-green-600 hover:bg-green-700 text-white" : "bg-red-600 hover:bg-red-700 text-white"
                         )}
                         onClick={(e) => {
                             e.stopPropagation();
                             router.push(`/dashboard/provider/emergency/${req.id}`);
                         }}
                     >
-                        {req.status === 'in_progress' ? "VER DETALHES / TRACKING" : "VER DETALHES"}
+                        {['in_progress', 'arrived', 'assessment_pending', 'service_accepted'].includes(req.status) ? "VER DETALHES / TRACKING" : "VER DETALHES"}
                         <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                 )}
