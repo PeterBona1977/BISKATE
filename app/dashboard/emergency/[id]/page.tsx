@@ -37,6 +37,7 @@ import { EmergencyMap } from "@/components/dashboard/emergency-map"
 import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase/client"
 import { EmergencyPaymentModal } from "@/components/emergency/emergency-payment-modal"
+import { ProviderProfileSheet } from "@/components/emergency/provider-profile-sheet"
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
 
@@ -51,6 +52,7 @@ export default function EmergencyTrackingPage() {
     const [loading, setLoading] = useState(true)
     const [isSelecting, setIsSelecting] = useState(false)
     const [isCancelling, setIsCancelling] = useState(false)
+    const [profileResp, setProfileResp] = useState<EmergencyResponse | null>(null)
     const { openChat: openFloatingChat } = useEmergencyChat()
 
     // Listen for chat_started broadcast from the provider side
@@ -398,10 +400,10 @@ export default function EmergencyTrackingPage() {
                                                 className="flex-1 bg-black text-white hover:bg-gray-800 font-bold text-xs"
                                                 onClick={(e) => {
                                                     e.stopPropagation()
-                                                    // TODO: Open detailed profile/info
+                                                    setProfileResp(resp)
                                                 }}
                                             >
-                                                VER INFO
+                                                VER PERFIL
                                             </Button>
                                             {/* Chat only available after payment (isAccepted) and only for selected provider */}
                                             {isAccepted && resp.provider_id === (request?.provider_id || selectedProviderId) && (
@@ -534,6 +536,15 @@ export default function EmergencyTrackingPage() {
                         await handlePaymentSuccess(pendingPaymentProviderId)
                     }
                 }}
+            />
+
+            {/* Provider Profile Sheet */}
+            <ProviderProfileSheet
+                open={!!profileResp}
+                onClose={() => setProfileResp(null)}
+                provider={profileResp?.provider ?? null}
+                quote={profileResp?.quote_details ?? null}
+                showContacts={isAccepted}
             />
         </div >
     )
