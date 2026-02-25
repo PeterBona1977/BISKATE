@@ -66,48 +66,76 @@ export function FloatingEmergencyChat() {
         }
     }, [])
 
-    // Subscribe via Realtime BROADCAST (bypasses RLS — messages are sent via admin API)
+    // Track message count for polling-based unread detection
+    const lastSeenCountRef = useRef(0)
+    const seenIdsRef = useRef<Set<string>>(new Set())
+
+    const checkForNewMessages = useCallback(async () => {
+        if (!activeConversationId || !user) return
+        try {
+            const res = await fetch(`/api/emergency/messages?conversationId=${activeConversationId}`)
+            if (!res.ok) return
+            const { messages: data } = await res.json()
+            const msgs: Array<{ id: string; sender_id: string }> = data || []
+
+            msgs.forEach(msg => {
+                if (seenIdsRef.current.has(msg.id)) return
+                seenIdsRef.current.add(msg.id)
+
+                // Only react to messages from the OTHER user
+                if (msg.sender_id === user.id) return
+
+                playBeep()
+                if (!isOpenRef.current) {
+                    setUnreadCount(prev => prev + 1)
+                    if (unreadTimerRef.current) clearTimeout(unreadTimerRef.current)
+                    unreadTimerRef.current = setTimeout(() => {
+                        showBrowserNotification(`Nova mensagem de ${otherNameRef.current || "utilizador"} no chat de emergência.`)
+                    }, 20000)
+                }
+            })
+        } catch { }
+    }, [activeConversationId, user])
+
+    // PRIMARY: postgres_changes on messages table
     useEffect(() => {
         if (!activeConversationId || !user) return
-
         const channel = supabase
-            .channel(`emergency_chat_${activeConversationId}`)
-            .on(
-                "broadcast",
-                { event: "new_message" },
-                (payload) => {
-                    const msg = payload.payload?.message as any
-                    if (!msg) return
+            .channel(`float_pg_${activeConversationId}`)
+            .on("postgres_changes", {
+                event: "INSERT",
+                schema: "public",
+                table: "messages",
+                filter: `conversation_id=eq.${activeConversationId}`
+            }, (payload) => {
+                const msg = payload.new as { id: string; sender_id: string }
+                if (seenIdsRef.current.has(msg.id)) return
+                seenIdsRef.current.add(msg.id)
+                if (msg.sender_id === user.id) return
 
-                    // Ignore own messages
-                    if (msg.sender_id === user.id) return
-                    // Deduplicate
-                    if (msg.id === lastHandledIdRef.current) return
-                    lastHandledIdRef.current = msg.id
-
-                    // Always play beep
-                    playBeep()
-
-                    // Only show badge + notification if chat is CLOSED
-                    if (!isOpenRef.current) {
-                        setUnreadCount(prev => prev + 1)
-
-                        // Cancel previous timer, start fresh 20s timer
-                        if (unreadTimerRef.current) clearTimeout(unreadTimerRef.current)
-                        unreadTimerRef.current = setTimeout(() => {
-                            const name = otherNameRef.current || "utilizador"
-                            showBrowserNotification(`Nova mensagem de ${name} no chat de emergência.`)
-                        }, 20000)
-                    }
+                playBeep()
+                if (!isOpenRef.current) {
+                    setUnreadCount(prev => prev + 1)
+                    if (unreadTimerRef.current) clearTimeout(unreadTimerRef.current)
+                    unreadTimerRef.current = setTimeout(() => {
+                        showBrowserNotification(`Nova mensagem de ${otherNameRef.current || "utilizador"} no chat de emergência.`)
+                    }, 20000)
                 }
-            )
+            })
             .subscribe()
-
         return () => {
             supabase.removeChannel(channel)
             if (unreadTimerRef.current) clearTimeout(unreadTimerRef.current)
         }
-    }, [activeConversationId, user]) // stable — refs handle isOpen, otherName
+    }, [activeConversationId, user])
+
+    // FALLBACK: poll every 4 seconds (catches messages even without realtime publication)
+    useEffect(() => {
+        if (!activeConversationId || !user) return
+        checkForNewMessages() // immediate check
+        const interval = setInterval(checkForNewMessages, 4000)
+        return () => clearInterval(interval)
+    }, [activeConversationId, user, checkForNewMessages])
 
     // Clear unread when opened
     useEffect(() => {
