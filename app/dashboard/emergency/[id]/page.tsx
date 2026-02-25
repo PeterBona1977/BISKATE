@@ -38,6 +38,8 @@ import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase/client"
 import { EmergencyPaymentModal } from "@/components/emergency/emergency-payment-modal"
 import { ProviderProfileSheet } from "@/components/emergency/provider-profile-sheet"
+import { CancellationModal } from "@/components/emergency/cancellation-modal"
+import { ServiceAssessmentReview } from "@/components/emergency/service-assessment-review"
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
 
@@ -64,6 +66,9 @@ export default function EmergencyTrackingPage() {
     const [conversationId, setConversationId] = useState<string | null>(null)
     const [chatOpen, setChatOpen] = useState(false)
     const [pendingPaymentProviderId, setPendingPaymentProviderId] = useState<string | null>(null)
+    const [cancelModalOpen, setCancelModalOpen] = useState(false)
+    const [assessment, setAssessment] = useState<any | null>(null)
+    const [assessmentReviewOpen, setAssessmentReviewOpen] = useState(false)
 
     useEffect(() => {
         if (id) {
@@ -89,7 +94,17 @@ export default function EmergencyTrackingPage() {
                 .channel(`req_${id}`)
                 .on("postgres_changes", { event: "*", schema: "public", table: "emergency_requests", filter: `id=eq.${id}` },
                     (payload) => {
-                        setRequest(prev => ({ ...prev, ...payload.new } as EmergencyRequest))
+                        const updated = payload.new as EmergencyRequest
+                        setRequest(prev => ({ ...prev, ...updated } as EmergencyRequest))
+                        // Auto-fetch assessment when status flips
+                        if (updated.status === 'assessment_pending') {
+                            fetch(`/api/emergency/assessment?emergencyId=${id}`)
+                                .then(r => r.json())
+                                .then(({ assessment: a }) => {
+                                    if (a) { setAssessment(a); setAssessmentReviewOpen(true) }
+                                })
+                                .catch(() => { })
+                        }
                     }
                 )
                 .subscribe()
@@ -259,8 +274,10 @@ export default function EmergencyTrackingPage() {
         }))
     ].filter(m => m.lat && m.lng)
 
-    const isAccepted = request.status === 'accepted' || request.status === 'in_progress' || request.status === 'arrived'
-    const isCompleted = request.status === 'completed'
+    const isAccepted = ['accepted', 'in_progress', 'arrived', 'assessment_pending', 'service_accepted'].includes(request.status)
+    const isCompleted = ['completed', 'disputed'].includes(request.status)
+    const isAssessmentPending = request.status === 'assessment_pending'
+    const providerEnRoute = ['in_progress', 'arrived', 'assessment_pending', 'service_accepted'].includes(request.status)
 
     return (
         <div className="max-w-7xl mx-auto pb-20 px-4 md:px-8">
@@ -278,17 +295,16 @@ export default function EmergencyTrackingPage() {
                     </div>
                 </div>
 
-                {!isAccepted && request.status !== 'cancelled' && (
+                {/* Cancel button — show for pending AND accepted-but-not-completed */}
+                {!isCompleted && request.status !== 'cancelled' && (
                     <Button
                         variant="outline"
                         size="sm"
                         className="border-red-200 text-red-600 hover:bg-red-50 font-bold shrink-0 text-[10px] sm:text-sm"
-                        onClick={handleCancelEmergency}
-                        disabled={isCancelling}
+                        onClick={() => setCancelModalOpen(true)}
                     >
-                        {isCancelling ? <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin mr-1 sm:mr-2" /> : <XCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />}
-                        <span className="hidden xs:inline">CANCELAR</span>
-                        <span className="inline xs:hidden">CANCELAR</span>
+                        <XCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                        CANCELAR
                     </Button>
                 )}
             </div>
@@ -545,6 +561,63 @@ export default function EmergencyTrackingPage() {
                 provider={profileResp?.provider ?? null}
                 quote={profileResp?.quote_details ?? null}
                 showContacts={isAccepted}
+            />
+
+            {/* Cancellation Modal */}
+            <CancellationModal
+                open={cancelModalOpen}
+                onClose={() => setCancelModalOpen(false)}
+                cancelledBy="client"
+                providerEnRoute={providerEnRoute}
+                onConfirm={async (reason) => {
+                    const res = await fetch("/api/emergency/cancel", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ requestId: id, reason, cancelledBy: "client" })
+                    })
+                    if (!res.ok) throw new Error((await res.json()).error)
+                    const { message } = await res.json()
+                    toast({ title: "Emergência cancelada", description: message })
+                    router.push("/dashboard")
+                }}
+            />
+
+            {/* Service Assessment Review — auto-opens on assessment_pending */}
+            {isAssessmentPending && (
+                <div
+                    className="fixed bottom-[90px] left-4 right-4 sm:left-auto sm:right-6 sm:w-96 bg-white border border-blue-200 rounded-2xl shadow-2xl p-4 z-[9000] flex items-center gap-4"
+                >
+                    <div className="flex-1 min-w-0">
+                        <p className="font-black text-sm text-blue-800">🔧 Avaliação do Técnico</p>
+                        <p className="text-xs text-gray-600 truncate">O técnico analisou o problema e submeteu um orçamento.</p>
+                    </div>
+                    <Button
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold shrink-0"
+                        onClick={() => {
+                            if (!assessment) {
+                                fetch(`/api/emergency/assessment?emergencyId=${id}`)
+                                    .then(r => r.json())
+                                    .then(({ assessment: a }) => { if (a) { setAssessment(a); setAssessmentReviewOpen(true) } })
+                            } else {
+                                setAssessmentReviewOpen(true)
+                            }
+                        }}
+                    >
+                        Ver Proposta
+                    </Button>
+                </div>
+            )}
+
+            <ServiceAssessmentReview
+                open={assessmentReviewOpen}
+                assessment={assessment}
+                emergencyId={id}
+                onClose={() => setAssessmentReviewOpen(false)}
+                onResponded={() => {
+                    setAssessmentReviewOpen(false)
+                    setAssessment(null)
+                }}
             />
         </div >
     )

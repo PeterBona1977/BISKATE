@@ -16,6 +16,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { EmergencyChat } from "@/components/emergency/emergency-chat"
 import { useEmergencyChat } from "@/contexts/emergency-chat-context"
 import { useEmergencyChatListener } from "@/hooks/use-emergency-chat-listener"
+import { CancellationModal } from "@/components/emergency/cancellation-modal"
+import { ServiceAssessmentForm } from "@/components/emergency/service-assessment-form"
+import { ServiceCompletionModal } from "@/components/emergency/service-completion-modal"
 
 interface EmergencyRequest {
     id: string
@@ -46,6 +49,10 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
     const [conversationId, setConversationId] = useState<string | null>(null)
     const [chatOpen, setChatOpen] = useState(false)
     const [hasResponded, setHasResponded] = useState(false)
+    const [cancelModalOpen, setCancelModalOpen] = useState(false)
+    const [completionModalOpen, setCompletionModalOpen] = useState(false)
+    const [assessmentSubmitted, setAssessmentSubmitted] = useState(false)
+    const [assessmentId, setAssessmentId] = useState<string | null>(null)
     const { openChat: openFloatingChat } = useEmergencyChat()
 
     // Listen for chat_started broadcast from the client side
@@ -433,13 +440,19 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                             <Badge className="w-full py-3 bg-white/20 text-white text-lg font-bold border-none uppercase">
                                                 NO LOCAL
                                             </Badge>
-                                            <Button
-                                                className="w-full h-16 text-xl font-bold bg-white text-blue-600 hover:bg-gray-100 shadow-xl"
-                                                onClick={handleComplete}
-                                                disabled={isResponding}
-                                            >
-                                                FINALIZAR SERVIÇO
-                                            </Button>
+                                            {assessmentSubmitted ? (
+                                                <Badge className="w-full py-3 bg-green-500/30 text-white text-sm font-bold border-none uppercase">
+                                                    ✅ Avaliação enviada — aguardar resposta do cliente
+                                                </Badge>
+                                            ) : (
+                                                <Button
+                                                    className="w-full h-16 text-xl font-bold bg-white text-blue-600 hover:bg-gray-100 shadow-xl"
+                                                    onClick={() => setCompletionModalOpen(true)}
+                                                    disabled={isResponding}
+                                                >
+                                                    FINALIZAR SERVIÇO
+                                                </Button>
+                                            )}
                                         </div>
                                     ) : isCompleted ? (
                                         <Badge className="w-full py-3 bg-white/20 text-white text-lg font-bold border-none uppercase">
@@ -467,10 +480,16 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                             Chat disponível após pagamento
                                         </Button>
                                     )}
-                                    <div className="flex items-center justify-center gap-2 py-2">
-                                        <CheckCircle2 className="h-5 w-5" />
-                                        <span className="font-semibold italic">A aguardar chegada</span>
-                                    </div>
+                                    {/* Cancel button visible while not yet completed */}
+                                    {(isAccepted || isInProgress || isArrived) && (
+                                        <Button
+                                            variant="outline"
+                                            className="w-full h-10 bg-transparent border-red-400/40 text-red-300 hover:bg-red-500/10 text-sm"
+                                            onClick={() => setCancelModalOpen(true)}
+                                        >
+                                            Cancelar Emergência
+                                        </Button>
+                                    )}
                                 </div>
                             )}
                         </CardContent>
@@ -491,6 +510,20 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                 </div>
             </div>
 
+            {/* Assessment panel — shown when arrived and no assessment submitted yet */}
+            {isArrived && !assessmentSubmitted && (
+                <div className="max-w-4xl mx-auto px-4 pb-8">
+                    <div className="bg-white rounded-2xl shadow-xl border border-blue-100 p-6">
+                        <h2 className="text-xl font-black uppercase tracking-tight mb-4 text-blue-800">
+                            🔍 Avaliação no Local
+                        </h2>
+                        <ServiceAssessmentForm
+                            emergencyId={requestId}
+                            onSubmitted={() => setAssessmentSubmitted(true)}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Chat Sheet */}
             <Sheet open={chatOpen} onOpenChange={setChatOpen}>
@@ -509,6 +542,34 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                     )}
                 </SheetContent>
             </Sheet>
+
+            {/* Cancellation Modal */}
+            <CancellationModal
+                open={cancelModalOpen}
+                onClose={() => setCancelModalOpen(false)}
+                cancelledBy="provider"
+                providerEnRoute={isInProgress || isArrived}
+                onConfirm={async (reason) => {
+                    const res = await fetch("/api/emergency/cancel", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ requestId, reason, cancelledBy: "provider" })
+                    })
+                    if (!res.ok) throw new Error((await res.json()).error)
+                    toast({ title: "Emergência cancelada", description: "A taxa de deslocação foi devolvida ao cliente." })
+                    router.push("/dashboard/provider/emergency")
+                }}
+            />
+
+            {/* Service Completion Modal */}
+            <ServiceCompletionModal
+                open={completionModalOpen}
+                onClose={() => setCompletionModalOpen(false)}
+                emergencyId={requestId}
+                assessmentId={assessmentId}
+                onCompleted={() => setRequest(prev => prev ? { ...prev, status: "completed" } : prev)}
+            />
         </div >
     )
 }
+

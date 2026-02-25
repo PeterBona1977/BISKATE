@@ -39,12 +39,18 @@ export async function POST(request: NextRequest) {
         const requestData = response.emergency as any
 
         // 2. Update the request with the chosen provider bypassing RLS
+        const travelFee = (response.quote_details as any)?.travel_fee
+            || (response.quote_details as any)?.price_per_hour
+            || 0
+
         const { error: requestError } = await supabaseAdmin
             .from("emergency_requests")
             .update({
                 provider_id: providerId,
                 status: "accepted",
                 accepted_at: new Date().toISOString(),
+                travel_fee: travelFee,
+                travel_fee_status: "held",  // simulated authorization hold
             })
             .eq("id", requestId)
             .neq("status", "accepted")
