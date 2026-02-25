@@ -147,7 +147,21 @@ export default function EmergencyTrackingPage() {
 
     const fetchRequest = async () => {
         const { data } = await supabase.from("emergency_requests").select("*").eq("id", id).single()
-        if (data) setRequest(data)
+        if (data) {
+            setRequest(data)
+            if (data.status === 'assessment_pending') {
+                try {
+                    const res = await fetch(`/api/emergency/assessment?emergencyId=${id}`)
+                    const { assessment: a } = await res.json()
+                    if (a) {
+                        setAssessment(a)
+                        setAssessmentReviewOpen(true)
+                    }
+                } catch (e) {
+                    console.error("Failed to auto-fetch assessment on load", e)
+                }
+            }
+        }
     }
 
     const fetchResponses = async () => {
@@ -533,9 +547,19 @@ export default function EmergencyTrackingPage() {
                             <div className="h-12 w-12 sm:h-20 sm:w-20 rounded-xl sm:rounded-2xl bg-green-50 flex items-center justify-center border-2 border-green-100 animate-pulse shrink-0">
                                 <CheckCircle2 className="h-6 w-6 sm:h-10 sm:w-10 text-green-600" />
                             </div>
-                            <div>
-                                <h3 className="text-lg sm:text-2xl font-black italic tracking-tight uppercase leading-tight">Profissional Confirmado!</h3>
-                                <p className="text-xs sm:text-gray-600 font-medium">O técnico está a caminho.</p>
+                            <div className="flex-1">
+                                <h3 className="text-lg sm:text-2xl font-black italic tracking-tight uppercase leading-tight">
+                                    {request.status === 'assessment_pending' ? 'Avaliação Recebida' :
+                                        request.status === 'service_accepted' ? 'Reparação em Curso' :
+                                            request.status === 'arrived' ? 'Técnico no Local' :
+                                                'Profissional Confirmado!'}
+                                </h3>
+                                <p className="text-xs sm:text-gray-600 font-medium">
+                                    {request.status === 'assessment_pending' ? 'Verifique o orçamento detalhado.' :
+                                        request.status === 'service_accepted' ? 'O técnico está a trabalhar no local.' :
+                                            request.status === 'arrived' ? 'Aproxime-se para receber o técnico.' :
+                                                'O técnico está a caminho.'}
+                                </p>
                             </div>
                         </div>
                         <div className="flex gap-2 sm:gap-4 w-full md:w-auto mt-4 md:mt-0">
@@ -558,39 +582,42 @@ export default function EmergencyTrackingPage() {
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
 
-            {isCompleted && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-                    <Card className="max-w-md w-full border-none shadow-2xl rounded-3xl overflow-hidden bg-white animate-in zoom-in-95 duration-500">
-                        <div className="bg-green-600 h-2 w-full" />
-                        <CardContent className="p-8 text-center space-y-6">
-                            <div className="h-24 w-24 bg-green-50 rounded-full flex items-center justify-center mx-auto border-4 border-green-100">
-                                <CheckCircle2 className="h-12 w-12 text-green-600" />
-                            </div>
-                            <div className="space-y-2">
-                                <h3 className="text-3xl font-black italic tracking-tight uppercase text-gray-900">Serviço Concluído!</h3>
-                                <p className="text-gray-600">A sua emergência foi resolvida com sucesso. Esperamos ter ajudado!</p>
-                            </div>
-                            <div className="pt-4 space-y-3">
-                                <Button
-                                    className="w-full h-14 bg-black text-white hover:bg-gray-800 font-black rounded-2xl"
-                                    onClick={() => router.push('/dashboard')}
-                                >
-                                    VOLTAR AO DASHBOARD
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    className="w-full h-12 border-2 border-gray-100 font-bold rounded-2xl"
-                                    onClick={() => router.push(`/dashboard/emergency/${id}/invoice`)}
-                                >
-                                    VER FATURA / DETALHES
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            )}
+            {
+                isCompleted && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                        <Card className="max-w-md w-full border-none shadow-2xl rounded-3xl overflow-hidden bg-white animate-in zoom-in-95 duration-500">
+                            <div className="bg-green-600 h-2 w-full" />
+                            <CardContent className="p-8 text-center space-y-6">
+                                <div className="h-24 w-24 bg-green-50 rounded-full flex items-center justify-center mx-auto border-4 border-green-100">
+                                    <CheckCircle2 className="h-12 w-12 text-green-600" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-3xl font-black italic tracking-tight uppercase text-gray-900">Serviço Concluído!</h3>
+                                    <p className="text-gray-600">A sua emergência foi resolvida com sucesso. Esperamos ter ajudado!</p>
+                                </div>
+                                <div className="pt-4 space-y-3">
+                                    <Button
+                                        className="w-full h-14 bg-black text-white hover:bg-gray-800 font-black rounded-2xl"
+                                        onClick={() => router.push('/dashboard')}
+                                    >
+                                        VOLTAR AO DASHBOARD
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full h-12 border-2 border-gray-100 font-bold rounded-2xl"
+                                        onClick={() => router.push(`/dashboard/emergency/${id}/invoice`)}
+                                    >
+                                        VER FATURA / DETALHES
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )
+            }
 
             {/* Chat Sheet */}
             <Sheet open={chatOpen} onOpenChange={setChatOpen}>
@@ -655,31 +682,33 @@ export default function EmergencyTrackingPage() {
             />
 
             {/* Service Assessment Review — auto-opens on assessment_pending */}
-            {isAssessmentPending && (
-                <div
-                    className="fixed bottom-[90px] left-4 right-4 sm:left-auto sm:right-6 sm:w-96 bg-white border border-blue-200 rounded-2xl shadow-2xl p-4 z-[9000] flex items-center gap-4"
-                >
-                    <div className="flex-1 min-w-0">
-                        <p className="font-black text-sm text-blue-800">🔧 Avaliação do Técnico</p>
-                        <p className="text-xs text-gray-600 truncate">O técnico analisou o problema e submeteu um orçamento.</p>
-                    </div>
-                    <Button
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold shrink-0"
-                        onClick={() => {
-                            if (!assessment) {
-                                fetch(`/api/emergency/assessment?emergencyId=${id}`)
-                                    .then(r => r.json())
-                                    .then(({ assessment: a }) => { if (a) { setAssessment(a); setAssessmentReviewOpen(true) } })
-                            } else {
-                                setAssessmentReviewOpen(true)
-                            }
-                        }}
+            {
+                isAssessmentPending && (
+                    <div
+                        className="fixed bottom-[180px] sm:bottom-[120px] left-4 right-4 sm:left-auto sm:right-6 sm:w-96 bg-white border border-blue-200 rounded-2xl shadow-2xl p-4 z-[9000] flex items-center gap-4 animate-in slide-in-from-right"
                     >
-                        Ver Proposta
-                    </Button>
-                </div>
-            )}
+                        <div className="flex-1 min-w-0">
+                            <p className="font-black text-sm text-blue-800">🔧 Avaliação do Técnico</p>
+                            <p className="text-xs text-gray-600 truncate">O técnico analisou o problema e submeteu um orçamento.</p>
+                        </div>
+                        <Button
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold shrink-0"
+                            onClick={() => {
+                                if (!assessment) {
+                                    fetch(`/api/emergency/assessment?emergencyId=${id}`)
+                                        .then(r => r.json())
+                                        .then(({ assessment: a }) => { if (a) { setAssessment(a); setAssessmentReviewOpen(true) } })
+                                } else {
+                                    setAssessmentReviewOpen(true)
+                                }
+                            }}
+                        >
+                            Ver Proposta
+                        </Button>
+                    </div>
+                )
+            }
 
             <ServiceAssessmentReview
                 open={assessmentReviewOpen}
