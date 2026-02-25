@@ -515,8 +515,9 @@ export default function EmergencyTrackingPage() {
                                                         {isSelecting ? <Loader2 className="animate-spin mr-2" /> : "ACEITAR"}
                                                     </Button>
                                                 </div>
+                                            </>
                                         )}
-                                            </CardContent>
+                                    </CardContent>
                                 </Card>
                             ))
                         )}
