@@ -102,10 +102,14 @@ export default function EmergencyTrackingPage() {
                         setRequest(prev => ({ ...prev, ...updated } as EmergencyRequest))
                         // Auto-fetch assessment when status flips
                         if (updated.status === 'assessment_pending') {
+                            // Immediately set state to trigger popup, then fetch details
+                            setAssessmentReviewOpen(true)
                             fetch(`/api/emergency/assessment?emergencyId=${id}`)
                                 .then(r => r.json())
                                 .then(({ assessment: a }) => {
-                                    if (a) { setAssessment(a); setAssessmentReviewOpen(true) }
+                                    if (a) {
+                                        setAssessment(a)
+                                    }
                                 })
                                 .catch(() => { })
                         }
@@ -552,13 +556,15 @@ export default function EmergencyTrackingPage() {
                                     {request.status === 'assessment_pending' ? 'Avaliação Recebida' :
                                         request.status === 'service_accepted' ? 'Reparação em Curso' :
                                             request.status === 'arrived' ? 'Técnico no Local' :
-                                                'Profissional Confirmado!'}
+                                                request.status === 'in_progress' ? 'Técnico a Caminho!' :
+                                                    'Profissional Confirmado!'}
                                 </h3>
                                 <p className="text-xs sm:text-gray-600 font-medium">
                                     {request.status === 'assessment_pending' ? 'Verifique o orçamento detalhado.' :
                                         request.status === 'service_accepted' ? 'O técnico está a trabalhar no local.' :
                                             request.status === 'arrived' ? 'Aproxime-se para receber o técnico.' :
-                                                'O técnico está a caminho.'}
+                                                request.status === 'in_progress' ? 'O técnico está em viagem para o seu local.' :
+                                                    'A aguardar que o técnico inicie o trajeto.'}
                                 </p>
                             </div>
                         </div>
