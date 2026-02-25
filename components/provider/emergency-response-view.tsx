@@ -42,8 +42,7 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
     const [isResponding, setIsResponding] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [quote, setQuote] = useState({
-        price_per_hour: 45,
-        min_hours: 1,
+        travel_fee: 45,
         eta: "20 min"
     })
     const [conversationId, setConversationId] = useState<string | null>(null)
@@ -370,15 +369,22 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                         <CardContent className="space-y-4">
                             {showProposalForm ? (
                                 <div className="space-y-4">
+                                    {/* Info note */}
+                                    <div className="rounded-xl bg-amber-50 border border-amber-200 p-3">
+                                        <p className="text-xs font-bold text-amber-800 mb-0.5">ℹ️ Deslocação / Taxa de Saída</p>
+                                        <p className="text-xs text-amber-700 leading-relaxed">
+                                            Este valor será retido no cartão do cliente ao aceitar. O valor total do serviço será definido no local após análise do problema.
+                                        </p>
+                                    </div>
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold uppercase text-gray-400">Preço / Hora (€)</label>
+                                        <label className="text-xs font-bold uppercase text-gray-400">Taxa de Saída / Deslocação (€)</label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                             <input
                                                 type="number"
                                                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                value={quote.price_per_hour}
-                                                onChange={(e) => setQuote(prev => ({ ...prev, price_per_hour: Number(e.target.value) }))}
+                                                value={quote.travel_fee}
+                                                onChange={(e) => setQuote(prev => ({ ...prev, travel_fee: Number(e.target.value) }))}
                                             />
                                         </div>
                                     </div>

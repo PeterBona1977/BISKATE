@@ -545,7 +545,8 @@ export default function EmergencyTrackingPage() {
                 providerName={responses.find(r => r.provider_id === pendingPaymentProviderId)?.provider?.full_name || "Técnico"}
                 amount={(() => {
                     const r = responses.find(resp => resp.provider_id === pendingPaymentProviderId);
-                    return r && r.quote_details ? (r.quote_details.price_per_hour * r.quote_details.min_hours) : 45;
+                    if (!r || !r.quote_details) return 45;
+                    return r.quote_details.travel_fee ?? (r.quote_details.price_per_hour * (r.quote_details.min_hours || 1)) ?? 45;
                 })()}
                 onSuccess={async () => {
                     if (pendingPaymentProviderId) {

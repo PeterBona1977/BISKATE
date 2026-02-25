@@ -54,7 +54,7 @@ export function EmergencyPaymentModal({ isOpen, onClose, onSuccess, amount, prov
                         Pagamento Seguro
                     </DialogTitle>
                     <DialogDescription>
-                        Para confirmar o técnico <span className="font-bold text-gray-900">{providerName}</span>, é necessário autorizar o valor da deslocação/serviço mínimo.
+                        Para confirmar o técnico <span className="font-bold text-gray-900">{providerName}</span>, é necessário autorizar o valor da deslocação / taxa de saída.
                     </DialogDescription>
                 </DialogHeader>
 

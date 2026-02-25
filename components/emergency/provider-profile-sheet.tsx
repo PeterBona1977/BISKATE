@@ -23,6 +23,7 @@ interface ProviderProfileSheetProps {
         verified?: boolean | null
     } | null
     quote?: {
+        travel_fee?: number
         price_per_hour?: number
         min_hours?: number
         eta?: string
@@ -73,24 +74,25 @@ export function ProviderProfileSheet({
 
                 {/* Quote */}
                 {quote && (
-                    <div className="mx-4 mt-4 grid grid-cols-3 gap-3 bg-red-50 border border-red-100 rounded-2xl p-4">
-                        <div className="text-center">
-                            <p className="text-[10px] uppercase font-bold text-red-400">Preço/Hora</p>
-                            <p className="text-lg font-black text-red-600">{quote.price_per_hour}€</p>
-                        </div>
-                        <div className="text-center border-x border-red-100">
-                            <p className="text-[10px] uppercase font-bold text-red-400">Mín. Horas</p>
-                            <p className="text-lg font-black text-red-600">{quote.min_hours ?? 1}h</p>
-                        </div>
-                        <div className="text-center">
-                            <p className="text-[10px] uppercase font-bold text-red-400">Chegada</p>
-                            <p className="text-lg font-black text-red-600">{quote.eta ?? "—"}</p>
-                        </div>
-                        {quote.notes && (
-                            <div className="col-span-3 pt-2 border-t border-red-100">
-                                <p className="text-xs text-red-800 italic">"{quote.notes}"</p>
+                    <div className="mx-4 mt-4 bg-red-50 border border-red-100 rounded-2xl p-4">
+                        <div className="flex justify-between items-center mb-3">
+                            <div>
+                                <p className="text-[10px] uppercase font-bold text-red-500">Deslocação / Taxa de Saída</p>
+                                <p className="text-2xl font-black text-red-600">{quote.travel_fee ?? quote.price_per_hour ?? 45}€</p>
                             </div>
-                        )}
+                            <div className="text-right">
+                                <p className="text-[10px] uppercase font-bold text-red-500">Tempo de Chegada</p>
+                                <p className="text-xl font-black text-red-600">{quote.eta ?? "—"}</p>
+                            </div>
+                        </div>
+                        <div className="pt-3 border-t border-red-200/50">
+                            <p className="text-xs text-red-700 leading-relaxed font-medium">
+                                ℹ️ Apenas o valor da deslocação será retido agora. O valor total do problema será orçamentado no local.
+                            </p>
+                            {quote.notes && (
+                                <p className="text-xs text-red-800 italic mt-2">"{quote.notes}"</p>
+                            )}
+                        </div>
                     </div>
                 )}
 
