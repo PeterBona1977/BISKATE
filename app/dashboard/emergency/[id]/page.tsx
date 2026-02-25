@@ -488,31 +488,35 @@ export default function EmergencyTrackingPage() {
                                         </div>
 
                                         {!isAccepted && (
-                                            <div className="flex gap-2 w-full">
-                                                <Button
-                                                    variant="outline"
-                                                    className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 font-bold py-6 rounded-xl"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        setDeclineProviderId(resp.provider_id)
-                                                    }}
-                                                    disabled={isSelecting}
-                                                >
-                                                    RECUSAR
-                                                </Button>
-                                                <Button
-                                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black py-6 rounded-xl shadow-lg shadow-green-200"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        handleAcceptProvider(resp.provider_id)
-                                                    }}
-                                                    disabled={isSelecting}
-                                                >
-                                                    {isSelecting ? <Loader2 className="animate-spin mr-2" /> : "ACEITAR"}
-                                                </Button>
-                                            </div>
+                                            <>
+                                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 leading-tight">
+                                                    <strong>Nota Importante:</strong> Este valor cobrirá <strong>apenas a deslocação</strong> e ficará cativo no seu cartão. Não será reembolsado se cancelar após o técnico iniciar viagem. O custo final da reparação será orçamentado no local após análise.
+                                                </div>
+                                                <div className="flex gap-2 w-full">
+                                                    <Button
+                                                        variant="outline"
+                                                        className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 font-bold py-6 rounded-xl"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            setDeclineProviderId(resp.provider_id)
+                                                        }}
+                                                        disabled={isSelecting}
+                                                    >
+                                                        RECUSAR
+                                                    </Button>
+                                                    <Button
+                                                        className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black py-6 rounded-xl shadow-lg shadow-green-200"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            handleAcceptProvider(resp.provider_id)
+                                                        }}
+                                                        disabled={isSelecting}
+                                                    >
+                                                        {isSelecting ? <Loader2 className="animate-spin mr-2" /> : "ACEITAR"}
+                                                    </Button>
+                                                </div>
                                         )}
-                                    </CardContent>
+                                            </CardContent>
                                 </Card>
                             ))
                         )}

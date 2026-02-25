@@ -55,6 +55,9 @@ export function EmergencyPaymentModal({ isOpen, onClose, onSuccess, amount, prov
                     </DialogTitle>
                     <DialogDescription>
                         Para confirmar o técnico <span className="font-bold text-gray-900">{providerName}</span>, é necessário autorizar o valor da deslocação / taxa de saída.
+                        <div className="mt-3 p-3 bg-amber-50 rounded-lg text-amber-800 border border-amber-200">
+                            <strong>Atenção:</strong> Este valor <strong>não inclui</strong> peças nem tempo de reparação, que serão orçamentados no local. A taxa de deslocação ficará cativa no seu cartão e <strong>não é reembolsável</strong> após o técnico confirmar que está a caminho.
+                        </div>
                     </DialogDescription>
                 </DialogHeader>
 
@@ -79,9 +82,9 @@ export function EmergencyPaymentModal({ isOpen, onClose, onSuccess, amount, prov
                             <div className="h-4 w-4 bg-blue-600 rounded-full" />
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs text-gray-500 justify-center mt-2">
-                            <ShieldCheck className="h-3 w-3" />
-                            <span>Pagamento seguro via Stripe. O valor só é capturado após conclusão.</span>
+                        <div className="flex items-center gap-2 text-xs text-gray-500 justify-center mt-2 text-center leading-tight">
+                            <ShieldCheck className="h-5 w-5 shrink-0" />
+                            <span>Pagamento seguro via Stripe. O valor da deslocação será cativo agora e cobrado após o técnico chegar.</span>
                         </div>
                     </div>
                 </div>
