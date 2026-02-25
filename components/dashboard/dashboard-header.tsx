@@ -208,6 +208,26 @@ export function DashboardHeader() {
                 </div>
                 <DropdownMenuSeparator />
 
+                {/* Desktop Client/Provider Mode Switch */}
+                {(profile?.role === "provider" || profile?.is_provider === true) && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      {isProviderMode ? (
+                        <Link href="/dashboard" className="flex items-center w-full cursor-pointer text-blue-600 font-medium">
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Mudar para Cliente</span>
+                        </Link>
+                      ) : (
+                        <Link href="/dashboard/provider" className="flex items-center w-full cursor-pointer text-purple-600 font-medium">
+                          <Briefcase className="mr-2 h-4 w-4" />
+                          <span>Mudar para Prestador</span>
+                        </Link>
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+
                 <DropdownMenuItem asChild>
                   <Link href={isProviderMode ? "/dashboard/provider/profile" : "/dashboard/profile"} className="flex items-center">
                     <User className="mr-2 h-4 w-4" />

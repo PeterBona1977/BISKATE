@@ -79,8 +79,14 @@ export async function middleware(request: NextRequest) {
     }
 
     if (user) {
-      const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+      const { data: profile } = await supabase.from("profiles").select("role, is_provider").eq("id", user.id).single()
       const userRole = profile?.role
+      const isProvider = profile?.is_provider
+
+      // STRICT ADMIN BLOCK: If trying to access /admin and not an admin
+      if (request.nextUrl.pathname.startsWith("/admin") && userRole !== "admin") {
+        return NextResponse.redirect(new URL("/dashboard", request.url))
+      }
 
       if (request.nextUrl.pathname === "/" && userRole === "admin") {
         const viewWebsite = request.nextUrl.searchParams.get("view") === "website"
@@ -88,7 +94,13 @@ export async function middleware(request: NextRequest) {
       }
 
       if ((request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/register")) {
-        return NextResponse.redirect(new URL(userRole === "admin" ? "/admin" : "/dashboard", request.url))
+        if (userRole === "admin") {
+          return NextResponse.redirect(new URL("/admin", request.url))
+        } else if (userRole === "provider" || isProvider) {
+          return NextResponse.redirect(new URL("/dashboard/provider", request.url))
+        } else {
+          return NextResponse.redirect(new URL("/dashboard", request.url))
+        }
       }
 
       if (request.nextUrl.pathname.startsWith("/dashboard") && userRole === "admin") {
