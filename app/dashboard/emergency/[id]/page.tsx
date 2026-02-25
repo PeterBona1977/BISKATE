@@ -102,13 +102,13 @@ export default function EmergencyTrackingPage() {
                         setRequest(prev => ({ ...prev, ...updated } as EmergencyRequest))
                         // Auto-fetch assessment when status flips
                         if (updated.status === 'assessment_pending') {
-                            // Immediately set state to trigger popup, then fetch details
-                            setAssessmentReviewOpen(true)
                             fetch(`/api/emergency/assessment?emergencyId=${id}`)
                                 .then(r => r.json())
                                 .then(({ assessment: a }) => {
                                     if (a) {
                                         setAssessment(a)
+                                        // ensure component has data before opening
+                                        setTimeout(() => setAssessmentReviewOpen(true), 100)
                                     }
                                 })
                                 .catch(() => { })
@@ -134,7 +134,7 @@ export default function EmergencyTrackingPage() {
                 responseSub.unsubscribe()
             }
         }
-    }, [id, request?.status])
+    }, [id])
 
     const loadInitialData = async () => {
         try {
@@ -159,7 +159,7 @@ export default function EmergencyTrackingPage() {
                     const { assessment: a } = await res.json()
                     if (a) {
                         setAssessment(a)
-                        setAssessmentReviewOpen(true)
+                        setTimeout(() => setAssessmentReviewOpen(true), 100)
                     }
                 } catch (e) {
                     console.error("Failed to auto-fetch assessment on load", e)

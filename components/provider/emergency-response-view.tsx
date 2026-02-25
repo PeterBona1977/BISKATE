@@ -50,7 +50,6 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
     const [hasResponded, setHasResponded] = useState(false)
     const [cancelModalOpen, setCancelModalOpen] = useState(false)
     const [completionModalOpen, setCompletionModalOpen] = useState(false)
-    const [assessmentSubmitted, setAssessmentSubmitted] = useState(false)
     const [assessmentId, setAssessmentId] = useState<string | null>(null)
     const [myResponseStatus, setMyResponseStatus] = useState<string | null>(null)
     const [rejectReason, setRejectReason] = useState<string | null>(null)
@@ -509,19 +508,22 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                             <Badge className="w-full py-3 bg-white/20 text-white text-lg font-bold border-none uppercase">
                                                 NO LOCAL
                                             </Badge>
-                                            {assessmentSubmitted ? (
-                                                <Badge className="w-full py-3 bg-green-500/30 text-white text-sm font-bold border-none uppercase">
-                                                    ✅ Avaliação enviada — aguardar resposta do cliente
-                                                </Badge>
-                                            ) : (
-                                                <Button
-                                                    className="w-full h-16 text-xl font-bold bg-white text-blue-600 hover:bg-gray-100 shadow-xl"
-                                                    onClick={() => setCompletionModalOpen(true)}
-                                                    disabled={isResponding}
-                                                >
-                                                    FINALIZAR SERVIÇO
-                                                </Button>
-                                            )}
+                                            <Button
+                                                className="w-full h-16 text-xl font-bold bg-white text-blue-600 hover:bg-gray-100 shadow-xl"
+                                                onClick={() => setCompletionModalOpen(true)}
+                                                disabled={isResponding}
+                                            >
+                                                FINALIZAR SERVIÇO
+                                            </Button>
+                                        </div>
+                                    ) : request?.status === 'assessment_pending' ? (
+                                        <div className="space-y-4">
+                                            <Badge className="w-full py-3 bg-white/20 text-white text-lg font-bold border-none uppercase">
+                                                NO LOCAL
+                                            </Badge>
+                                            <Badge className="w-full py-3 bg-green-500/30 text-white text-sm font-bold border-none uppercase">
+                                                ✅ Avaliação enviada — aguardar cliente
+                                            </Badge>
                                         </div>
                                     ) : isCompleted ? (
                                         <Badge className="w-full py-3 bg-white/20 text-white text-lg font-bold border-none uppercase">
@@ -579,8 +581,8 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                 </div>
             </div>
 
-            {/* Assessment panel — shown when arrived and no assessment submitted yet */}
-            {isArrived && !assessmentSubmitted && (
+            {/* Assessment panel — shown when arrived */}
+            {isArrived && (
                 <div className="max-w-4xl mx-auto px-4 pb-8">
                     <div className="bg-white rounded-2xl shadow-xl border border-blue-100 p-6">
                         <h2 className="text-xl font-black uppercase tracking-tight mb-4 text-blue-800">
@@ -588,7 +590,7 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                         </h2>
                         <ServiceAssessmentForm
                             emergencyId={requestId}
-                            onSubmitted={() => setAssessmentSubmitted(true)}
+                            onSubmitted={() => fetchRequest()}
                         />
                     </div>
                 </div>
