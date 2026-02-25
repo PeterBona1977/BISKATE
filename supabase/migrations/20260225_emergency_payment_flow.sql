@@ -14,6 +14,10 @@ ALTER TABLE public.emergency_requests
   -- values: client | provider
   ADD COLUMN IF NOT EXISTS dispute_reason      TEXT;
 
+-- 1b. Novo campo na tabela de respostas (para o cliente justificar a recusa da proposta inicial)
+ALTER TABLE public.emergency_responses
+  ADD COLUMN IF NOT EXISTS reject_reason TEXT;
+
 -- 2. Create emergency_assessments table (provider evaluates on-site)
 CREATE TABLE IF NOT EXISTS public.emergency_assessments (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),

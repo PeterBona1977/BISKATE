@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
     AlertTriangle,
     MapPin,
@@ -69,6 +71,8 @@ export default function EmergencyTrackingPage() {
     const [cancelModalOpen, setCancelModalOpen] = useState(false)
     const [assessment, setAssessment] = useState<any | null>(null)
     const [assessmentReviewOpen, setAssessmentReviewOpen] = useState(false)
+    const [declineProviderId, setDeclineProviderId] = useState<string | null>(null)
+    const [declineReason, setDeclineReason] = useState("")
 
     useEffect(() => {
         if (id) {
@@ -187,6 +191,53 @@ export default function EmergencyTrackingPage() {
         } finally {
             setIsSelecting(false)
             setPendingPaymentProviderId(null)
+        }
+    }
+
+    const handleDeclineProvider = async () => {
+        if (!declineProviderId || !declineReason.trim()) {
+            toast({ title: "Atenção", description: "Por favor, indique o motivo da recusa.", variant: "destructive" });
+            return;
+        }
+
+        const pId = declineProviderId;
+        setIsSelecting(true);
+
+        try {
+            const { error } = await supabase
+                .from("emergency_responses")
+                .update({ status: 'rejected', reject_reason: declineReason.trim() })
+                .eq('emergency_id', id)
+                .eq('provider_id', pId);
+
+            if (error) throw error;
+
+            // Optimistic UI updates
+            setResponses(prev => prev.filter(r => r.provider_id !== pId));
+            if (selectedProviderId === pId) setSelectedProviderId(null);
+
+            toast({
+                title: "Proposta Recusada",
+                description: "O técnico foi notificado do motivo e removido da sua lista."
+            });
+
+            // Warn if no providers left
+            const remaining = responses.filter(r => r.provider_id !== pId);
+            if (remaining.length === 0 && onlineProviders.length === 0) {
+                toast({
+                    title: "Atenção",
+                    description: "De momento não temos mais profissionais online. A recomendação é manter a pesquisa ativa.",
+                    variant: "destructive"
+                });
+            }
+        } catch (err) {
+            console.error("Erro ao recusar técnico:", err);
+            toast({ title: "Erro", description: "Falha ao recusar a proposta.", variant: "destructive" });
+            fetchResponses();
+        } finally {
+            setIsSelecting(false);
+            setDeclineProviderId(null);
+            setDeclineReason("");
         }
     }
 
@@ -402,8 +453,8 @@ export default function EmergencyTrackingPage() {
 
                                         <div className="grid grid-cols-2 gap-2">
                                             <div className="bg-gray-50 p-2 rounded-lg text-center">
-                                                <p className="text-[10px] uppercase font-bold text-gray-400">Preço / Hora</p>
-                                                <p className="text-sm font-black text-gray-900">{resp.quote_details?.price_per_hour}€</p>
+                                                <p className="text-[10px] uppercase font-bold text-gray-400">Deslocação / Saída</p>
+                                                <p className="text-sm font-black text-gray-900">{resp.quote_details?.travel_fee ?? resp.quote_details?.price_per_hour ?? 45}€</p>
                                             </div>
                                             <div className="bg-red-50 p-2 rounded-lg text-center">
                                                 <p className="text-[10px] uppercase font-bold text-red-400">Chegada</p>
@@ -436,16 +487,31 @@ export default function EmergencyTrackingPage() {
                                             )}
                                         </div>
 
-                                        <Button
-                                            className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-6 rounded-xl shadow-lg shadow-red-200"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                handleAcceptProvider(resp.provider_id)
-                                            }}
-                                            disabled={isSelecting || isAccepted}
-                                        >
-                                            {isSelecting ? <Loader2 className="animate-spin mr-2" /> : "ACEITAR TÉCNICO"}
-                                        </Button>
+                                        {!isAccepted && (
+                                            <div className="flex gap-2 w-full">
+                                                <Button
+                                                    variant="outline"
+                                                    className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 font-bold py-6 rounded-xl"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setDeclineProviderId(resp.provider_id)
+                                                    }}
+                                                    disabled={isSelecting}
+                                                >
+                                                    RECUSAR
+                                                </Button>
+                                                <Button
+                                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black py-6 rounded-xl shadow-lg shadow-green-200"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handleAcceptProvider(resp.provider_id)
+                                                    }}
+                                                    disabled={isSelecting}
+                                                >
+                                                    {isSelecting ? <Loader2 className="animate-spin mr-2" /> : "ACEITAR"}
+                                                </Button>
+                                            </div>
+                                        )}
                                     </CardContent>
                                 </Card>
                             ))
@@ -620,6 +686,29 @@ export default function EmergencyTrackingPage() {
                     setAssessment(null)
                 }}
             />
+
+            {/* Decline Proposal Dialog */}
+            <Dialog open={!!declineProviderId} onOpenChange={(open) => !open && setDeclineProviderId(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Recusar Proposta</DialogTitle>
+                        <DialogDescription>
+                            Por favor, indique o motivo da recusa para ajudar este profissional a melhorar e ajustar as suas propostas no futuro.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Textarea
+                        placeholder="Ex: O valor de deslocação é muito alto, o tempo de chegada não serve..."
+                        value={declineReason}
+                        onChange={e => setDeclineReason(e.target.value)}
+                        className="mt-4"
+                        rows={3}
+                    />
+                    <DialogFooter className="mt-4">
+                        <Button variant="outline" onClick={() => setDeclineProviderId(null)} disabled={isSelecting}>Cancelar</Button>
+                        <Button variant="destructive" onClick={handleDeclineProvider} disabled={isSelecting}>Confirmar Recusa</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div >
     )
 }

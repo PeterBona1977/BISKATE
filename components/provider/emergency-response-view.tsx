@@ -52,6 +52,8 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
     const [completionModalOpen, setCompletionModalOpen] = useState(false)
     const [assessmentSubmitted, setAssessmentSubmitted] = useState(false)
     const [assessmentId, setAssessmentId] = useState<string | null>(null)
+    const [myResponseStatus, setMyResponseStatus] = useState<string | null>(null)
+    const [rejectReason, setRejectReason] = useState<string | null>(null)
     const { openChat: openFloatingChat } = useEmergencyChat()
 
     // Listen for chat_started broadcast from the client side
@@ -85,9 +87,15 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
             const { data: { user } } = await supabase.auth.getUser()
             if (user && data) {
                 const { data: myResponse } = await supabase.from("emergency_responses")
-                    .select("id").eq("emergency_id", requestId).eq("provider_id", user.id).single()
+                    .select("id, status, reject_reason").eq("emergency_id", requestId).eq("provider_id", user.id).single()
                 if (myResponse) {
                     setHasResponded(true)
+                    setMyResponseStatus(myResponse.status)
+                    setRejectReason(myResponse.reject_reason)
+                } else {
+                    setHasResponded(false)
+                    setMyResponseStatus(null)
+                    setRejectReason(null)
                 }
             }
         } catch (err: any) {
@@ -103,6 +111,16 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
             setIsResponding(true)
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error("Não autenticado")
+
+            // If replacing a rejected proposal, we should delete the old one or update it
+            // The respondToEmergency service currently inserts. To avoid duplicate keys, 
+            // if we have a rejected response, we delete it first before creating a new pending one.
+            if (myResponseStatus === 'rejected') {
+                await supabase.from("emergency_responses")
+                    .delete()
+                    .eq("emergency_id", requestId)
+                    .eq("provider_id", user.id);
+            }
 
             const { error } = await EmergencyService.respondToEmergency({
                 requestId,
@@ -186,16 +204,40 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                     if (payload.new.status === 'cancelled') {
                         toast({ title: "Atenção", description: "O cliente cancelou esta emergência.", variant: "destructive" })
                     } else if (payload.new.status === 'accepted') {
-                        // In a real app we'd check if it was accepted for US or someone else
-                        // here we just refresh to see the new state
                         fetchRequest()
                     }
                 }
             )
             .subscribe()
 
+        // Also subscribe to our own response status
+        let responseChannel: any = null
+        supabase.auth.getUser().then(({ data: { user } }) => {
+            if (user) {
+                responseChannel = supabase
+                    .channel(`my_resp_${requestId}`)
+                    .on("postgres_changes", { event: "UPDATE", schema: "public", table: "emergency_responses", filter: `emergency_id=eq.${requestId}` },
+                        (payload) => {
+                            if (payload.new.provider_id === user.id) {
+                                setMyResponseStatus(payload.new.status)
+                                setRejectReason(payload.new.reject_reason)
+                                if (payload.new.status === 'rejected') {
+                                    toast({
+                                        title: "Proposta Recusada",
+                                        description: "O cliente recusou a sua proposta. Verifique o motivo e tente novamente.",
+                                        variant: "destructive"
+                                    })
+                                }
+                            }
+                        }
+                    )
+                    .subscribe()
+            }
+        })
+
         return () => {
             supabase.removeChannel(channel)
+            if (responseChannel) supabase.removeChannel(responseChannel)
         }
     }, [requestId])
 
@@ -275,12 +317,14 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
     }
 
     const isPending = request.status === "pending"
-    const isAccepted = request.status === "accepted"
+    const isAccepted = request.status === "accepted" && request.provider_id === request.provider_id // Simplification for now, rely on myResponseStatus
+    const isMyProposalAccepted = myResponseStatus === 'accepted' || (request.provider_id && myResponseStatus !== 'rejected')
     const isInProgress = request.status === "in_progress"
     const isArrived = request.status === "arrived"
     const isCompleted = request.status === "completed"
 
-    const showProposalForm = isPending && !hasResponded
+    const isRejected = myResponseStatus === 'rejected'
+    const showProposalForm = (isPending && !hasResponded) || isRejected
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -309,8 +353,12 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                                 <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
                                     <div className="text-center px-4 group-hover:scale-105 transition-transform duration-300">
                                         <MapPin className="h-8 w-8 sm:h-12 sm:w-12 text-red-600 mx-auto mb-2 drop-shadow-md" />
-                                        <p className="font-bold text-sm sm:text-base text-gray-800 break-words max-w-[250px] mx-auto">{request.address}</p>
-                                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Gps: {request.lat.toFixed(6)}, {request.lng.toFixed(6)}</p>
+                                        <p className="font-bold text-sm sm:text-base text-gray-800 break-words max-w-[250px] mx-auto">
+                                            {isMyProposalAccepted ? request.address : "Endereço exato disponível após aceitação pelo cliente"}
+                                        </p>
+                                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">
+                                            {isMyProposalAccepted ? `Gps: ${request.lat.toFixed(6)}, ${request.lng.toFixed(6)}` : "Localidade aproximada obtida via API"}
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="absolute bottom-4 right-4 animate-in fade-in zoom-in duration-700 delay-300">
@@ -369,6 +417,21 @@ export function EmergencyResponseView({ requestId }: { requestId: string }) {
                         <CardContent className="space-y-4">
                             {showProposalForm ? (
                                 <div className="space-y-4">
+                                    {isRejected && (
+                                        <div className="rounded-xl bg-red-50 border border-red-200 p-4 mb-4">
+                                            <div className="flex items-center gap-2 text-red-800 font-bold mb-1">
+                                                <AlertTriangle className="h-5 w-5" />
+                                                Proposta Anterior Recusada
+                                            </div>
+                                            <p className="text-sm text-red-700">
+                                                O cliente recusou a sua proposta com o seguinte motivo:
+                                                <br />
+                                                <span className="italic">"{rejectReason || "Nenhum motivo fornecido."}"</span>
+                                            </p>
+                                            <p className="text-xs text-red-600 mt-2 font-medium">Tem a oportunidade de propor outro valor de deslocação ou um tempo de chegada mais rápido.</p>
+                                        </div>
+                                    )}
+
                                     {/* Info note */}
                                     <div className="rounded-xl bg-amber-50 border border-amber-200 p-3">
                                         <p className="text-xs font-bold text-amber-800 mb-0.5">ℹ️ Deslocação / Taxa de Saída</p>
