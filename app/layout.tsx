@@ -17,7 +17,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Biskate - Freelance Platform",
   description: "Connect with skilled professionals for your projects",
-  manifest: "/manifest.json?v=4",
+  manifest: "/manifest-v5.json",
   icons: {
     icon: "/biskate-icon-512.png",
     apple: "/biskate-icon-512.png",
@@ -35,9 +35,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        <meta name="app-version" content="v-final-force-4" />
-      </head>
-      <body className={inter.className}>
+        <meta name="app-version" content="v-force-final-5" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -46,13 +44,14 @@ export default async function RootLayout({
                 e.preventDefault();
                 window.deferredPrompt = e;
                 console.log('🚀 PWA: beforeinstallprompt captured globally');
-                // Dispatch a custom event to notify React components
                 window.dispatchEvent(new CustomEvent('pwa-prompt-available', { detail: e }));
               });
-              console.log('🚀 APP VERSION: v-final-force-4');
+              setTimeout(() => console.log('🚀 APP VERSION: v-force-final-5'), 100);
             `
           }}
         />
+      </head>
+      <body className={inter.className}>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <AuthProvider>
@@ -68,8 +67,8 @@ export default async function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    console.log('SW registered with scope:', registration.scope);
+                  navigator.serviceWorker.register('/sw-v5.js').then(function(registration) {
+                    console.log('SW (v5) registered with scope:', registration.scope);
                   }, function(err) {
                     console.log('SW registration failed:', err);
                   });
