@@ -16,13 +16,13 @@
   "dir": "ltr",
   "icons": [
     {
-      "src": "/biskate-icon.png",
+      "src": "/apple-icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/biskate-icon.png",
+      "src": "/apple-icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
