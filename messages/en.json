@@ -181,7 +181,7 @@
                 "locationError": "Não foi possível obter sua localização."
             }
         },
-        "MyGigs": {
+        "MyServices": {
             "title": "My Services",
             "subtitle": "Manage your services",
             "newGig": "New Service",

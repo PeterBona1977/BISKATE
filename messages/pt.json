@@ -19,7 +19,7 @@
     "Navigation": {
         "overview": "Visão Geral",
         "emergencies": "Emergências",
-        "myGigs": "Meus Serviços",
+        "myGigs": "Meus Biscatos",
         "messages": "Mensagens",
         "notifications": "Notificações",
         "clientProfile": "Perfil de Cliente",
@@ -28,13 +28,13 @@
         "settings": "Definições",
         "support": "Suporte",
         "providerDashboard": "Painel de Prestador",
-        "gigOpportunities": "Oportunidades de Serviços",
+        "gigOpportunities": "Oportunidades de Biscatos",
         "providerProfile": "Perfil de Prestador",
         "billingAndPlans": "Faturação e Planos",
         "becomeProvider": "Tornar-se Prestador",
         "adminDashboard": "Painel de Admin",
         "users": "Utilizadores",
-        "gigs": "Serviços",
+        "gigs": "Biscatos",
         "analytics": "Análise",
         "adminSettings": "Definições de Admin",
         "opportunities": "Oportunidades",
@@ -69,9 +69,9 @@
         },
         "quickActions": {
             "title": "Ações Rápidas",
-            "createGig": "Criar Serviço",
+            "createGig": "Criar Biscato",
             "manageUsers": "Gerir Utilizadores",
-            "manageGigs": "Gerir Serviços",
+            "manageGigs": "Gerir Biscatos",
             "analytics": "Análise",
             "myJobs": "Meus Trabalhos",
             "payments": "Pagamentos",
@@ -81,8 +81,8 @@
             "completeProfile": "Completar Perfil"
         },
         "stats": {
-            "totalGigs": "Total de Serviços",
-            "activeGigs": "Serviços Ativos",
+            "totalGigs": "Total de Biscatos",
+            "activeGigs": "Biscatos Ativos",
             "views": "Visualizações",
             "responseRate": "Taxa de Resposta"
         },
@@ -91,10 +91,10 @@
             "viewAll": "Ver Toda a Atividade"
         },
         "featured": {
-            "title": "Serviços em Destaque",
+            "title": "Biscatos em Destaque",
             "noFound": "Nenhum serviço encontrado",
-            "createFirst": "Criar Primeiro Serviço",
-            "viewAll": "Ver Todos os Serviços"
+            "createFirst": "Criar Primeiro Biscato",
+            "viewAll": "Ver Todos os Biscatos"
         },
         "loading": "A carregar painel...",
         "roles": {
@@ -103,20 +103,20 @@
             "client": "Cliente"
         },
         "CreateGig": {
-            "pageTitle": "Criar Novo Serviço",
-            "pageDescription": "Publique um serviço para oferecer os seus serviços à comunidade.",
+            "pageTitle": "Criar Novo Biscato",
+            "pageDescription": "Publique um biscato para oferecer os seus serviços à comunidade.",
             "tabs": {
                 "manual": "Formulário Manual",
                 "ai": "Criar com IA"
             },
             "ai": {
-                "title": "Criar Serviço com Assistente de IA",
-                "description": "Converse com o nosso assistente de IA para criar o seu serviço de forma rápida e simples. O assistente irá fazer-lhe perguntas para recolher todas as informações necessárias.",
+                "title": "Criar Biscato com Assistente de IA",
+                "description": "Converse com o nosso assistente de IA para criar o seu biscato de forma rápida e simples. O assistente irá fazer-lhe perguntas para recolher todas as informações necessárias.",
                 "startBtn": "Iniciar Conversa com IA",
                 "helpText": "A IA irá ajudá-lo a definir título, descrição, categoria, preço, localização e tempo estimado.",
                 "analyzing": "Analisando...",
                 "suggestBtn": "Sugerir com IA",
-                "suggestionsTitle": "Sugestões da IA para o seu serviço:",
+                "suggestionsTitle": "Sugestões da IA para o seu biscato:",
                 "clearSuggestions": "Limpar sugestões",
                 "insufficientInfo": "Informação insuficiente",
                 "fillInfoFirst": "Por favor, preencha o título e a descrição primeiro para obter sugestões da IA.",
@@ -125,18 +125,18 @@
                 "errorProcessing": "Ocorreu um erro ao processar sugestões da IA.",
                 "suggestionApplied": "Sugestão aplicada",
                 "categorySetTo": "Categoria definida para: {path}",
-                "success": "Serviço publicado!",
-                "successDesc": "Seu serviço foi criado e os prestadores correspondentes foram notificados.",
-                "errorCreating": "Erro ao criar serviço"
+                "success": "Biscato publicado!",
+                "successDesc": "Seu biscato foi criado e os prestadores correspondentes foram notificados.",
+                "errorCreating": "Erro ao criar biscato"
             },
             "form": {
-                "formTitle": "Criar Novo Serviço",
-                "titleLabel": "Título do Serviço",
+                "formTitle": "Criar Novo Biscato",
+                "titleLabel": "Título do Biscato",
                 "titlePlaceholder": "Ex: Criarei um logo profissional para sua empresa",
                 "chars": "caracteres",
                 "descriptionLabel": "Descrição Detalhada",
                 "descriptionPlaceholder": "Descreva detalhadamente o que oferece, seu processo de trabalho, o que está incluído...",
-                "categorizationLabel": "Categorização do Serviço",
+                "categorizationLabel": "Categorização do Biscato",
                 "mainCategoryLabel": "Categoria Principal",
                 "selectPlaceholder": "Selecione",
                 "subgroupLabel": "Subgrupo",
@@ -156,9 +156,9 @@
                 "clientRequirementsPlaceholder": "Ex: Logo em alta resolução, cores preferidas, estilo desejado...",
                 "clientRequirementsHint": "Informe o que precisa do cliente para realizar o trabalho",
                 "feesAlert": "Taxas da plataforma:",
-                "feesDesc": "5% sobre o valor do serviço + taxas de processamento de pagamento. O valor líquido que receberá será calculado na próxima etapa.",
+                "feesDesc": "5% sobre o valor do biscato + taxas de processamento de pagamento. O valor líquido que receberá será calculado na próxima etapa.",
                 "submitBtn": "Continuar para Pagamento",
-                "submitting": "Criando Serviço..."
+                "submitting": "Criando Biscato..."
             },
             "validation": {
                 "titleMin": "Título deve ter pelo menos 10 caracteres",
@@ -181,13 +181,13 @@
                 "locationError": "Não foi possível obter sua localização."
             }
         },
-        "MyGigs": {
-            "title": "Meus Serviços",
-            "subtitle": "Gerir os seus serviços",
-            "newGig": "Novo Serviço",
-            "noGigs": "Ainda não criou nenhum serviço",
-            "createFirstDesc": "Crie o seu primeiro serviço",
-            "createFirstBtn": "Criar Primeiro Serviço",
+        "MyBiscatos": {
+            "title": "Meus Biscatos",
+            "subtitle": "Gerir os seus biscatos",
+            "newGig": "Novo Biscato",
+            "noGigs": "Ainda não criou nenhum biscato",
+            "createFirstDesc": "Crie o seu primeiro biscato",
+            "createFirstBtn": "Criar Primeiro Biscato",
             "status": {
                 "active": "Ativo",
                 "completed": "Concluído",
@@ -209,8 +209,8 @@
                 "responses": "respostas"
             },
             "errors": {
-                "loadingTitle": "Erro ao carregar serviços",
-                "loadingDesc": "Não foi possível carregar os seus serviços."
+                "loadingTitle": "Erro ao carregar biscatos",
+                "loadingDesc": "Não foi possível carregar os seus biscatos."
             }
         },
         "Messages": {
@@ -268,7 +268,7 @@
         "Profile": {
             "Client": {
                 "title": "Perfil de Cliente",
-                "subtitle": "Gerencie as suas informações pessoais usadas ao publicar serviços.",
+                "subtitle": "Gerencie as suas informações pessoais usadas ao publicar biscatos.",
                 "sections": {
                     "personalInfo": "Informações Pessoais",
                     "notifications": "Notificações"
@@ -397,9 +397,9 @@
             "updates": "Atualizações",
             "marketing": "Marketing & Novidades",
             "types": {
-                "gigApproved": "Serviço aprovado",
+                "gigApproved": "Biscato aprovado",
                 "responseReceived": "Nova resposta recebida",
-                "newMatchingGigs": "Novos serviços compatíveis",
+                "newMatchingGigs": "Novos biscatos compatíveis",
                 "responseAccepted": "Resposta aceite",
                 "profileViews": "Visualizações de perfil"
             }
@@ -470,11 +470,11 @@
             "emergency": "Serviço de Emergência",
             "getStarted": "Começar Agora",
             "hasAccount": "Já tenho uma conta",
-            "createGig": "Criar Serviço",
-            "browseGigs": "Explorar Serviços"
+            "createGig": "Criar Biscato",
+            "browseGigs": "Explorar Biscatos"
         },
         "stats": {
-            "completed": "Serviços concluídos",
+            "completed": "Biscatos concluídos",
             "activeProviders": "Prestadores ativos",
             "avgRating": "Avaliação média"
         },
@@ -528,7 +528,7 @@
         },
         "cta": {
             "title": "Pronto para começar?",
-            "userSubtitle": "Crie o seu primeiro serviço ou encontre o que precisa",
+            "userSubtitle": "Crie o seu primeiro biscato ou encontre o que precisa",
             "guestSubtitle": "Junte-se a milhares de pessoas que já confiam no Biskate",
             "createFreeAccount": "Criar Conta Grátis"
         }
@@ -538,7 +538,7 @@
         "forClients": {
             "title": "Para Clientes",
             "howItWorks": "Como funciona",
-            "findGigs": "Encontrar serviços",
+            "findGigs": "Encontrar biscatos",
             "security": "Segurança"
         },
         "forProviders": {
@@ -566,7 +566,7 @@
             "menu": "Menu de Admin",
             "overview": "Visão Geral",
             "users": "Utilizadores",
-            "gigs": "Serviços",
+            "gigs": "Biscatos",
             "providers": "Prestadores",
             "categories": "Categorias",
             "responses": "Respostas",
@@ -600,7 +600,7 @@
             },
             "stats": {
                 "totalUsers": "Total de Utilizadores",
-                "activeGigs": "Serviços Ativos",
+                "activeGigs": "Biscatos Ativos",
                 "responses": "Respostas",
                 "premiumUsers": "Utilizadores Premium",
                 "activeUsers": "Utilizadores Ativos",
@@ -608,15 +608,15 @@
             },
             "cards": {
                 "registeredUsers": "Utilizadores registados",
-                "publishedGigs": "Serviços publicados",
-                "gigResponses": "Respostas a serviços",
+                "publishedGigs": "Biscatos publicados",
+                "gigResponses": "Respostas a biscatos",
                 "usersWithPaidPlans": "Utilizadores com planos pagos",
                 "regularUsers": "Utilizadores regulares",
                 "pendingReview": "Revisão pendente",
                 "usersDesc": "Gerir contas e permissões de utilizadores",
                 "manageUsers": "Gerir Utilizadores",
-                "gigsDesc": "Moderar e gerir todos os serviços na plataforma",
-                "manageGigs": "Gerir Serviços",
+                "gigsDesc": "Moderar e gerir todos os biscatos na plataforma",
+                "manageGigs": "Gerir Biscatos",
                 "categoriesDesc": "Gerir hierarquia de categorias e serviços",
                 "manageCategories": "Gerir Categorias",
                 "analyticsDesc": "Relatórios e análise de dados da plataforma",

@@ -39,8 +39,8 @@ export function InstallPrompt() {
         console.log("InstallPrompt: isIOS =", isIPhoneIPad);
 
         // Check if app is already installed safely
-        const isAppStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)')?.matches) ||
-            ('standalone' in window.navigator && (window.navigator as any).standalone === true)
+        const isAppStandalone = (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(display-mode: standalone)')?.matches) ||
+            (window.navigator && 'standalone' in window.navigator && (window.navigator as any).standalone === true)
 
         setIsStandalone(isAppStandalone)
         console.log("InstallPrompt: isStandalone =", isAppStandalone);
