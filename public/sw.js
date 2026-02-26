@@ -1,8 +1,9 @@
-// Minimal Service Worker to enable PWA installability
-const CACHE_NAME = 'biskate-v1';
+// Minimal Service Worker to enable PWA installability - v3
+const CACHE_NAME = 'biskate-v2';
 const ASSETS_TO_CACHE = [
     '/dashboard',
     '/manifest.json',
+    '/biskate-icon-192.png',
     '/biskate-icon-512.png',
     '/favicon.ico'
 ];

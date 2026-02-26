@@ -44,7 +44,7 @@
     "UserMenu": {
         "adminPanel": "Painel de Administração",
         "manageUsers": "Gerir Utilizadores",
-        "myWorks": "Meus Serviços",
+        "myWorks": "Meus Biscatos",
         "myProfile": "Meu Perfil",
         "settings": "Definições",
         "logout": "Sair",
@@ -59,7 +59,7 @@
         },
         "roleDesc": {
             "admin": "Painel de administração da plataforma Biskate",
-            "provider": "Gira os seus serviços e trabalhos",
+            "provider": "Gira os seus biscatos e trabalhos",
             "client": "Bem-vindo à sua área pessoal"
         },
         "emergency": "EMERGÊNCIA",
@@ -92,7 +92,7 @@
         },
         "featured": {
             "title": "Biscatos em Destaque",
-            "noFound": "Nenhum serviço encontrado",
+            "noFound": "Nenhum biscato encontrado",
             "createFirst": "Criar Primeiro Biscato",
             "viewAll": "Ver Todos os Biscatos"
         },
@@ -465,7 +465,7 @@
         },
         "hero": {
             "badge": "🚀 A plataforma de serviços mais confiável do mundo",
-            "hero_title_main": "Encontre o <highlight>serviço perfeito</highlight> para cada necessidade",
+            "hero_title_main": "Encontre o <highlight>biscato perfeito</highlight> para cada necessidade",
             "subtitle": "Ligamos você a prestadores qualificados globalmente. Rápido, seguro e confiável.",
             "emergency": "Serviço de Emergência",
             "getStarted": "Começar Agora",
@@ -480,7 +480,7 @@
         },
         "features": {
             "title": "Porquê escolher o Biskate?",
-            "subtitle": "Oferecemos a melhor experiência para ligar clientes e prestadores de serviços",
+            "subtitle": "Oferecemos a melhor experiência para ligar clientes e prestadores de biscatos",
             "items": {
                 "instant": {
                     "title": "Ligação Instantânea",
@@ -502,7 +502,7 @@
             "steps": {
                 "step1": {
                     "title": "Descreva o que precisa",
-                    "description": "Diga-nos que tipo de serviço procura"
+                    "description": "Diga-nos que tipo de biscato procura"
                 },
                 "step2": {
                     "title": "Receba propostas",
@@ -516,7 +516,7 @@
         },
         "categories": {
             "title": "Categorias populares",
-            "subtitle": "Encontre o serviço que precisa",
+            "subtitle": "Encontre o biscato que precisa",
             "items": {
                 "home": "Casa & Jardim",
                 "repairs": "Reparações",
@@ -534,7 +534,7 @@
         }
     },
     "Footer": {
-        "description": "A plataforma que liga pessoas e serviços em todo o mundo.",
+        "description": "A plataforma que liga pessoas e biscatos em todo o mundo.",
         "forClients": {
             "title": "Para Clientes",
             "howItWorks": "Como funciona",
