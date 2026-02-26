@@ -43,6 +43,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `console.log('🚀 APP VERSION: v-debug-nuclear-2');`
           }}
+        />
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <AuthProvider>
