@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/auth-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { CookieConsentBanner } from "@/components/shared/cookie-consent-banner"
+import { InstallPrompt } from "@/components/shared/install-prompt"
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 
@@ -42,13 +43,13 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `console.log('🚀 APP VERSION: v-debug-nuclear-2');`
           }}
-        />
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <AuthProvider>
               {children}
               <Toaster />
               <CookieConsentBanner />
+              <InstallPrompt />
             </AuthProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
@@ -69,6 +70,6 @@ export default async function RootLayout({
           }}
         />
       </body>
-    </html>
+    </html >
   )
 }

@@ -767,6 +767,14 @@
         "reject": "Rejeitar",
         "acceptAll": "Aceitar Tudo"
     },
+    "InstallPrompt": {
+        "title": "Install Biskate App",
+        "description": "Install our application on your home screen for quick and easy access without the browser.",
+        "installButton": "Install App",
+        "iosInstructions": "To install this web app on your iPhone/iPad, tap the Share icon and then 'Add to Home Screen'.",
+        "iosInstructionsDetails": "Tap the Share button at the bottom of the screen, then scroll down and tap 'Add to Home Screen'.",
+        "iosHelpTip": "Tap Share ↑ then 'Add to Home Screen' +"
+    },
     "Payments": {
         "title": {
             "client": "Pagamentos",

@@ -767,6 +767,14 @@
         "reject": "Rejeitar",
         "acceptAll": "Aceitar Tudo"
     },
+    "InstallPrompt": {
+        "title": "Instalar a App Biskate",
+        "description": "Instale a nossa aplicação no seu ecrã principal para um acesso rápido e fácil, sem precisar do navegador.",
+        "installButton": "Instalar App",
+        "iosInstructions": "Para instalar esta aplicação web no seu iPhone/iPad, toque no ícone Partilhar e depois em 'Ecrã Principal'.",
+        "iosInstructionsDetails": "Toque no botão Partilhar na parte inferior do ecrã, deslize para baixo e toque em 'Ecrã Principal'.",
+        "iosHelpTip": "Toque em Partilhar ↑ depois em 'Ecrã Principal' +"
+    },
     "Payments": {
         "title": {
             "client": "Pagamentos",
