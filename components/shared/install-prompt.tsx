@@ -25,26 +25,34 @@ export function InstallPrompt() {
 
     useEffect(() => {
         // Safe check for window and navigator to avoid SSR or exotic browser crashes
-        if (typeof window === 'undefined' || !window.navigator) return;
+        if (typeof window === 'undefined' || !window.navigator) {
+            console.log("InstallPrompt: window or navigator undefined");
+            return;
+        }
+
+        console.log("InstallPrompt: Component mounted, starting checks...");
 
         // Check if device is iOS safely
         const userAgent = window.navigator.userAgent?.toLowerCase() || "";
         const isIPhoneIPad = /iphone|ipad|ipod/.test(userAgent)
         setIsIOS(isIPhoneIPad)
+        console.log("InstallPrompt: isIOS =", isIPhoneIPad);
 
         // Check if app is already installed safely
         const isAppStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)')?.matches) ||
             ('standalone' in window.navigator && (window.navigator as any).standalone === true)
 
         setIsStandalone(isAppStandalone)
+        console.log("InstallPrompt: isStandalone =", isAppStandalone);
 
         if (isAppStandalone) {
-            return; // Don't show if already installed
+            console.log("InstallPrompt: App is already standalone, exiting.");
+            return;
         }
 
         // Handle the standard PWA install prompt (Android, Chrome, Edge)
         const handleBeforeInstallPrompt = (e: Event) => {
-            console.log("InstallPrompt: beforeinstallprompt event fired!")
+            console.log("InstallPrompt: beforeinstallprompt event fired! PWA is installable.");
             // Prevent the mini-infobar from appearing on mobile
             e.preventDefault()
             // Stash the event so it can be triggered later.
@@ -57,29 +65,38 @@ export function InstallPrompt() {
                 const now = new Date().getTime()
                 // TEMPORARY DEBUG: Set to 0 so it always shows
                 if (now - dismissedTime < 0) {
-                    console.log("InstallPrompt: Suppressed due to recent dismissal")
+                    console.log("InstallPrompt: Suppressed due to recent dismissal (debug: current limit 0)");
                     return
                 }
             }
 
             // Show our custom UI
-            console.log("InstallPrompt: showing prompt")
+            console.log("InstallPrompt: Setting showPrompt to true via event");
             setShowPrompt(true)
         }
 
+        // Check if the event already fired before we could listen
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+
+        // DEBUG: Force show after 5 seconds even if event doesn't fire, 
+        // just to see the component is working and can render.
+        const debugTimer = setTimeout(() => {
+            if (!showPrompt) {
+                console.log("InstallPrompt: DEBUG - Forcing prompt display after 5s timeout");
+                setShowPrompt(true);
+            }
+        }, 5000);
 
         // If iOS, show it after a small delay (since iOS doesn't support beforeinstallprompt)
         let iosTimer: NodeJS.Timeout
         if (isIPhoneIPad && !isAppStandalone) {
-            console.log("InstallPrompt: Detected iOS environment")
+            console.log("InstallPrompt: iOS detected, setting 3s timer");
             const lastDismissed = localStorage.getItem("biskate-install-dismissed")
             let shouldShow = true
 
             if (lastDismissed) {
                 const dismissedTime = parseInt(lastDismissed, 10)
                 const now = new Date().getTime()
-                // TEMPORARY DEBUG: Set to 0 so it always shows
                 if (now - dismissedTime < 0) {
                     shouldShow = false
                 }
@@ -87,15 +104,16 @@ export function InstallPrompt() {
 
             if (shouldShow) {
                 iosTimer = setTimeout(() => {
-                    console.log("InstallPrompt: showing iOS prompt")
+                    console.log("InstallPrompt: Setting showPrompt to true via iOS timer");
                     setShowPrompt(true)
-                }, 3000) // Show after 3 seconds of browsing
+                }, 3000)
             }
         }
 
         // Cleanup
         return () => {
             window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+            clearTimeout(debugTimer);
             if (iosTimer) clearTimeout(iosTimer)
         }
     }, [])
