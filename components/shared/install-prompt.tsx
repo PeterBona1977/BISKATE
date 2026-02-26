@@ -24,13 +24,16 @@ export function InstallPrompt() {
     const t = useTranslations("InstallPrompt")
 
     useEffect(() => {
-        // Check if device is iOS
-        const userAgent = window.navigator.userAgent.toLowerCase()
+        // Safe check for window and navigator to avoid SSR or exotic browser crashes
+        if (typeof window === 'undefined' || !window.navigator) return;
+
+        // Check if device is iOS safely
+        const userAgent = window.navigator.userAgent?.toLowerCase() || "";
         const isIPhoneIPad = /iphone|ipad|ipod/.test(userAgent)
         setIsIOS(isIPhoneIPad)
 
-        // Check if app is already installed
-        const isAppStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+        // Check if app is already installed safely
+        const isAppStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)')?.matches) ||
             ('standalone' in window.navigator && (window.navigator as any).standalone === true)
 
         setIsStandalone(isAppStandalone)
@@ -41,6 +44,7 @@ export function InstallPrompt() {
 
         // Handle the standard PWA install prompt (Android, Chrome, Edge)
         const handleBeforeInstallPrompt = (e: Event) => {
+            console.log("InstallPrompt: beforeinstallprompt event fired!")
             // Prevent the mini-infobar from appearing on mobile
             e.preventDefault()
             // Stash the event so it can be triggered later.
@@ -51,13 +55,15 @@ export function InstallPrompt() {
             if (lastDismissed) {
                 const dismissedTime = parseInt(lastDismissed, 10)
                 const now = new Date().getTime()
-                // If dismissed within the last 7 days, don't show it again yet
-                if (now - dismissedTime < 7 * 24 * 60 * 60 * 1000) {
+                // TEMPORARY DEBUG: Set to 0 so it always shows
+                if (now - dismissedTime < 0) {
+                    console.log("InstallPrompt: Suppressed due to recent dismissal")
                     return
                 }
             }
 
             // Show our custom UI
+            console.log("InstallPrompt: showing prompt")
             setShowPrompt(true)
         }
 
@@ -66,20 +72,22 @@ export function InstallPrompt() {
         // If iOS, show it after a small delay (since iOS doesn't support beforeinstallprompt)
         let iosTimer: NodeJS.Timeout
         if (isIPhoneIPad && !isAppStandalone) {
+            console.log("InstallPrompt: Detected iOS environment")
             const lastDismissed = localStorage.getItem("biskate-install-dismissed")
             let shouldShow = true
 
             if (lastDismissed) {
                 const dismissedTime = parseInt(lastDismissed, 10)
                 const now = new Date().getTime()
-                // Hide for 7 days if dismissed
-                if (now - dismissedTime < 7 * 24 * 60 * 60 * 1000) {
+                // TEMPORARY DEBUG: Set to 0 so it always shows
+                if (now - dismissedTime < 0) {
                     shouldShow = false
                 }
             }
 
             if (shouldShow) {
                 iosTimer = setTimeout(() => {
+                    console.log("InstallPrompt: showing iOS prompt")
                     setShowPrompt(true)
                 }, 3000) // Show after 3 seconds of browsing
             }
