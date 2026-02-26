@@ -51,12 +51,11 @@ export function InstallPrompt() {
         }
 
         // Handle the standard PWA install prompt (Android, Chrome, Edge)
-        const handleBeforeInstallPrompt = (e: Event) => {
-            console.log("InstallPrompt: beforeinstallprompt event fired! PWA is installable.");
-            // Prevent the mini-infobar from appearing on mobile
-            e.preventDefault()
-            // Stash the event so it can be triggered later.
-            setDeferredPrompt(e as BeforeInstallPromptEvent)
+        const handleBeforeInstallPrompt = (e: any) => {
+            console.log("InstallPrompt: beforeinstallprompt received!");
+            const event = e.detail || e;
+            if (event.preventDefault) event.preventDefault();
+            setDeferredPrompt(event);
 
             // Check if user previously dismissed it recently
             const lastDismissed = localStorage.getItem("biskate-install-dismissed")
@@ -75,8 +74,15 @@ export function InstallPrompt() {
             setShowPrompt(true)
         }
 
-        // Check if the event already fired before we could listen
+        // Check if the event already fired and was captured globally
+        if ((window as any).deferredPrompt) {
+            console.log("InstallPrompt: Global deferredPrompt found!");
+            handleBeforeInstallPrompt((window as any).deferredPrompt);
+        }
+
+        // Listen for the global event OR the custom event we dispatch from layout.tsx
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+        window.addEventListener('pwa-prompt-available', handleBeforeInstallPrompt as any)
 
         // DEBUG: Force show after 5 seconds even if event doesn't fire, 
         // just to see the component is working and can render.
@@ -194,8 +200,8 @@ export function InstallPrompt() {
                                     onClick={handleInstallClick}
                                     size="default"
                                     className={`w-full h-10 text-sm font-semibold shadow-md transition-all duration-300 ${deferredPrompt
-                                            ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                                            : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                                        ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+                                        : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
                                         }`}
                                 >
                                     {deferredPrompt ? t("installButton") : "Preparing App..."}

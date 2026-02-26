@@ -41,7 +41,17 @@ export default async function RootLayout({
       <body className={inter.className}>
         <script
           dangerouslySetInnerHTML={{
-            __html: `console.log('🚀 APP VERSION: v-debug-nuclear-2');`
+            __html: `
+              window.deferredPrompt = null;
+              window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                window.deferredPrompt = e;
+                console.log('🚀 PWA: beforeinstallprompt captured globally');
+                // Dispatch a custom event to notify React components
+                window.dispatchEvent(new CustomEvent('pwa-prompt-available', { detail: e }));
+              });
+              console.log('🚀 APP VERSION: v-debug-nuclear-2');
+            `
           }}
         />
         <NextIntlClientProvider messages={messages} locale={locale}>
