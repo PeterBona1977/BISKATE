@@ -59,11 +59,10 @@ export default async function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                      console.log('Unregistering SW:', registration);
-                      registration.unregister();
-                    }
+                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('SW registered with scope:', registration.scope);
+                  }, function(err) {
+                    console.log('SW registration failed:', err);
                   });
                 });
               }
