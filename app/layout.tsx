@@ -17,7 +17,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Biskate - Freelance Platform",
   description: "Connect with skilled professionals for your projects",
-  manifest: "/manifest.json?v=3",
+  manifest: "/manifest.json?v=4",
   icons: {
     icon: "/biskate-icon-512.png",
     apple: "/biskate-icon-512.png",
@@ -35,7 +35,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        <meta name="app-version" content="v-debug-nuclear-2" />
+        <meta name="app-version" content="v-final-force-4" />
       </head>
       <body className={inter.className}>
         <script
@@ -49,7 +49,7 @@ export default async function RootLayout({
                 // Dispatch a custom event to notify React components
                 window.dispatchEvent(new CustomEvent('pwa-prompt-available', { detail: e }));
               });
-              console.log('🚀 APP VERSION: v-debug-nuclear-2');
+              console.log('🚀 APP VERSION: v-final-force-4');
             `
           }}
         />
