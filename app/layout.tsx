@@ -17,11 +17,10 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Biskate - Freelance Platform",
   description: "Connect with skilled professionals for your projects",
-  manifest: "/manifest.json",
+  manifest: "/manifest.json?v=3",
   icons: {
-    icon: "/biskate-icon.png",
-    shortcut: "/biskate-icon.png",
-    apple: "/biskate-icon.png",
+    icon: "/biskate-icon-512.png",
+    apple: "/biskate-icon-512.png",
   },
 }
 
