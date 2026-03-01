@@ -13,7 +13,7 @@ interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Logo({ className, size = "medium", href, ...props }: LogoProps) {
   const containerSizeClasses = {
     small: "h-8 sm:h-10",
-    medium: "h-12 sm:h-16",
+    medium: "w-[130px] h-[64px]", // Specific dimensions requested by user for header alignment
     large: "h-24 sm:h-32",
   }
 
@@ -22,7 +22,7 @@ export function Logo({ className, size = "medium", href, ...props }: LogoProps) 
       <img
         src="/biskate-logo-full.png"
         alt="Biskate Logo"
-        className="w-auto h-full max-w-full object-contain drop-shadow-sm"
+        className="w-full h-full object-contain drop-shadow-sm"
       />
     </div>
   )
