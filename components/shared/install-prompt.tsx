@@ -179,8 +179,8 @@ export function InstallPrompt() {
 
                 <div className="p-5 flex items-start gap-4">
                     <div className="flex-shrink-0 mt-1">
-                        <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 shadow-inner">
-                            <img src="/biskate-icon.png" alt="App Icon" className="w-9 h-9 rounded-lg object-contain" onError={(e) => {
+                        <div className="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 shadow-inner overflow-hidden">
+                            <img src="/biskate-icon.png" alt="App Icon" className="w-full h-full p-1 object-contain" onError={(e) => {
                                 e.currentTarget.style.display = 'none';
                                 e.currentTarget.nextElementSibling?.classList.remove('hidden');
                             }} />
