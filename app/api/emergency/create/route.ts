@@ -23,7 +23,17 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 export async function POST(request: NextRequest) {
     try {
         const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
+        const authHeader = request.headers.get("Authorization")
+        const token = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : undefined
+
+        let user;
+        if (token) {
+            const { data } = await supabase.auth.getUser(token)
+            user = data.user
+        } else {
+            const { data } = await supabase.auth.getUser()
+            user = data.user
+        }
 
         if (!user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
