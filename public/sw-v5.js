@@ -39,3 +39,60 @@ self.addEventListener('fetch', (event) => {
         })
     );
 });
+
+// Web Push Notification Listener
+self.addEventListener('push', function (event) {
+    if (event.data) {
+        try {
+            const data = event.data.json();
+            const options = {
+                body: data.body || 'Nova notificação de emergência!',
+                icon: '/biskate-icon-192.png',
+                badge: '/favicon.ico',
+                vibrate: [200, 100, 200, 100, 200, 100, 200],
+                requireInteraction: true,
+                data: {
+                    url: data.url || '/dashboard/provider/emergency'
+                },
+            };
+            event.waitUntil(
+                self.registration.showNotification(data.title || '🚨 URGENTE: Biskate', options)
+            );
+        } catch (e) {
+            console.error('Error parsing push data:', e);
+            event.waitUntil(
+                self.registration.showNotification('🚨 Emergência', {
+                    body: event.data.text() || 'Nova notificação!',
+                    icon: '/biskate-icon-192.png',
+                    vibrate: [200, 100, 200],
+                    requireInteraction: true,
+                })
+            );
+        }
+    }
+});
+
+// Handle Notification Clicks (resume app or open)
+self.addEventListener('notificationclick', function (event) {
+    event.notification.close();
+
+    // This looks to see if the current is already open and focuses if it is
+    event.waitUntil(
+        clients.matchAll({ type: 'window' }).then(windowClients => {
+            const urlToOpen = event.notification.data?.url || '/dashboard/provider';
+            // Check if there is already a window/tab open with the target URL
+            for (let i = 0; i < windowClients.length; i++) {
+                const client = windowClients[i];
+                // If so, just focus it.
+                if (client.url.includes('biskate') && 'focus' in client) {
+                    client.navigate(urlToOpen);
+                    return client.focus();
+                }
+            }
+            // If not, then open the target URL in a new window/tab.
+            if (clients.openWindow) {
+                return clients.openWindow(urlToOpen);
+            }
+        })
+    );
+});

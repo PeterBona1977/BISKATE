@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 
-export const runtime = "edge"
 export const dynamic = "force-dynamic"
 import { createClient } from "@/lib/supabase/server"
+import { sendWebPush } from "@/lib/web-push"
 import { supabaseAdmin } from "@/lib/supabase/admin"
 import { notificationService } from "@/lib/notifications/notification-service"
 import { sendEmailByTrigger } from "@/lib/email/client"
@@ -111,7 +111,8 @@ export async function POST(request: NextRequest) {
                 provider_service_radius,
                 provider_emergency_calls,
                 is_provider,
-                role
+                role,
+                notification_preferences
             `)
             .eq("is_online", true)
             // Allow if is_provider is true OR role is 'provider'
@@ -193,7 +194,28 @@ export async function POST(request: NextRequest) {
                 debugLog.push(`Notify Error: ${notifyError.message}`)
             }
 
-            // 4. Send Emails via Resend (Server Side Action)
+            // 4. Send Web Push Notifications (Native Background Alerts)
+            const pushPromises = eligibleProviders.map(async (provider: any) => {
+                const prefs = provider.notification_preferences;
+                if (prefs && Array.isArray(prefs.push_subscriptions)) {
+                    for (const sub of prefs.push_subscriptions) {
+                        try {
+                            const payload = JSON.stringify({
+                                title: "🚨 URGENTE: Novo Pedido de Emergência!",
+                                body: `Serviço de ${category} próximo de si. Clique para responder!`,
+                                url: `/dashboard/provider/emergency/${emergencyRequest.id}`,
+                                type: "emergency"
+                            });
+                            await sendWebPush(sub, payload);
+                        } catch (e) {
+                            console.error("Failed to push to sub:", e);
+                        }
+                    }
+                }
+            });
+            Promise.allSettled(pushPromises).catch(console.error);
+
+            // 5. Send Emails via Resend (Server Side Action)
             // Trigger parallel email dispatch to all matching providers
             const emailPromises = eligibleProviders.map((provider: any) =>
                 sendEmailByTrigger({

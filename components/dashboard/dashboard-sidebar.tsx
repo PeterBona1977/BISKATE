@@ -29,6 +29,7 @@ import { useTranslations } from "next-intl"
 
 import { DashboardNav } from "./dashboard-nav"
 import { OrgSwitcher } from "./org-switcher"
+import { subscribeToPushNotifications } from "@/lib/web-push-client"
 
 export function DashboardSidebar() {
     const t = useTranslations("Sidebar")
@@ -82,6 +83,11 @@ export function DashboardSidebar() {
 
             const { error } = await EmergencyService.updateProviderStatus(user.id, checked, location)
             if (error) throw error
+
+            if (checked) {
+                // Try to subscribe to Web Push when going online
+                await subscribeToPushNotifications()
+            }
 
             await refreshProfile()
             toast({

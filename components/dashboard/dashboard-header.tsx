@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label"
 import { supabase } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
+import { subscribeToPushNotifications } from "@/lib/web-push-client"
 
 export function DashboardHeader() {
   const t = useTranslations("Header")
@@ -56,6 +57,10 @@ export function DashboardHeader() {
         is_online: checked,
         last_active: new Date().toISOString()
       }).eq('id', user.id)
+
+      if (checked) {
+        await subscribeToPushNotifications()
+      }
 
       await refreshProfile()
     } catch (error) {
