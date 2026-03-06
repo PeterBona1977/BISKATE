@@ -358,7 +358,9 @@ export default function EmergencyTrackingPage() {
                     <div className="min-w-0">
                         <h1 className="text-xl sm:text-3xl font-black tracking-tighter flex items-center gap-2 truncate">
                             TRACKING <span className="text-red-600">LIVE</span>
-                            <Badge variant="destructive" className="ml-1 sm:ml-2 animate-pulse bg-red-600 text-[10px] sm:text-xs">ATIVO</Badge>
+                            <Badge variant={request.status === 'cancelled' ? "secondary" : "destructive"} className={cn("ml-1 sm:ml-2 text-[10px] sm:text-xs", request.status !== 'cancelled' && "animate-pulse bg-red-600")}>
+                                {request.status === 'cancelled' ? "CANCELADO" : "ATIVO"}
+                            </Badge>
                         </h1>
                         <p className="text-[10px] sm:text-sm text-muted-foreground uppercase font-bold tracking-widest truncate">{request.category}</p>
                     </div>
@@ -431,7 +433,15 @@ export default function EmergencyTrackingPage() {
                     </div>
 
                     <div className="flex-1 space-y-4 overflow-y-auto pr-2 max-h-[700px]">
-                        {responses.length === 0 ? (
+                        {request.status === 'cancelled' ? (
+                            <div className="flex flex-col items-center justify-center py-20 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                                <div className="h-16 w-16 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+                                    <XCircle className="h-8 w-8 text-gray-500" />
+                                </div>
+                                <p className="font-bold text-gray-900">Pedido Cancelado</p>
+                                <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">Esta emergência foi cancelada e os técnicos já não estão a ser notificados.</p>
+                            </div>
+                        ) : responses.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-3xl border-2 border-dashed border-gray-100">
                                 <div className="h-16 w-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
                                     <Loader2 className="h-8 w-8 text-red-600 animate-spin" />
