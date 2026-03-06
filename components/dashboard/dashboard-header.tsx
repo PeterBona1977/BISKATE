@@ -35,6 +35,9 @@ export function DashboardHeader() {
   useEffect(() => {
     if (profile) {
       setIsOnline(profile.is_online || false)
+      if (profile.is_online) {
+        subscribeToPushNotifications().catch(console.error)
+      }
     }
   }, [profile])
 

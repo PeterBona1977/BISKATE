@@ -26,7 +26,10 @@ export const subscribeToPushNotifications = async () => {
             return false;
         }
 
-        const registration = await navigator.serviceWorker.ready;
+        // Explicitly register our custom service worker so Firebase doesn't hijack the push events
+        const registration = await navigator.serviceWorker.register('/sw-v5.js');
+        await navigator.serviceWorker.ready;
+
         let subscription = await registration.pushManager.getSubscription();
 
         if (!subscription) {

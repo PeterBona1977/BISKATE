@@ -101,14 +101,16 @@ export function EmergencyRequestsListView() {
         (r.status === 'pending' && r.my_response_status)
     )
 
-    // 3- "Recusadas" - solicitations not accepted by provider (my response was rejected OR client accepted someone else)
+    // 3- "Canceladas / Recusadas" - solicitations not accepted by provider (my response was rejected OR client accepted someone else) or cancelled by client
     const refusedRequests = requests.filter((r: any) =>
         // I responded but was rejected
         (r.my_response_status === 'rejected') ||
         // It's no longer pending, not my job, and I HAD a response there
         (r.status !== 'pending' && r.provider_id !== profile?.id && r.my_response_status) ||
-        // Explicitly cancelled after I was involved
-        (r.status === 'cancelled' && r.my_response_status)
+        // Explicitly cancelled after I was involved or while I was pending
+        (r.status === 'cancelled' && r.my_response_status) ||
+        // If I haven't responded but the client cancelled it entirely
+        (r.status === 'cancelled' && !r.my_response_status)
     )
 
     // 4- "Concluidas" - Solicitations already Concluded by Provider
@@ -145,7 +147,7 @@ export function EmergencyRequestsListView() {
                 {isInactive ? (
                     <div className="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-lg text-xs font-medium text-gray-500 italic">
                         <AlertTriangle className="h-3 w-3" />
-                        Outro profissional selecionado para esta emergência.
+                        {req.status === 'cancelled' ? "A emergência foi cancelada pelo cliente." : "Outro profissional selecionado para esta emergência."}
                     </div>
                 ) : (
                     <Button
@@ -191,7 +193,7 @@ export function EmergencyRequestsListView() {
                         Ativas ({activeRequests.length})
                     </TabsTrigger>
                     <TabsTrigger value="refused" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
-                        Recusadas ({refusedRequests.length})
+                        Canceladas / Recusadas ({refusedRequests.length})
                     </TabsTrigger>
                     <TabsTrigger value="concluded" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
                         Concluídas ({concludedRequests.length})

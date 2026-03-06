@@ -58,6 +58,12 @@ export function DashboardSidebar() {
 
     const hasEmergencyFeature = (profile?.plan === 'pro' || profile?.plan === 'unlimited')
 
+    useEffect(() => {
+        if (profile?.is_online) {
+            subscribeToPushNotifications().catch(console.error)
+        }
+    }, [profile?.is_online])
+
     const toggleOnlineStatus = async (checked: boolean) => {
         if (!user) return
 

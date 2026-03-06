@@ -81,8 +81,8 @@ export function ClientEmergencyListView() {
     // 2- "Ativas" - accepted and in-progress, arrived, assessment, etc.
     const activeRequests = requests.filter(r => ['accepted', 'in_progress', 'arrived', 'assessment_pending', 'service_accepted'].includes(r.status))
 
-    // 3- "Recusadas" - cancelled requests
-    const rejectedRequests = requests.filter(r => r.status === 'cancelled')
+    // 3- "Canceladas" - cancelled requests
+    const cancelledRequests = requests.filter(r => r.status === 'cancelled')
 
     // 4- "Concluídas" - completed services
     const completedRequests = requests.filter(r => r.status === 'completed')
@@ -174,8 +174,8 @@ export function ClientEmergencyListView() {
                     <TabsTrigger value="active" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
                         Ativas ({activeRequests.length})
                     </TabsTrigger>
-                    <TabsTrigger value="rejected" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
-                        Recusadas ({rejectedRequests.length})
+                    <TabsTrigger value="cancelled" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
+                        Canceladas ({cancelledRequests.length})
                     </TabsTrigger>
                     <TabsTrigger value="completed" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold uppercase text-xs tracking-wider">
                         Concluídas ({completedRequests.length})
@@ -208,15 +208,15 @@ export function ClientEmergencyListView() {
                     )}
                 </TabsContent>
 
-                <TabsContent value="rejected" className="mt-0">
-                    {rejectedRequests.length === 0 ? (
+                <TabsContent value="cancelled" className="mt-0">
+                    {cancelledRequests.length === 0 ? (
                         <EmptyState
-                            message="Sem pedidos recusados."
+                            message="Sem pedidos cancelados."
                             description="Pedidos cancelados aparecerão aqui para referência."
                         />
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {rejectedRequests.map(req => <RequestCard key={req.id} req={req} />)}
+                            {cancelledRequests.map(req => <RequestCard key={req.id} req={req} />)}
                         </div>
                     )}
                 </TabsContent>
