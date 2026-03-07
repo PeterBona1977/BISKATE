@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { CookieConsentBanner } from "@/components/shared/cookie-consent-banner"
 import { InstallPrompt } from "@/components/shared/install-prompt"
+import { AutoRefresh } from "@/components/shared/auto-refresh"
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 
@@ -55,6 +56,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <AuthProvider>
+              <AutoRefresh />
               {children}
               <Toaster />
               <CookieConsentBanner />
