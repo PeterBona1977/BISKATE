@@ -6,41 +6,41 @@ import { useRouter } from "next/navigation"
 export function AutoRefresh() {
   const router = useRouter()
 
-  const refreshPage = useCallback(() => {
-    console.log("🔄 AutoRefresh: Performing seamless background data refresh...")
+  const refreshAll = useCallback(() => {
+    // 1. Refresh Next.js Server Components (Server-side data)
     router.refresh()
+    // 2. Dispatch a global custom event so ALL client components can re-fetch their own data
+    window.dispatchEvent(new CustomEvent("app-refresh"))
   }, [router])
 
   useEffect(() => {
-    // 1. Refresh on an interval (e.g. every 30 seconds)
-    const REFRESH_INTERVAL_MS = 30000 
-    const intervalId = setInterval(refreshPage, REFRESH_INTERVAL_MS)
+    // Refresh every 5 seconds
+    const REFRESH_INTERVAL_MS = 5000
+    const intervalId = setInterval(refreshAll, REFRESH_INTERVAL_MS)
 
-    // 2. Refresh when the page regains visibility (e.g. user returns to the tab or app)
+    // Also refresh when the user returns to the tab/app
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        refreshPage()
+      if (document.visibilityState === "visible") {
+        refreshAll()
       }
     }
 
-    // 3. Refresh when the device comes back online from an offline state
+    // Also refresh when device comes back online
     const handleOnline = () => {
-      refreshPage()
+      refreshAll()
     }
 
     document.addEventListener("visibilitychange", handleVisibilityChange)
     window.addEventListener("online", handleOnline)
 
-    // Initial log
-    console.log("⏱️ AutoRefresh initialized: will refresh data every 30s or on tab focus.")
+    console.log("⏱️ AutoRefresh: active — refreshing every 5s and on tab focus.")
 
     return () => {
       clearInterval(intervalId)
       document.removeEventListener("visibilitychange", handleVisibilityChange)
       window.removeEventListener("online", handleOnline)
     }
-  }, [refreshPage])
+  }, [refreshAll])
 
-  // This component doesn't render any visible UI
   return null
 }

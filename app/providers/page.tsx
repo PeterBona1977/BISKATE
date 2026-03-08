@@ -24,6 +24,34 @@ export default function ProvidersDirectoryPage() {
     useEffect(() => {
         loadCategories()
         loadProviders()
+
+        // Listen for global app-refresh event and silently re-fetch (no loading spinner)
+        const handleAppRefresh = () => {
+            supabase
+                .from("profiles")
+                .select(`
+        id,
+        full_name,
+        avatar_url,
+        bio,
+        location,
+        skills,
+        rating,
+        total_reviews,
+        plan,
+        provider_verified_at,
+        hourly_rate,
+        availability
+      `)
+                .eq("role", "provider")
+                .order("created_at", { ascending: false })
+                .then(({ data, error }) => {
+                    if (!error && data) setProviders(data as ProviderCardData[])
+                })
+        }
+
+        window.addEventListener("app-refresh", handleAppRefresh)
+        return () => window.removeEventListener("app-refresh", handleAppRefresh)
     }, [])
 
     useEffect(() => {

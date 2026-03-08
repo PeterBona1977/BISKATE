@@ -136,6 +136,20 @@ export default function EmergencyTrackingPage() {
         }
     }, [id])
 
+    // Listen for global silent refresh events (fired every 5s by AutoRefresh component)
+    useEffect(() => {
+        if (!id) return
+
+        const handleAppRefresh = () => {
+            fetchRequest()
+            fetchResponses()
+            fetchOnlineProviders()
+        }
+
+        window.addEventListener("app-refresh", handleAppRefresh)
+        return () => window.removeEventListener("app-refresh", handleAppRefresh)
+    }, [id])
+
     const loadInitialData = async () => {
         try {
             setLoading(true)

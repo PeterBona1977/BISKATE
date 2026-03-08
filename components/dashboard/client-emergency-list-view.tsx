@@ -46,19 +46,24 @@ export function ClientEmergencyListView() {
                     filter: `client_id=eq.${user.id}`
                 },
                 () => {
-                    fetchMyEmergencies()
+                    fetchMyEmergencies(true)
                 }
             )
             .subscribe()
 
+        // Listen for global silent auto-refresh events (every 5s)
+        const handleAppRefresh = () => fetchMyEmergencies(true)
+        window.addEventListener("app-refresh", handleAppRefresh)
+
         return () => {
             supabase.removeChannel(channel)
+            window.removeEventListener("app-refresh", handleAppRefresh)
         }
     }, [user])
 
-    const fetchMyEmergencies = async () => {
+    const fetchMyEmergencies = async (silent = false) => {
         try {
-            setLoading(true)
+            if (!silent) setLoading(true)
             const { data, error } = await supabase
                 .from("emergency_requests")
                 .select("*")
@@ -70,7 +75,7 @@ export function ClientEmergencyListView() {
         } catch (err) {
             console.error("Error fetching client emergencies:", err)
         } finally {
-            setLoading(false)
+            if (!silent) setLoading(false)
         }
     }
 
